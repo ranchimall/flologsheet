@@ -8772,9 +8772,134 @@ Bitcoin.Util = {
 
         floDapps.launchStartUp().then(result => {
             console.log(result)
-            alert(`Welcome FLO_ID: ${myFloID}`)
+            spreadSheet.init().then(result => {
+                console.log(result)
+                alert(`Welcome FLO_ID: ${myFloID}`)
+            })
             //App functions....
         }).catch(error => console.error(error))
+    }
+</script>
+
+<script id="SpreadSheet">
+    const spreadSheet = {
+
+        init(){
+            return floCloudAPI.requestObjectData("spreadSheet")
+        },
+        
+        addPerson(floID, name, otherDetails = {}){
+            if(floGlobals.appObjects.spreadSheet.personDetails[floID])
+                throw("floID already exist")
+            floGlobals.appObjects.spreadSheet.personDetails[floID] = {};
+            floGlobals.appObjects.spreadSheet.personDetails[floID].name = name
+            for(d in otherDetails){
+                if(d === "name" || d === "floID" || otherDetails[d] === undefined || otherDetails[d] === null)
+                    continue;
+                else
+                    floGlobals.appObjects.spreadSheet.personDetails[floID][d] = otherDetails[d]
+            }
+        },
+
+        rmPerson(floID){
+            if(!floGlobals.appObjects.spreadSheet.personDetails[floID])
+                throw("floID not found")
+            delete floGlobals.appObjects.spreadSheet.personDetails[floID]
+        },
+
+        editPerson(floID, details){
+            if(!floGlobals.appObjects.spreadSheet.personDetails[floID])
+                throw("floID not found")
+            for(d in details){
+                if(details[d] === undefined || details[d] === null)
+                    delete floGlobals.appObjects.spreadSheet.personDetails[floID][d];
+                else if(d === "floID")
+                    continue;
+                else
+                    floGlobals.appObjects.spreadSheet.personDetails[floID][d] = details[d];
+            }
+        },
+
+        listPersons(){
+            return floGlobals.appObjects.spreadSheet.personDetails
+        },
+
+        viewPerson(floID){
+            if(!floGlobals.appObjects.spreadSheet.personDetails[floID])
+                throw("floID not found")
+            return floGlobals.appObjects.spreadSheet.personDetails[floID]
+        },
+
+        createNewSheet(title, editors = floGlobals.subAdmins){
+            if(title in floGlobals.appObjects.spreadSheet.sheetList)
+                throw ("Sheet already exist! try with different title")
+            floGlobals.appObjects.spreadSheet.sheetList[title] = editors
+        },
+
+        manageSheetControl(addList, rmList){
+            let editorList = floGlobals.appObjects.spreadSheet.sheetList[title]
+            if(Array.isArray(addList))
+                addList.forEach(e => editorList.includes(e) ? null: editorList.push(e))
+            if(Array.isArray(rmList))
+                editorList = editorList.filter(e => !rmList.includes(e));
+            floGlobals.appObjects.spreadSheet.sheetList[title] = editorList
+        }, 
+
+        listSheets(){
+            return floGlobals.appObjects.spreadSheet.sheetList
+        },
+
+        commitUpdates(){
+            return new Promise((resolve, reject) => {
+                if(!floGlobals.subAdmins.includes(myFloID))
+                    reject("Access Denied! only subAdmins can commit")
+                floCloudAPI.updateObjectData("spreadSheet")
+                    .then(result => resolve(result))
+                    .catch(error => reject(error))
+            })
+        },
+    
+        updateLog(title, floID, log){
+            return new Promise((resolve, reject) => {
+                if(!(floID in floGlobals.appObjects.spreadSheet.personDetails))
+                    reject("floID not found")
+                else{
+                    floCloudAPI.sendGeneralData({floID: floID, log: log}, title)
+                        .then(result => resolve(result))
+                        .catch(error => reject(error))
+                }
+            })
+        },
+
+        refreshLogs(title){
+            return new Promise((resolve, reject) => {
+                if(!(title in floGlobals.appObjects.spreadSheet.sheetList))
+                    reject("Sheet not found")
+                else{
+                    floCloudAPI.requestGeneralData(title, {senderIDs : floGlobals.appObjects.spreadSheet.sheetList[title]})
+                        .then(result => resolve(result))
+                        .catch(error => reject(error))
+                }
+            })
+        },
+
+        viewLogs(title){
+            if(!(title in floGlobals.appObjects.spreadSheet.sheetList))
+                throw ("Sheet not found")
+            let sheet = []
+            floDapps.getNextGeneralData(title, '0').forEach(l => sheet.push({
+                vc: l.vectorClock,
+                floID: l.message.floID,
+                log: l.message.log
+            }))
+            return {
+                title: title,
+                editors: floGlobals.appObjects.spreadSheet.sheetList[title],
+                sheet: sheet
+            }
+        }
+    
+    
     }
 </script>
 </body>
