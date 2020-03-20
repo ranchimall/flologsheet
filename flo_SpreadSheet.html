@@ -8830,20 +8830,28 @@ Bitcoin.Util = {
             return floGlobals.appObjects.spreadSheet.personDetails[floID]
         },
 
-        createNewSheet(title, editors = floGlobals.subAdmins){
+        createNewSheet(title, description, attributes, editors = floGlobals.subAdmins){
             if(title in floGlobals.appObjects.spreadSheet.sheetList)
                 throw ("Sheet already exist! try with different title")
-            floGlobals.appObjects.spreadSheet.sheetList[title] = editors
+            floGlobals.appObjects.spreadSheet.sheetList[title] = {
+                description: description,
+                editors: editors,
+                attributes: attributes
+            }
         },
 
         manageSheetControl(addList, rmList){
-            let editorList = floGlobals.appObjects.spreadSheet.sheetList[title]
+            let editorList = floGlobals.appObjects.spreadSheet.sheetList[title].editors
             if(Array.isArray(addList))
                 addList.forEach(e => editorList.includes(e) ? null: editorList.push(e))
             if(Array.isArray(rmList))
                 editorList = editorList.filter(e => !rmList.includes(e));
-            floGlobals.appObjects.spreadSheet.sheetList[title] = editorList
+            floGlobals.appObjects.spreadSheet.sheetList[title].editors = editorList
         }, 
+
+        editSheetDescription(title, description){
+            floGlobals.appObjects.spreadSheet.sheetList[title].description = description
+        },
 
         listSheets(){
             return floGlobals.appObjects.spreadSheet.sheetList
@@ -8859,9 +8867,11 @@ Bitcoin.Util = {
             })
         },
     
-        updateLog(title, floID, log){
+        enterLog(title, floID, log){
             return new Promise((resolve, reject) => {
-                if(!(floID in floGlobals.appObjects.spreadSheet.personDetails))
+                if(!floGlobals.appObjects.spreadSheet.sheetList[title].editors.includes(myFloID))
+                    reject("Only editors can update logs")
+                else if(!(floID in floGlobals.appObjects.spreadSheet.personDetails))
                     reject("floID not found")
                 else{
                     floCloudAPI.sendGeneralData({floID: floID, log: log}, title)
@@ -8876,7 +8886,7 @@ Bitcoin.Util = {
                 if(!(title in floGlobals.appObjects.spreadSheet.sheetList))
                     reject("Sheet not found")
                 else{
-                    floCloudAPI.requestGeneralData(title, {senderIDs : floGlobals.appObjects.spreadSheet.sheetList[title]})
+                    floCloudAPI.requestGeneralData(title, {senderIDs : floGlobals.appObjects.spreadSheet.sheetList[title].editors})
                         .then(result => resolve(result))
                         .catch(error => reject(error))
                 }
@@ -8894,7 +8904,9 @@ Bitcoin.Util = {
             }))
             return {
                 title: title,
-                editors: floGlobals.appObjects.spreadSheet.sheetList[title],
+                description: floGlobals.appObjects.spreadSheet.sheetList[title].description,
+                editors: floGlobals.appObjects.spreadSheet.sheetList[title].editors,
+                attributes: floGlobals.appObjects.spreadSheet.sheetList[title].attributes,
                 sheet: sheet
             }
         }
