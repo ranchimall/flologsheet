@@ -9100,7 +9100,8 @@ Bitcoin.Util = {
             if(!(title in floGlobals.appObjects.logSheet.sheetList))
                 throw ("Sheet not found")
             let sheet = []
-            floDapps.getNextGeneralData(title, '0').forEach(l => sheet.push({
+            let filter = floDapps.util.getFilterString(title)
+            floGlobals.generalData[filter].forEach(l => sheet.push({
                 vc: l.vectorClock,
                 floID: l.message.floID,
                 log: l.message.log
@@ -9112,6 +9113,101 @@ Bitcoin.Util = {
                 attributes: floGlobals.appObjects.logSheet.sheetList[title].attributes,
                 sheet: sheet
             }
+        },
+
+        groupLogsBy: {
+
+            count(title){
+                if(!(title in floGlobals.appObjects.logSheet.sheetList))
+                    throw ("Sheet not found")
+                let group = {};
+                let filter = floDapps.util.getFilterString(title)
+                floGlobals.generalData[filter].forEach(l => {
+                    if(!(l.message.floID in group))
+                        group[l.message.floID] = 1
+                    else
+                        group[l.message.floID] += 1
+                })
+                return group
+            },
+
+            total(title, attribute){
+                if(!(title in floGlobals.appObjects.logSheet.sheetList))
+                    throw ("Sheet not found")
+                let group = {};
+                let attrubuteIndex = floGlobals.appObjects.logSheet.sheetList[title].attributes.indexOf(attribute)
+                let filter = floDapps.util.getFilterString(title)
+                floGlobals.generalData[filter].forEach(l => {
+                    let value = parseFloat(l.message.log[attrubuteIndex])
+                    if(!isNaN(value)){
+                        if(!(l.message.floID in group))
+                            group[l.message.floID] = value
+                        else
+                            group[l.message.floID] += value
+                    }
+                })
+                return group
+            },
+
+            avg(title, attribute){
+                if(!(title in floGlobals.appObjects.logSheet.sheetList))
+                    throw ("Sheet not found")
+                let group = {};
+                let attrubuteIndex = floGlobals.appObjects.logSheet.sheetList[title].attributes.indexOf(attribute)
+                let filter = floDapps.util.getFilterString(title)
+                floGlobals.generalData[filter].forEach(l => {
+                    let value = parseFloat(l.message.log[attrubuteIndex])
+                    if(!isNaN(value)){
+                        if(!(l.message.floID in group))
+                            group[l.message.floID] = {
+                                total: value,
+                                count: 1
+                            }
+                        else{
+                            group[l.message.floID].total += value
+                            group[l.message.floID].count += 1
+                        }
+                    }
+                })
+                for(floID in group)
+                    group[floID] = group[floID].total / group[floID].count
+                return group
+            },
+            min(title, attribute){
+                if(!(title in floGlobals.appObjects.logSheet.sheetList))
+                    throw ("Sheet not found")
+                let group = {};
+                let attrubuteIndex = floGlobals.appObjects.logSheet.sheetList[title].attributes.indexOf(attribute)
+                let filter = floDapps.util.getFilterString(title)
+                floGlobals.generalData[filter].forEach(l => {
+                    let value = parseFloat(l.message.log[attrubuteIndex])
+                    if(!isNaN(value)){
+                        if(!(l.message.floID in group))
+                            group[l.message.floID] = value
+                        else if(value < group[l.message.floID])
+                            group[l.message.floID] = value
+                    }
+                })
+                return group
+            },
+
+            max(title, attribute){
+                if(!(title in floGlobals.appObjects.logSheet.sheetList))
+                    throw ("Sheet not found")
+                let group = {};
+                let attrubuteIndex = floGlobals.appObjects.logSheet.sheetList[title].attributes.indexOf(attribute)
+                let filter = floDapps.util.getFilterString(title)
+                floGlobals.generalData[filter].forEach(l => {
+                    let value = parseFloat(l.message.log[attrubuteIndex])
+                    if(!isNaN(value)){
+                        if(!(l.message.floID in group))
+                            group[l.message.floID] = value
+                        else if(value > group[l.message.floID])
+                            group[l.message.floID] = value
+                    }
+                })
+                return group
+            },
         }
     
     
