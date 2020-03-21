@@ -121,6 +121,19 @@
         <button id="enterLogBtn" disabled>Enter Log</button><br/>
         <span id="viewSheet_table"></span>
     </section>
+    <section>
+        Group By
+        <select id="groupBy_selectType">
+            <option value="count">Count</option>
+            <option value="total">Total</option>
+            <option value="avg">Average</option>
+            <option value="min">Minimum</option>
+            <option value="max">Maximum</option>
+        </select>
+        <select id="groupBy_selectColumn"></select>
+        <button id="groupByBtn" disabled>Group</button><br/>
+        <span id="groupBy_table"></span>
+    </section>
 </div>
 
 <script id="UI">
@@ -210,6 +223,7 @@
             document.getElementById("viewSheet_editors").textContent = data.editors.join(", ")
             document.getElementById("viewSheet_table").innerHTML = ""
             document.getElementById("enterLogBtn").disabled = true
+            document.getElementById("groupByBtn").disabled = false
             //Create Table
             let table = document.createElement("table")
             //Render Header and Input Row
@@ -232,12 +246,23 @@
             //Enable Entry log button if user is editor
             if(data.editors.includes(myFloID))
                 document.getElementById("enterLogBtn").disabled = false
+            //Add columnSelect for groupBy
+            let groupBySelectColumn = document.getElementById("groupBy_selectColumn");
+            groupBySelectColumn.innerHTML = "";
+            data.attributes.forEach(attribute => {
+                let columnOption = document.createElement("option")
+                columnOption.setAttribute("value", attribute);
+                columnOption.textContent = attribute;
+                groupBySelectColumn.appendChild(columnOption)
+            })
         }).catch(error => {
+            console.log(error)
             document.getElementById("viewSheet_title").textContent = "null"
             document.getElementById("viewSheet_description").textContent = "null"
             document.getElementById("viewSheet_editors").textContent = "null"
             document.getElementById("viewSheet_table").textContent = "ERROR"
             document.getElementById("enterLogBtn").disabled = true
+            document.getElementById("groupByBtn").disabled = true
         })
     }
 
@@ -258,6 +283,26 @@
         }).catch(error => console.log(error))
     })
 
+    document.getElementById("groupByBtn").addEventListener("click", () => {
+        let title = document.getElementById("viewSheet_title").textContent;
+        let type = document.getElementById("groupBy_selectType").value;
+        let column = document.getElementById("groupBy_selectColumn").value;
+        let groupedData = logSheet.groupLogsBy[type](title, column);
+        console.log(groupedData)
+        //clear existing display
+        document.getElementById("groupBy_table").innerHTML = "";
+        //create groupBy table
+        let table = document.createElement("table");
+        let header = table.insertRow(0)
+        header.insertCell(0).textContent = `FLO_ID`
+        header.insertCell(1).textContent = `${type}(${column})`
+        for(floID in groupedData){
+            let row = table.insertRow(1);
+            row.insertCell(0).textContent = floID;
+            row.insertCell(1).textContent = groupedData[floID];
+        }
+        document.getElementById("groupBy_table").appendChild(table)
+    })
 </script>
 
 <script id="init_lib">
