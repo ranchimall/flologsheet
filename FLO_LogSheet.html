@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>FLO SpreadSheet</title>
+  <title>FLO LogSheet</title>
 <style>
     section{
         align-self: center;
@@ -41,7 +41,7 @@
 
     //for cloud apps
     subAdmins: [],
-    application: "TEST_MODE", //"SpreadSheet"
+    application: "TEST_MODE", //"LogSheet"
     vectorClock: {},
     appObjects: {},
     generalData: {},
@@ -57,11 +57,11 @@
 
         floDapps.launchStartUp().then(result => {
             console.log(result)
-            spreadSheet.init().then(result => {
+            logSheet.init().then(result => {
                 console.log(result)
                 alert(`Welcome FLO_ID: ${myFloID}`)
-                renderPersonList(spreadSheet.listPersons())
-                renderSheetList(spreadSheet.listSheets())
+                renderPersonList(logSheet.listPersons())
+                renderSheetList(logSheet.listSheets())
                 if(floGlobals.subAdmins.includes(myFloID))
                     document.getElementById("saveBtn").disabled = false
             })
@@ -72,7 +72,7 @@
 </head>
 
 <body onload="onLoadStartUp()">
-    SpreadSheet_TEST_MODE
+    logSheet_TEST_MODE
 <div>
     <b>REMEMBER TO SAVE EDITS OF PERSONS AND SHEETS ONLY</b><br/>
     <i>Entry Logs are saved automatically</i><br/>
@@ -126,7 +126,7 @@
 <script id="UI">
 
     document.getElementById("saveBtn").addEventListener("click", () => {
-        spreadSheet.commitUpdates().then(result=>{
+        logSheet.commitUpdates().then(result=>{
             console.log("Save Successful", result)
             alert("Save Successful")
         })
@@ -145,7 +145,7 @@
 
     function viewPersonDetails(floID){
         let display = document.getElementById("personDetails")
-        let details = spreadSheet.viewPerson(floID)
+        let details = logSheet.viewPerson(floID)
         display.innerHTML = `<li><b>FLO_ID: ${floID}</b></li> `
         for(d in details){
             let element = document.createElement("li");
@@ -172,8 +172,8 @@
         let otherDetails = {}
         for (var i = 0; i < otherFields.length; i++)
             otherDetails[otherFields[i].children[0].value] = otherFields[i].children[1].value
-        spreadSheet.addPerson(floID, name, otherDetails) 
-        renderPersonList({[floID]:spreadSheet.viewPerson(floID)})
+        logSheet.addPerson(floID, name, otherDetails) 
+        renderPersonList({[floID]:logSheet.viewPerson(floID)})
         document.getElementById("addPerson").reset()
     })
 
@@ -194,16 +194,16 @@
         let attributes = document.getElementById("createSheet_columns").value.split('\n')
         let customEditors = document.getElementById("createSheet_editors").value.split('\n')
         if(document.getElementById("createSheet_customEditorCheck").checked)
-            spreadSheet.createNewSheet(title, description, attributes, customEditors)
+            logSheet.createNewSheet(title, description, attributes, customEditors)
         else
-            spreadSheet.createNewSheet(title, description, attributes)
+            logSheet.createNewSheet(title, description, attributes)
         renderSheetList({[title]: true})
         document.getElementById("createSheet").reset()
     })
 
     function viewSheet(title){
-        spreadSheet.refreshLogs(title).then(result => {
-            let data = spreadSheet.viewLogs(title)
+        logSheet.refreshLogs(title).then(result => {
+            let data = logSheet.viewLogs(title)
             console.log(data)
             document.getElementById("viewSheet_title").textContent = data.title
             document.getElementById("viewSheet_description").textContent = data.description
@@ -250,7 +250,7 @@
             log.push(inputs[i].value)
             inputs[i].value = ''
         }
-        spreadSheet.enterLog(title, floID, log).then(result => {
+        logSheet.enterLog(title, floID, log).then(result => {
             let row = document.getElementById("viewSheet_table").getElementsByTagName("table")[0].insertRow(2)
             row.insertCell(0).textContent = floID
             for(let k = 0; k < log.length; k++)
@@ -8984,59 +8984,59 @@ Bitcoin.Util = {
     reactor.addEventListener("startUpErrorLog", log => console.error(log))
 </script>
 
-<script id="SpreadSheet">
-    const spreadSheet = {
+<script id="logSheet">
+    const logSheet = {
 
         init(){
-            return floCloudAPI.requestObjectData("spreadSheet")
+            return floCloudAPI.requestObjectData("logSheet")
         },
         
         addPerson(floID, name, otherDetails = {}){
-            if(floGlobals.appObjects.spreadSheet.personDetails[floID])
+            if(floGlobals.appObjects.logSheet.personDetails[floID])
                 throw("floID already exist")
-            floGlobals.appObjects.spreadSheet.personDetails[floID] = {};
-            floGlobals.appObjects.spreadSheet.personDetails[floID].name = name
+            floGlobals.appObjects.logSheet.personDetails[floID] = {};
+            floGlobals.appObjects.logSheet.personDetails[floID].name = name
             for(d in otherDetails){
                 if(d === "name" || d === "floID" || otherDetails[d] === undefined || otherDetails[d] === null)
                     continue;
                 else
-                    floGlobals.appObjects.spreadSheet.personDetails[floID][d] = otherDetails[d]
+                    floGlobals.appObjects.logSheet.personDetails[floID][d] = otherDetails[d]
             }
         },
 
         rmPerson(floID){
-            if(!floGlobals.appObjects.spreadSheet.personDetails[floID])
+            if(!floGlobals.appObjects.logSheet.personDetails[floID])
                 throw("floID not found")
-            delete floGlobals.appObjects.spreadSheet.personDetails[floID]
+            delete floGlobals.appObjects.logSheet.personDetails[floID]
         },
 
         editPerson(floID, details){
-            if(!floGlobals.appObjects.spreadSheet.personDetails[floID])
+            if(!floGlobals.appObjects.logSheet.personDetails[floID])
                 throw("floID not found")
             for(d in details){
                 if(details[d] === undefined || details[d] === null)
-                    delete floGlobals.appObjects.spreadSheet.personDetails[floID][d];
+                    delete floGlobals.appObjects.logSheet.personDetails[floID][d];
                 else if(d === "floID")
                     continue;
                 else
-                    floGlobals.appObjects.spreadSheet.personDetails[floID][d] = details[d];
+                    floGlobals.appObjects.logSheet.personDetails[floID][d] = details[d];
             }
         },
 
         listPersons(){
-            return floGlobals.appObjects.spreadSheet.personDetails
+            return floGlobals.appObjects.logSheet.personDetails
         },
 
         viewPerson(floID){
-            if(!floGlobals.appObjects.spreadSheet.personDetails[floID])
+            if(!floGlobals.appObjects.logSheet.personDetails[floID])
                 throw("floID not found")
-            return floGlobals.appObjects.spreadSheet.personDetails[floID]
+            return floGlobals.appObjects.logSheet.personDetails[floID]
         },
 
         createNewSheet(title, description, attributes, editors = floGlobals.subAdmins){
-            if(title in floGlobals.appObjects.spreadSheet.sheetList)
+            if(title in floGlobals.appObjects.logSheet.sheetList)
                 throw ("Sheet already exist! try with different title")
-            floGlobals.appObjects.spreadSheet.sheetList[title] = {
+            floGlobals.appObjects.logSheet.sheetList[title] = {
                 description: description,
                 editors: editors,
                 attributes: attributes
@@ -9044,27 +9044,27 @@ Bitcoin.Util = {
         },
 
         manageSheetControl(addList, rmList){
-            let editorList = floGlobals.appObjects.spreadSheet.sheetList[title].editors
+            let editorList = floGlobals.appObjects.logSheet.sheetList[title].editors
             if(Array.isArray(addList))
                 addList.forEach(e => editorList.includes(e) ? null: editorList.push(e))
             if(Array.isArray(rmList))
                 editorList = editorList.filter(e => !rmList.includes(e));
-            floGlobals.appObjects.spreadSheet.sheetList[title].editors = editorList
+            floGlobals.appObjects.logSheet.sheetList[title].editors = editorList
         }, 
 
         editSheetDescription(title, description){
-            floGlobals.appObjects.spreadSheet.sheetList[title].description = description
+            floGlobals.appObjects.logSheet.sheetList[title].description = description
         },
 
         listSheets(){
-            return floGlobals.appObjects.spreadSheet.sheetList
+            return floGlobals.appObjects.logSheet.sheetList
         },
 
         commitUpdates(){
             return new Promise((resolve, reject) => {
                 if(!floGlobals.subAdmins.includes(myFloID))
                     reject("Access Denied! only subAdmins can commit")
-                floCloudAPI.updateObjectData("spreadSheet")
+                floCloudAPI.updateObjectData("logSheet")
                     .then(result => resolve(result))
                     .catch(error => reject(error))
             })
@@ -9072,9 +9072,9 @@ Bitcoin.Util = {
     
         enterLog(title, floID, log){
             return new Promise((resolve, reject) => {
-                if(!floGlobals.appObjects.spreadSheet.sheetList[title].editors.includes(myFloID))
+                if(!floGlobals.appObjects.logSheet.sheetList[title].editors.includes(myFloID))
                     reject("Only editors can update logs")
-                else if(!(floID in floGlobals.appObjects.spreadSheet.personDetails))
+                else if(!(floID in floGlobals.appObjects.logSheet.personDetails))
                     reject("floID not found")
                 else{
                     floCloudAPI.sendGeneralData({floID: floID, log: log}, title)
@@ -9086,10 +9086,10 @@ Bitcoin.Util = {
 
         refreshLogs(title){
             return new Promise((resolve, reject) => {
-                if(!(title in floGlobals.appObjects.spreadSheet.sheetList))
+                if(!(title in floGlobals.appObjects.logSheet.sheetList))
                     reject("Sheet not found")
                 else{
-                    floCloudAPI.requestGeneralData(title, {senderIDs : floGlobals.appObjects.spreadSheet.sheetList[title].editors})
+                    floCloudAPI.requestGeneralData(title, {senderIDs : floGlobals.appObjects.logSheet.sheetList[title].editors})
                         .then(result => resolve(result))
                         .catch(error => reject(error))
                 }
@@ -9097,7 +9097,7 @@ Bitcoin.Util = {
         },
 
         viewLogs(title){
-            if(!(title in floGlobals.appObjects.spreadSheet.sheetList))
+            if(!(title in floGlobals.appObjects.logSheet.sheetList))
                 throw ("Sheet not found")
             let sheet = []
             floDapps.getNextGeneralData(title, '0').forEach(l => sheet.push({
@@ -9107,9 +9107,9 @@ Bitcoin.Util = {
             }))
             return {
                 title: title,
-                description: floGlobals.appObjects.spreadSheet.sheetList[title].description,
-                editors: floGlobals.appObjects.spreadSheet.sheetList[title].editors,
-                attributes: floGlobals.appObjects.spreadSheet.sheetList[title].attributes,
+                description: floGlobals.appObjects.logSheet.sheetList[title].description,
+                editors: floGlobals.appObjects.logSheet.sheetList[title].editors,
+                attributes: floGlobals.appObjects.logSheet.sheetList[title].attributes,
                 sheet: sheet
             }
         }
