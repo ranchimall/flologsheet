@@ -2,23 +2,551 @@
 <html>
 
 <head>
-  <title>FLO LogSheet</title>
-<style>
-    section{
-        align-self: center;
-        border-style: solid;
-        width: 1000px;
-    }
-    section>div{
-        border-style: groove;
-        width: 45%;
-        display: inline-block;
-    }
-    ol li:hover{
-        background-color: rgba(0,0,0,0.5);
-        cursor: pointer;
-    }
-</style>
+    <title>FLO LogSheet</title>
+    <style>
+        :root {
+            --accent-light: #20a878;
+            --accent-dark: #1d976c;
+            --alt-light: #eceff1;
+            --alt-dark: #828c92;
+            --default-text: #313233;
+            --header: linear-gradient(150deg, rgba(29, 151, 108, 1) 0%, rgba(29, 151, 108, 1) 10%, rgba(32, 168, 120, 1) 10%, rgba(32, 168, 120, 1) 20%, rgba(29, 151, 108, 1) 20%, rgba(29, 151, 108, 1) 100%);
+            --background: linear-gradient(148deg, rgba(236, 239, 241, 1) 0%, rgba(236, 239, 241, 1) 20%, rgba(210, 217, 223, 1) 25%, rgba(236, 239, 241, 1) 30%, rgba(236, 239, 241, 1) 70%, rgba(210, 217, 223, 1) 75%, rgba(236, 239, 241, 1) 80%, rgba(236, 239, 241, 1) 100%);
+            --foreground: #fff;
+            --rgb-bw: 24, 25, 25;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+            scrollbar-color: rgba(var(--rgb-bw), 0.1) rgba(var(--rgb-bw), 0.0);
+            scrollbar-width: thin;
+        }
+
+        /* width */
+        ::-webkit-scrollbar {
+            width: 0.1rem;
+            height: 0.2rem;
+        }
+
+        /* Track */
+        ::-webkit-scrollbar-track {
+            background: rgba(var(--rgb-bw), 0.0);
+        }
+
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+            background: rgba(var(--rgb-bw), 0.2);
+        }
+
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(var(--rgb-bw), 0.3);
+        }
+
+        body {
+            margin: 0;
+            font-size: 16px;
+            color: var(--default-text);
+            background: var(--background);
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        button:hover,
+        button:focus {
+            outline: 0;
+            transform: scale(1.025);
+        }
+
+        button:active {
+            transform: translateY(0.01rem);
+        }
+
+        [data-title] {
+            position: relative;
+            z-index: 6;
+        }
+
+        [data-title]:hover::before {
+            content: attr(data-title);
+            position: absolute;
+            bottom: -26px;
+            display: inline-block;
+            padding: 3px 6px;
+            border-radius: 2px;
+            background: #000;
+            color: var(--alt-light);
+            font-size: 12px;
+            font-family: sans-serif;
+            white-space: nowrap;
+            z-index: 6;
+        }
+
+        [data-title]:hover::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 8px;
+            display: inline-block;
+            color: var(--alt-light);
+            border: 8px solid transparent;
+            border-bottom: 8px solid #000;
+            z-index: 6;
+        }
+
+        header {
+            position: relative;
+            background: var(--header);
+            display: flex;
+            align-items: center;
+            z-index: 4;
+            padding: 0.2rem 1em;
+        }
+
+        header h1 {
+            margin: 1rem 0 0 1rem;
+            padding: 0;
+            color: var(--alt-light);
+            font: italic bold 3rem/1rem Georgia, serif;
+            text-shadow: -2.5px 2.5px rgba(var(--rgb-bw), 0.5);
+        }
+
+        header h2 {
+            margin-bottom: 0;
+            padding: 0;
+            color: var(--alt-light);
+            font: italic bold 1.5rem Georgia, serif;
+            text-shadow: -2.5px 2.5px rgba(var(--rgb-bw), 0.5);
+        }
+
+        header button {
+            color: var(--alt-light);
+            background: var(--accent-light);
+            border: 1px solid var(--alt-light);
+            border-radius: 0.25em;
+            position: absolute;
+            right: 1em;
+            font-size: 1.1rem;
+            font-weight: bold;
+            width: 7rem;
+        }
+
+        header button:hover,
+        header button:focus {
+            background: var(--alt-light);
+            color: var(--accent-light);
+        }
+
+        .hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .no-transformations {
+            transform: none !important;
+        }
+
+        #show-message,
+        #save-button {
+            transform: translate(0.4rem, 0);
+            transition: transform 0.3s ease, opacity 1s ease;
+            box-shadow: 0.2rem 0.4rem 0.8rem rgba(var(--rgb-bw), 0.16);
+            align-items: center;
+            display: flex;
+            color: var(--alt-light);
+            position: fixed;
+            margin: 1rem;
+            width: max-content;
+            border-radius: 0.2rem;
+            z-index: 5;
+        }
+
+        #show-message {
+            bottom: 0;
+            right: 0;
+        }
+
+        #save-button {
+            top: 5rem;
+            right: 0;
+        }
+
+        #show-message span,
+        #save-button span {
+            font-weight: 500;
+            margin: 0.5rem;
+            flex: 1;
+        }
+
+        #show-message button {
+            margin: 0.5rem;
+            border: none;
+            color: var(--alt-light);
+            background: rgba(var(--rgb-bw), 0);
+        }
+
+        #show-message button:hover {
+            color: rgba(var(--rgb-bw), 0.2);
+        }
+
+        #save-button button {
+            margin: 0.5rem;
+            padding: 0.3rem;
+            border-radius: 0.2rem;
+            border: none;
+            color: var(--alt-light);
+            background: rgba(var(--rgb-bw), 0.2);
+        }
+
+        #save-button button:hover {
+            background: rgba(var(--rgb-bw), 0.5);
+        }
+
+        section {
+            width: 100%;
+            display: block;
+        }
+
+        .container {
+            background: var(--foreground);
+            position: relative;
+            border-radius: 0.4rem;
+        }
+
+        #leftPanel {
+            height: 34rem;
+            width: 16rem;
+            float: left;
+            margin: 0 0 0 2rem;
+        }
+
+        #leftPanel>div {
+            height: 30rem;
+            width: 100%;
+            margin: 2rem 0;
+        }
+
+        #rightPanel {
+            height: 34rem;
+            width: 56rem;
+            float: right;
+            margin: 1.5rem 2rem 0rem 2rem;
+        }
+
+        #rightPanel>nav {
+            height: 2rem;
+            width: 100%;
+            background: var(--accent-light);
+        }
+
+        #rightPanel>div {
+            margin-top: 0.5rem;
+            height: 28rem;
+            width: 100%;
+        }
+
+        .list-header {
+            font-weight: bold;
+            cursor: default;
+        }
+
+        .list-header button {
+            float: right;
+            border: none;
+            border-radius: 0.2rem;
+            color: inherit;
+            background: rgba(var(--rgb-bw), 0);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .list-header button:hover,
+        .list-header button:focus {
+            background: rgba(var(--rgb-bw), 0.1);
+        }
+
+        .vertical-list .list-header {
+            padding: 0.5rem 1rem;
+            font-size: 1.1rem;
+        }
+
+        .horizontal-list div {
+            display: inline-block;
+            color: var(--alt-light);
+        }
+
+        #sheet-list {
+            width: 52rem;
+            overflow-x: scroll;
+            white-space: nowrap;
+            margin-right: 1rem;
+        }
+
+        #sheet-list>div {
+            padding: 0.3rem;
+        }
+
+        #sheet-list>div:hover {
+            background: rgba(var(--rgb-bw), 0.2);
+            cursor: pointer;
+        }
+
+        #person-list {
+            height: 27rem;
+            overflow-y: scroll;
+        }
+
+        .person-card {
+            padding: 1rem;
+            background: rgba(var(--rgb-bw), 0);
+        }
+
+        .person-card>div:nth-child(1) span {
+            border-radius: 0.5rem;
+            padding: 0.3rem 0.5rem;
+            margin-right: 0.5rem;
+            background-color: var(--accent-dark);
+            color: var(--alt-light);
+        }
+
+        .person-card>div:nth-child(2) {
+            display: none;
+            margin-top: 0.5rem;
+        }
+
+        .person-card>div:nth-child(2) span {
+            color: var(--accent-dark);
+            font-size: 0.7rem
+        }
+
+        .person-card>div:nth-child(2) li {
+            list-style: none;
+            font-size: 0.8rem;
+            word-wrap: break-word;
+        }
+
+        .person-card:hover {
+            background: var(--alt-light);
+        }
+
+        .person-card:hover>div:nth-child(2) {
+            display: block;
+        }
+
+        #sheet-details h4 {
+            margin: 0;
+            padding: 1rem;
+            font-weight: bolder;
+            font-size: 1.3rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #sheet-details h6 {
+            margin: 0;
+            padding: 0 1rem;
+            font-style: italic;
+            font-size: 0.75rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #sheet-details p {
+            margin: 0;
+            padding: 0.5rem 1rem;
+            overflow: hidden;
+            height: 3rem;
+        }
+
+        .table-container {
+            margin: 0 1rem 1rem 1rem;
+            overflow: scroll;
+            max-height: 18rem;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        table td {
+            padding: 0.25rem;
+        }
+
+        thead {
+            position: relative;
+            background: var(--alt-dark);
+            color: var(--alt-light);
+            cursor: pointer;
+        }
+
+        tbody tr:nth-child(even) {
+            background: rgba(var(--rgb-bw), 0.0);
+        }
+
+        tbody tr:nth-child(odd) {
+            background: rgba(var(--rgb-bw), 0.1);
+        }
+
+        tbody td {
+            border: none;
+        }
+
+        .popup-container {
+            width: 100%;
+            height: 100%;
+            top: 0;
+            position: fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(var(--rgb-bw), 0.1);
+            z-index: 4;
+        }
+
+        .popup-container form fieldset {
+            margin: 0.5rem;
+            padding: 0.25rem;
+            color: var(--alt-dark);
+            border-style: solid;
+            border-color: var(--alt-dark);
+            border-radius: 0.5rem;
+            font-style: italic;
+            font-size: 0.8rem;
+        }
+
+        .popup-container form fieldset div {
+            font-style: normal;
+            font-weight: bold;
+        }
+
+        .input-container {
+            margin: 0.5rem;
+            align-items: center;
+        }
+
+        .input-container input,
+        .input-container select,
+        .input-container textarea {
+            height: 2rem;
+            border-radius: 0.2rem;
+            border: 0.1rem solid rgba(var(--rgb-bw), 0.2);
+            padding: 0.2rem;
+        }
+
+        .input-container textarea {
+            resize: none;
+            height: 5rem;
+        }
+
+        .input-container input[type="button"] {
+            background: var(--alt-light);
+            color: var(--default-text);
+        }
+
+        .input-container input[type="submit"] {
+            background: var(--accent-light);
+            color: var(--alt-light);
+        }
+
+        .input-container input[type="reset"] {
+            background: var(--alt-light);
+            color: var(--alt-dark);
+        }
+
+        .input-container input[type="button"]:hover {
+            background: var(--alt-dark)
+        }
+
+        .input-container input[type="submit"]:hover {
+            background: var(--accent-dark)
+        }
+
+        .input-container input[type="reset"]:hover {
+            background: var(--alt-dark);
+            color: var(--alt-light);
+        }
+
+        .i-1 input,
+        .i-1 textarea {
+            width: 18rem;
+        }
+
+        .i-2 input,
+        .i-2 select {
+            width: 8.5rem;
+        }
+
+        .i-2b input:not([type=button]):first-child,
+        .i-2b select {
+            width: 7rem;
+        }
+
+        .i-2b input:not([type=button]) {
+            width: 8rem;
+        }
+
+        .i-2b input[type=button] {
+            width: 2rem;
+        }
+
+        .asterisk-notation {
+            color: red;
+            font-size: 0.5rem;
+            display: block;
+            font-weight: normal;
+            font-style: italic;
+            margin: 0.5rem;
+        }
+
+        #group-by > div{
+            text-align: center;
+            margin: 0.5rem;
+            font-weight: bold;
+        }
+
+        #group-by-menu{
+            align-items: center;
+            text-align: center;
+        }
+
+        #group-by-menu .input-container{
+            margin: 0;
+            padding: 0;
+        }
+        #group-by-menu select{
+            height: 2rem;
+            border-radius: 0.2rem;
+            border: 0.1rem solid rgba(var(--rgb-bw), 0.2);
+            padding: 0.2rem;
+            margin: 0 1rem;
+        }
+
+        #group-by-view{
+            width: 30rem;
+            height: 15rem;
+            overflow: scroll;
+        }
+        
+        #group-by-view td:first-child{
+            width: 20rem;
+        }
+
+        #group-by-view td:last-child{
+            width: 10rem;
+            text-align: right;
+        }
+
+        #sheet-view input{
+            width: 100%;
+            border-radius: 0.2rem;
+            border: 0.1rem solid rgba(var(--rgb-bw), 0.2);
+            padding: 0.1rem;
+        }
+    </style>
+
 <script id="floGlobals">
   /* Constants for FLO blockchain operations !!Make sure to add this at begining!! */
   const floGlobals = {
@@ -61,9 +589,9 @@
                 console.log(result)
                 alert(`Welcome FLO_ID: ${myFloID}`)
                 renderPersonList(logSheet.listPersons())
-                renderSheetList(logSheet.listSheets())
-                if(floGlobals.subAdmins.includes(myFloID))
-                    document.getElementById("saveBtn").disabled = false
+                renderSheetList(Object.keys(logSheet.listSheets()))
+                //if(floGlobals.subAdmins.includes(myFloID))
+                   // document.getElementById("saveBtn").disabled = false
             })
             //App functions....
         }).catch(error => console.error(error))
@@ -72,238 +600,427 @@
 </head>
 
 <body onload="onLoadStartUp()">
-    logSheet_TEST_MODE
-<div>
-    <b>REMEMBER TO SAVE EDITS OF PERSONS AND SHEETS ONLY</b><br/>
-    <i>Entry Logs are saved automatically</i><br/>
-    <button id="saveBtn" disable>Save</button>
-    <section>
-        <div>
-            Persons:
-            <ol id="personList"></ol>
-        </div>
-        <div>
-            Person Details:
-            <ul id="personDetails"></ul>
-        </div>
-        <div>
-            Add Person: <br/>
-            <form id="addPerson">
-                FLO_ID: <input type="text" id="addPerson_floID"/><br/>
-                name: <input type="text" id="addPerson_name"/><br/>
-            </form>
-                otherFields: <input type="number" id="addPerson_nFields"/><button>Go</button>
-                <div id="otherFields"></div><br/>
-                <button id="addPerson_submit">Add Person</button>
-            
-        </div>
-    </section>
-    <section>
-        <div>
-            Sheets:
-            <ol id="sheetList"></ol>
-        </div>
-        <div>
-            Create New Sheet: <br/>
-            <form id="createSheet">
-                Title: <input type="text" id="createSheet_title"/><br/>
-                Description: <input type="text" id="createSheet_description"/><br/>
-                <input type="checkbox" id="createSheet_customEditorCheck"/>Custom Editors(line seperate): <textarea type="text" id="createSheet_editors"></textarea><br/>
-                Columns(line seperated): <textarea type="text" id="createSheet_columns"></textarea><br/>
-                <button id="createSheet_submit">Create New Sheet</button>
-            </form>
-        </div>
-    </section>
-    <section>
-        TITLE: <span id="viewSheet_title"></span><br/>
-        Description: <span id="viewSheet_description"></span><br/>
-        Editors: <span id="viewSheet_editors"></span><br/>
-        <button id="enterLogBtn" disabled>Enter Log</button><br/>
-        <span id="viewSheet_table"></span>
-    </section>
-    <section>
-        Group By
-        <select id="groupBy_selectType">
-            <option value="count">Count</option>
-            <option value="total">Total</option>
-            <option value="avg">Average</option>
-            <option value="min">Minimum</option>
-            <option value="max">Maximum</option>
-        </select>
-        <select id="groupBy_selectColumn"></select>
-        <button id="groupByBtn" disabled>Group</button><br/>
-        <span id="groupBy_table"></span>
-    </section>
-</div>
 
-<script id="UI">
+    <header>
+        <h1>l</h1>
+        <h2>ogSheet</h2>
+        <button id="signOutBtn">
+            &#x219A; Sign Out
+        </button>
+    </header>
 
-    document.getElementById("saveBtn").addEventListener("click", () => {
-        logSheet.commitUpdates().then(result=>{
-            console.log("Save Successful", result)
-            alert("Save Successful")
+    <div class="popup-container hide">
+        <form id="add-person-form" class="container" onsubmit="addPerson(); return false;">
+            <fieldset>
+                <legend>Add Person </legend>
+                <div class="input-container i-1"><input type="text" name="floID" placeholder="FLO ID*"
+                        autocomplete="off" required /></div>
+                <div class="input-container i-1"><input type="text" name="name" placeholder="Name*" autocomplete="off"
+                        required /></div>
+                <hr />
+                <div id="additional-fields"></div>
+                <div class="input-container i-2b">
+                    <span data-title="Add field"><input type="button" value="&#x271A;" name="add-field" /></span>
+                    <select name="gender">
+                        <option value='' disabled selected hidden>Gender</option>
+                        <option value='Male'>Male</option>
+                        <option value='Female'>Female</option>
+                    </select>
+                    <input type="tel" placeholder="Contact" name="contact" autocomplete="off" />
+                </div>
+                <span class="asterisk-notation">*Required</span>
+                <div class="input-container i-2">
+                    <input type="submit" value="Add" />
+                    <input type="reset" value="Reset" />
+                </div>
+            </fieldset>
+        </form>
+    </div>
+
+    <div class="popup-container hide">
+        <form id="new-sheet-form" class="container" onsubmit="createSheet(); return false;">
+            <fieldset>
+                <legend>New Sheet </legend>
+                <div class="input-container i-1"><input type="text" name="title" placeholder="Title*" autocomplete="off"
+                        required /></div>
+                <div class="input-container i-1"><input type="text" name="description" placeholder="Description"
+                        autocomplete="off" /></div>
+                <div class="input-container i-1">
+                    <textarea name="writers" placeholder="Writers** [line separated]"></textarea></div>
+                <div class="input-container i-1"><textarea name="columns" placeholder="Columns* [line separated]"
+                        required></textarea></div>
+                <span class="asterisk-notation">*Required<br />**(Blank field) Default subAdmin</span>
+                <div class="input-container i-2">
+                    <input type="submit" value="Create" />
+                    <input type="reset" value="Reset" />
+                </div>
+            </fieldset>
+        </form>
+    </div>
+
+    <div class="popup-container hide">
+        <div id="group-by" class="container">
+            <div>Group Title By</div>
+            <div class="i-2" id="group-by-menu">
+                <select>
+                    <option value="count">Count</option>
+                    <option value="total" selected>Total</option>
+                    <option value="avg">Avg</option>
+                    <option value="max">Max</option>
+                    <option value="min">Min</option>
+                </select><select></select>
+            </div>
+            <div class="table-container" id="group-by-view"></div>
+        </div>
+    </div>
+
+    <div id="save-button" class="hide" data-unsaved="0">
+        <span>Changes needs to be saved!</span>
+        <button>Save</span>
+    </div>
+    <div id="show-message" class="hide">
+        <span>Message</span>
+        <button> &#x2716;</span>
+    </div>
+
+    <section>
+
+        <div id="leftPanel">
+            <div class="container vertical-list">
+                <div class="list-header">
+                    <span>&#x1F465; &nbsp;Persons</span>
+                    <button data-title="Add Person" id="add-person"> &#x271A;</button>
+                </div>
+                <div id="person-list"></div>
+            </div>
+        </div>
+
+        <div id="rightPanel">
+            <nav class="container horizontal-list">
+                <div class="list-header">
+                    <button data-title="New Sheet" id="new-sheet"> &#x271A;</button>
+                </div>
+                <div id="sheet-list"></div>
+            </nav>
+            <div class="container">
+                <div id="sheet-details">
+                    <h4>TitleOfTable</h4>
+                    <h6>XYZ, ABC, OPQ</h6>
+                    <p>Lorem ipsum dolor sit amet, </p>
+                </div>
+                <form class="table-container" id="sheet-view" onsubmit="enterLog(); return false;"></form>
+                <button type="submit" form="sheet-view" style="display: none;"></button>
+            </div>
+        </div>
+
+    </section>
+
+    <script>
+        document.onclick = (e) => {
+            try {
+                if (e.target.classList.contains("popup-container"))
+                    e.target.classList.add("hide")
+                else if (e.target.parentNode.id === "sheet-list")
+                    viewSheet(e.target.textContent)
+                else if (e.target.parentNode.classList.contains("person-card"))
+                    copyToLogInput(e.target.parentNode.children[1].children[0].textContent)
+                else if (e.target.parentNode.parentNode.classList.contains("person-card"))
+                    copyToLogInput(e.target.parentNode.parentNode.children[1].children[0].textContent)
+                else if (e.target.tagName === "TD" && e.target.parentElement.parentElement.tagName === "THEAD")
+                    document.getElementById("group-by").parentNode.classList.remove("hide")
+            } catch (error) {
+
+            }
+        };
+
+        document.getElementById("sheet-list").addEventListener('wheel', function (e) {
+            e.preventDefault();
+            this.scrollLeft += (e.wheelDelta ? e.wheelDelta * -0.5 : e.deltaY * 25)
+        });
+
+        document.getElementById('show-message').children[1].addEventListener("click", function (e) {
+            this.parentNode.classList.add('hide')
+            this.parentNode.classList.remove('no-transformations')
         })
-    })
 
-    function renderPersonList(list){
-        let display = document.getElementById("personList")
-        for(p in list){
-            let floID = p //need scope
-            let element = document.createElement("li");
-            element.textContent = list[floID].name;
-            element.addEventListener("click", () => viewPersonDetails(floID))
-            display.appendChild(element)
-        }
-    }
+        document.getElementById('save-button').children[1].addEventListener("click", function (e) {
+            logSheet.commitUpdates().then(result => {
+                this.parentNode.classList.add('hide')
+                this.parentNode.classList.remove('no-transformations')
+                this.parentNode.dataset["unsaved"] = '0'
+                showMessage("Save Successful")
+            }).catch(error => showMessage(`Save Unsuccessful [${error}]`, error))
+        })
 
-    function viewPersonDetails(floID){
-        let display = document.getElementById("personDetails")
-        let details = logSheet.viewPerson(floID)
-        display.innerHTML = `<li><b>FLO_ID: ${floID}</b></li> `
-        for(d in details){
-            let element = document.createElement("li");
-            element.textContent = `${d}: ${details[d]}`
-            display.appendChild(element)
-        }
-    }
+        document.getElementById('add-person').addEventListener("click", function (e) {
+            document.getElementById("add-person-form").parentNode.classList.remove('hide')
+        })
 
-    document.getElementById("addPerson_nFields").nextSibling.addEventListener("click", () => {
-        let n = document.getElementById("addPerson_nFields").value;
-        console.log(n)
-        let fields = document.getElementById("otherFields")
-        for(i = 1; i <= n; i++){
-            let element = document.createElement("p")
-            element.innerHTML = `<input type="text">: <input type="text">`
-            fields.appendChild(element)
-        }
-    })
+        document.getElementById('new-sheet').addEventListener("click", function (e) {
+            document.getElementById("new-sheet-form").parentNode.classList.remove('hide')
+        })
 
-    document.getElementById("addPerson_submit").addEventListener("click", () => {
-        let floID = document.getElementById("addPerson_floID").value;
-        let name = document.getElementById("addPerson_name").value;
-        var otherFields = document.getElementById("otherFields").children;
-        let otherDetails = {}
-        for (var i = 0; i < otherFields.length; i++)
-            otherDetails[otherFields[i].children[0].value] = otherFields[i].children[1].value
-        logSheet.addPerson(floID, name, otherDetails) 
-        renderPersonList({[floID]:logSheet.viewPerson(floID)})
-        document.getElementById("addPerson").reset()
-    })
+        document.forms['add-person-form']['add-field'].addEventListener("click", function (e) {
+            let field = document.createElement("div")
+            field.classList.add("input-container")
+            field.classList.add("i-2b")
+            field.innerHTML = `<input type="text" placeholder="Type" />: 
+                <input type="text" placeholder="Value" /> 
+                <input type="button" value="&#x2717;" onclick="removeElement(this.parentNode)"/>`
+            document.getElementById("additional-fields").appendChild(field)
+        })
 
-    function renderSheetList(list){
-        let display = document.getElementById("sheetList")
-        for(s in list){
-            let title = s //need scope
-            let element = document.createElement("li");
-            element.textContent = title;
-            element.addEventListener("click", () => viewSheet(title))
-            display.appendChild(element)
-        }
-    }
+        document.getElementById('group-by-menu').children[0].addEventListener("change", function (e) {
 
-    document.getElementById("createSheet_submit").addEventListener("click", () => {
-        let title = document.getElementById("createSheet_title").value;
-        let description = document.getElementById("createSheet_description").value;
-        let attributes = document.getElementById("createSheet_columns").value.split('\n')
-        let customEditors = document.getElementById("createSheet_editors").value.split('\n')
-        if(document.getElementById("createSheet_customEditorCheck").checked)
-            logSheet.createNewSheet(title, description, attributes, customEditors)
-        else
-            logSheet.createNewSheet(title, description, attributes)
-        renderSheetList({[title]: true})
-        document.getElementById("createSheet").reset()
-    })
+            try {
+                let title = document.getElementById("sheet-details").children[0].textContent;
+                let type = this.value;
+                if (type === 'count') {
+                    this.nextSibling.classList.add("hide")
+                    let data = logSheet.groupLogsBy.count(title)
+                    renderGroupByView("count", data)
+                } else {
+                    this.nextSibling.classList.remove("hide")
+                    let column = this.nextSibling.value;
+                    let data = logSheet.groupLogsBy[type](title, column);
+                    renderGroupByView(`${type}(${column})`, data)
+                }
 
-    function viewSheet(title){
-        logSheet.refreshLogs(title).then(result => {
-            let data = logSheet.viewLogs(title)
-            console.log(data)
-            document.getElementById("viewSheet_title").textContent = data.title
-            document.getElementById("viewSheet_description").textContent = data.description
-            document.getElementById("viewSheet_editors").textContent = data.editors.join(", ")
-            document.getElementById("viewSheet_table").innerHTML = ""
-            document.getElementById("enterLogBtn").disabled = true
-            document.getElementById("groupByBtn").disabled = false
-            //Create Table
-            let table = document.createElement("table")
-            //Render Header and Input Row
-            let header = table.insertRow(0);
-            let inputRow = table.insertRow(1);
-            header.insertCell(0).textContent = 'FLO_ID'
-            inputRow.insertCell(0).innerHTML = `<input type="text">`
-            for(let i = 0; i < data.attributes.length; i++){
-                header.insertCell(i+1).textContent = data.attributes[i]
-                inputRow.insertCell(i+1).innerHTML = `<input type="text">`
+
+            } catch (error) {
+                showMessage(error, "error")
             }
-            //Render all Log activities
-            for(let j = 0; j < data.sheet.length; j++){
-                let row = table.insertRow(2)
-                row.insertCell(0).textContent = data.sheet[j].floID
-                for(let k = 0; k<  data.sheet[j].log.length; k++)
-                    row.insertCell(k+1).textContent = data.sheet[j].log[k]
+        })
+
+        document.getElementById('group-by-menu').children[1].addEventListener("change", function (e) {
+            try {
+                let title = document.getElementById("sheet-details").children[0].textContent;
+                let type = this.previousSibling.value;
+                let column = this.value;
+                let data = logSheet.groupLogsBy[type](title, column);
+                renderGroupByView(`${type}(${column})`, data)
+            } catch (error) {
+                showMessage(error, "error")
             }
-            document.getElementById("viewSheet_table").appendChild(table)
-            //Enable Entry log button if user is editor
-            if(data.editors.includes(myFloID))
-                document.getElementById("enterLogBtn").disabled = false
-            //Add columnSelect for groupBy
-            let groupBySelectColumn = document.getElementById("groupBy_selectColumn");
-            groupBySelectColumn.innerHTML = "";
-            data.attributes.forEach(attribute => {
-                let columnOption = document.createElement("option")
-                columnOption.setAttribute("value", attribute);
-                columnOption.textContent = attribute;
-                groupBySelectColumn.appendChild(columnOption)
+        })
+
+        function removeElement(element) {
+            element.parentNode.removeChild(element);
+        }
+
+        function clearElement(element) {
+            element.innerHTML = '';
+            return element;
+        }
+
+        function showMessage(message, mode = "normal", fixed = false) {
+            if (mode === "error")
+                console.error(message)
+            else if (mode === "warn")
+                console.warn(message)
+            else
+                console.log(mode.toUpperCase(), message)
+            let bg = {
+                normal: '#00C853',
+                error: '#D32F2F',
+                warn: '#FFCC00',
+                cool: '#08B6CE'
+            }
+            let banner = document.getElementById('show-message')
+            clearTimeout(this.currentTimeout)
+            banner.classList.add('hide');
+            banner.classList.remove('no-transformations');
+            setTimeout(() => {
+                banner.style.background = bg[mode];
+                banner.children[0].textContent = message;
+                banner.classList.add('no-transformations');
+                banner.classList.remove('hide');
+                if (!fixed)
+                    this.currentTimeout = setTimeout(() => banner.children[1].click(), 4000)
+            }, 500)
+        }
+
+        function showSave() {
+            let banner = document.getElementById('save-button')
+            banner.dataset["unsaved"] = parseInt(banner.dataset["unsaved"]) + 1
+            banner.classList.add('hide');
+            banner.classList.remove('no-transformations');
+            setTimeout(() => {
+                banner.style.background = `#F${Math.max(9-parseInt(banner.dataset["unsaved"]), 0)}0`;
+                banner.classList.add('no-transformations');
+                banner.classList.remove('hide');
+            }, 500)
+        }
+
+        function addPerson() {
+            try {
+                let form = document.forms["add-person-form"]
+                let floID = form.floID.value.trim();
+                let name = form.name.value.trim();
+                let otherDetails = {
+                    "Gender": form.gender.value,
+                    "Contact": form.contact.value,
+                }
+                let fields = document.getElementById("additional-fields").getElementsByTagName("input")
+                for (let i = 0; i < fields.length; i += 3)
+                    otherDetails[fields[i].value] = fields[i + 1].value
+                logSheet.addPerson(floID, name, otherDetails)
+                renderPersonCard(floID, logSheet.viewPerson(floID))
+                form.reset()
+                showMessage(`Added Person: ${floID}`)
+                showSave()
+            } catch (error) {
+                showMessage(error, "error")
+            }
+
+        }
+
+        function createSheet() {
+            try {
+                let form = document.forms["new-sheet-form"]
+                let title = form.title.value.trim().replace(" ", "_");
+                let description = form.description.value.trim();
+                let columns = form.columns.value.trim().split('\n');
+                let writers = form.writers.value.trim();
+                if (writers === '')
+                    writers = floGlobals.subAdmins
+                else
+                    writers = writers.split('\n')
+                logSheet.createNewSheet(title, description, columns, writers)
+                renderSheetList([title])
+                form.reset()
+                showMessage(`Created New Sheet: ${title}`)
+                showSave()
+            } catch (error) {
+                showMessage(error, "error")
+            }
+        }
+
+        function copyToLogInput(floID) {
+            let input = document.forms['sheet-view'][0]
+            if (input.tagName === 'INPUT')
+                input.value = floID;
+            console.log(floID, input)
+        }
+
+        function enterLog() {
+            let title = document.getElementById("sheet-details").children[0].textContent;
+            let form = document.forms['sheet-view']
+            if (form[0].tagName === 'INPUT'){
+                let floID = form[0].value;
+                let log = []
+                for(let i=1;i<form.length-1;i++)
+                    log.push(form[i].value)
+                logSheet.enterLog(title, floID, log).then(result => {
+                    showMessage('Log Entry Successful')
+                    let row = document.getElementById("sheet-view").getElementsByTagName("tbody")[0].insertRow(2)
+                    row.insertCell(0).textContent = floID
+                    for(let k = 0; k < log.length; k++)
+                        row.insertCell(k+1).textContent = log[k]
+                }).catch(error => showMessage(error, "error"))
+            }
+        }
+
+        function viewSheet(title) {
+            logSheet.refreshLogs(title).then(result => {
+                let data = logSheet.viewLogs(title)
+                renderSheetView(data.title, data.description, data.editors, data.attributes, data.sheet, data
+                    .editors.includes(myFloID))
+            }).catch(error => showMessage(error, "error"))
+        }
+
+        function renderPersonCard(floID, details) {
+            let newCard = document.createElement("div");
+            newCard.classList.add("person-card"); {}
+            let frontSide = document.createElement("div");
+            let initalTag = document.createElement("span");
+            initalTag.textContent = details.name.charAt(0)
+            frontSide.appendChild(initalTag);
+            let nameTag = document.createTextNode(details.name);
+            frontSide.appendChild(nameTag);
+            let backSide = document.createElement("div");
+            let idTag = document.createElement("span");
+            idTag.textContent = floID;
+            backSide.appendChild(idTag);
+            for (d in details)
+                if (d !== "name") {
+                    let detailTag = document.createElement("li")
+                    detailTag.textContent = `${d}: ${details[d]}`
+                    backSide.appendChild(detailTag)
+                }
+            newCard.appendChild(frontSide);
+            newCard.appendChild(backSide);
+            document.getElementById("person-list").appendChild(newCard);
+        }
+
+        function renderPersonList(personList = {}) {
+            for (person in personList)
+                renderPersonCard(person, personList[person])
+        }
+
+        function renderSheetList(sheetList = []) {
+            let sheetHolder = document.getElementById("sheet-list")
+            sheetList.forEach(sheet => {
+                let sheetCard = document.createElement("div");
+                sheetCard.textContent = sheet;
+                sheetHolder.appendChild(sheetCard)
             })
-        }).catch(error => {
-            console.log(error)
-            document.getElementById("viewSheet_title").textContent = "null"
-            document.getElementById("viewSheet_description").textContent = "null"
-            document.getElementById("viewSheet_editors").textContent = "null"
-            document.getElementById("viewSheet_table").textContent = "ERROR"
-            document.getElementById("enterLogBtn").disabled = true
-            document.getElementById("groupByBtn").disabled = true
-        })
-    }
-
-    document.getElementById("enterLogBtn").addEventListener("click", () => {
-        let title = document.getElementById("viewSheet_title").textContent
-        let inputs = document.getElementById("viewSheet_table").getElementsByTagName("input")
-        let floID = inputs[0].value
-        let log = []
-        for(let i=1; i<inputs.length; i++){
-            log.push(inputs[i].value)
-            inputs[i].value = ''
         }
-        logSheet.enterLog(title, floID, log).then(result => {
-            let row = document.getElementById("viewSheet_table").getElementsByTagName("table")[0].insertRow(2)
-            row.insertCell(0).textContent = floID
-            for(let k = 0; k < log.length; k++)
-                row.insertCell(k+1).textContent = log[k]
-        }).catch(error => console.log(error))
-    })
 
-    document.getElementById("groupByBtn").addEventListener("click", () => {
-        let title = document.getElementById("viewSheet_title").textContent;
-        let type = document.getElementById("groupBy_selectType").value;
-        let column = document.getElementById("groupBy_selectColumn").value;
-        let groupedData = logSheet.groupLogsBy[type](title, column);
-        console.log(groupedData)
-        //clear existing display
-        document.getElementById("groupBy_table").innerHTML = "";
-        //create groupBy table
-        let table = document.createElement("table");
-        let header = table.insertRow(0)
-        header.insertCell(0).textContent = `FLO_ID`
-        header.insertCell(1).textContent = `${type}(${column})`
-        for(floID in groupedData){
-            let row = table.insertRow(1);
-            row.insertCell(0).textContent = floID;
-            row.insertCell(1).textContent = groupedData[floID];
+        function renderSheetView(title, description, editors, attributes, sheet, isWriteable) {
+            //Add Sheet Details
+            let sheetDetails = document.getElementById("sheet-details")
+            sheetDetails.children[0].textContent = title;
+            sheetDetails.children[1].textContent = editors;
+            sheetDetails.children[2].textContent = description;
+            //Create and add the sheet table
+            let table = document.createElement("table")
+            let thead = table.createTHead()
+            thead.setAttribute('data-title', 'click to groupBy')
+            let head = thead.insertRow(0)
+            head.insertCell(0).textContent = "FLO ID"
+            attributes.forEach(a => head.insertCell().textContent = a)
+            let tbody = document.createElement("tbody")
+            sheet.forEach(data => {
+                let row = tbody.insertRow(0);
+                row.insertCell(0).textContent = data.floID
+                data.log.forEach(l => row.insertCell().textContent = l)
+            })
+            //Add input fields if writable
+            if (isWriteable) {
+                let row = tbody.insertRow(0);
+                row.insertCell(0).innerHTML = `<input type="text">`;
+                attributes.forEach(a => row.insertCell().innerHTML = `<input type="text">`);
+            }
+            table.appendChild(tbody);
+            clearElement(document.getElementById("sheet-view")).appendChild(table);
+            //Add options for groupBy 
+            document.getElementById('group-by').children[0].textContent = `Group ${title} by`;
+            document.getElementById('group-by-view').innerHTML = `<table><thead><tr><td>FLO ID</td><td><i>null</i></td></tr></thead></table>`
+            let colSelect = clearElement(document.getElementById('group-by-menu').children[1]);
+            attributes.forEach(a => {
+                let opt = document.createElement('option');
+                opt.setAttribute('value', a);
+                opt.textContent = a;
+                colSelect.appendChild(opt)
+            })
         }
-        document.getElementById("groupBy_table").appendChild(table)
-    })
-</script>
+
+        function renderGroupByView(groupName, groupData) {
+            let table = document.createElement("table")
+            let head = table.createTHead().insertRow(0)
+            head.insertCell(0).textContent = "FLO ID";
+            head.insertCell(1).textContent = groupName;
+            let tbody = document.createElement("tbody")
+            for (floID in groupData) {
+                let row = tbody.insertRow(0);
+                row.insertCell(0).textContent = floID
+                row.insertCell(1).textContent = groupData[floID]
+            }
+            table.appendChild(tbody);
+            clearElement(document.getElementById("group-by-view")).appendChild(table);
+        }
+    </script>
 
 <script id="init_lib">
     //All util libraries required for Standard operations (DO NOT EDIT ANY)
@@ -9042,7 +9759,7 @@ Bitcoin.Util = {
             floGlobals.appObjects.logSheet.personDetails[floID] = {};
             floGlobals.appObjects.logSheet.personDetails[floID].name = name
             for(d in otherDetails){
-                if(d === "name" || d === "floID" || otherDetails[d] === undefined || otherDetails[d] === null)
+                if(d === "name" || d === "floID" || !d ||!otherDetails[d])
                     continue;
                 else
                     floGlobals.appObjects.logSheet.personDetails[floID][d] = otherDetails[d]
@@ -9252,11 +9969,10 @@ Bitcoin.Util = {
                     }
                 })
                 return group
-            },
+            }
         }
-    
-    
     }
 </script>
+
 </body>
 </html>
