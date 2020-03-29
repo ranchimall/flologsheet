@@ -53,6 +53,136 @@
             background-attachment: fixed;
         }
 
+        #loading-screen {
+            width: 100%;
+            height: 100%;
+            top: 0;
+            position: fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-light);
+            z-index: 4;
+        }
+
+        #loading-screen .appName {
+            top: 8rem;
+            position: fixed;
+            display: flex;
+            z-index: 5;
+        }
+
+        #startup-load-msg {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            text-align: right;
+            font-size: 0.75rem;
+        }
+
+        #startup-load-msg .success-log {
+            color: white;
+        }
+
+        #startup-load-msg .error-log {
+            color: red;
+        }
+
+        #sign-in-box {
+            height: 25rem;
+            width: 25rem;
+            background: rgba(var(--rgb-bw), 1);
+            z-index: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1rem;
+        }
+
+        #sign-in-box div {
+            text-align: center;
+        }
+
+        #sign-in-box span {
+            color: var(--alt-light);
+            font: italic bold 1.5rem Georgia, serif;
+        }
+
+        #sign-in-box input,
+        #sign-in-box button {
+            margin: 1rem;
+            padding: 0.5rem;
+            background: rgba(var(--rgb-bw), 0.5);
+            border: 0.1rem solid;
+            outline: none;
+            border-radius: 0.2rem;
+            font-size: 1.3rem;
+            color: transparent;
+
+        }
+
+        #sign-in-box input,
+        #sign-in-box button:first-child {
+            text-shadow: 0 0 0 var(--accent-dark);
+            border-color: var(--accent-dark);
+        }
+
+        #sign-in-box input {
+            height: 2.5rem;
+            width: 20rem;
+        }
+
+        #sign-in-box input:focus {
+            box-shadow: -0.1rem -0.1rem var(--accent-dark)
+        }
+
+        #sign-in-box button {
+            height: 5rem;
+            width: 9rem;
+        }
+
+        #sign-in-box button:last-child {
+            text-shadow: 0 0 0 var(--alt-dark);
+            border-color: var(--alt-dark);
+        }
+
+        .loader {
+            display: inline-block;
+            position: absolute;
+            width: 80px;
+            height: 80px;
+        }
+
+        .loader div {
+            position: absolute;
+            border: 4px solid #fff;
+            opacity: 1;
+            border-radius: 50%;
+            animation: loader 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+        }
+
+        .loader div:nth-child(2) {
+            animation-delay: -0.5s;
+        }
+
+        @keyframes loader {
+            0% {
+                top: 36px;
+                left: 36px;
+                width: 0;
+                height: 0;
+                opacity: 1;
+            }
+
+            100% {
+                top: 0px;
+                left: 0px;
+                width: 72px;
+                height: 72px;
+                opacity: 0;
+            }
+        }
+
         button:hover,
         button:focus {
             outline: 0;
@@ -65,7 +195,7 @@
 
         [data-title] {
             position: relative;
-            z-index: 6;
+            z-index: 3;
         }
 
         [data-title]:hover::before {
@@ -75,12 +205,14 @@
             display: inline-block;
             padding: 3px 6px;
             border-radius: 2px;
-            background: #000;
+            background: var(--alt-dark);
             color: var(--alt-light);
             font-size: 12px;
             font-family: sans-serif;
+            font-weight: normal;
+            font-style: normal;
             white-space: nowrap;
-            z-index: 6;
+            z-index: 5;
         }
 
         [data-title]:hover::after {
@@ -91,8 +223,8 @@
             display: inline-block;
             color: var(--alt-light);
             border: 8px solid transparent;
-            border-bottom: 8px solid #000;
-            z-index: 6;
+            border-bottom: 8px solid var(--alt-dark);
+            z-index: 5;
         }
 
         header {
@@ -104,7 +236,7 @@
             padding: 0.2rem 1em;
         }
 
-        header h1 {
+        .appName h1 {
             margin: 1rem 0 0 1rem;
             padding: 0;
             color: var(--alt-light);
@@ -112,7 +244,7 @@
             text-shadow: -2.5px 2.5px rgba(var(--rgb-bw), 0.5);
         }
 
-        header h2 {
+        .appName h2 {
             margin-bottom: 0;
             padding: 0;
             color: var(--alt-light);
@@ -120,9 +252,16 @@
             text-shadow: -2.5px 2.5px rgba(var(--rgb-bw), 0.5);
         }
 
+        header span {
+            color: var(--alt-light);
+            right: 10rem;
+            position: absolute;
+            font: italic normal 0.9rem Georgia, serif;
+        }
+
         header button {
             color: var(--alt-light);
-            background: var(--accent-light);
+            background: var(--accent-dark);
             border: 1px solid var(--alt-light);
             border-radius: 0.25em;
             position: absolute;
@@ -135,7 +274,7 @@
         header button:hover,
         header button:focus {
             background: var(--alt-light);
-            color: var(--accent-light);
+            color: var(--accent-dark);
         }
 
         .hide {
@@ -145,6 +284,10 @@
 
         .no-transformations {
             transform: none !important;
+        }
+
+        #confirmation div {
+            text-align: center;
         }
 
         #show-message,
@@ -251,6 +394,11 @@
             cursor: default;
         }
 
+        .list-header span {
+            color: transparent;
+            text-shadow: 0 0 0 var(--default-text);
+        }
+
         .list-header button {
             float: right;
             border: none;
@@ -334,29 +482,37 @@
             display: block;
         }
 
+        #sheet-details {
+            padding: 0.5rem
+        }
+
         #sheet-details h4 {
-            margin: 0;
-            padding: 1rem;
+            margin: 0.5rem;
+            padding: 0.5rem;
             font-weight: bolder;
             font-size: 1.3rem;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            border-radius: 0.25rem;
+            background: var(--alt-light);
+            color: var(--accent-dark);
         }
 
         #sheet-details h6 {
-            margin: 0;
-            padding: 0 1rem;
+            margin: 0 0.5rem;
+            padding: 0 0.5rem;
             font-style: italic;
             font-size: 0.75rem;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            color: var(--alt-dark)
         }
 
         #sheet-details p {
-            margin: 0;
-            padding: 0.5rem 1rem;
+            margin: 0.5rem;
+            padding: 0 0.5rem;
             overflow: hidden;
             height: 3rem;
         }
@@ -442,7 +598,7 @@
         }
 
         .input-container input[type="button"] {
-            background: var(--alt-light);
+            background: rgba(var(--rgb-bw), 0);
             color: var(--default-text);
         }
 
@@ -457,7 +613,7 @@
         }
 
         .input-container input[type="button"]:hover {
-            background: var(--alt-dark)
+            background: var(--alt-light)
         }
 
         .input-container input[type="submit"]:hover {
@@ -501,22 +657,26 @@
             margin: 0.5rem;
         }
 
-        #group-by > div{
+        #group-by>div:first-child {
             text-align: center;
-            margin: 0.5rem;
             font-weight: bold;
         }
 
-        #group-by-menu{
+        #group-by>div {
+            margin: 0.5rem;
+        }
+
+        #group-by-menu {
             align-items: center;
             text-align: center;
         }
 
-        #group-by-menu .input-container{
+        #group-by-menu .input-container {
             margin: 0;
             padding: 0;
         }
-        #group-by-menu select{
+
+        #group-by-menu select {
             height: 2rem;
             border-radius: 0.2rem;
             border: 0.1rem solid rgba(var(--rgb-bw), 0.2);
@@ -524,22 +684,22 @@
             margin: 0 1rem;
         }
 
-        #group-by-view{
+        #group-by-view {
             width: 30rem;
             height: 15rem;
             overflow: scroll;
         }
-        
-        #group-by-view td:first-child{
+
+        #group-by-view td:first-child {
             width: 20rem;
         }
 
-        #group-by-view td:last-child{
+        #group-by-view td:last-child {
             width: 10rem;
             text-align: right;
         }
 
-        #sheet-view input{
+        #sheet-view input {
             width: 100%;
             border-radius: 0.2rem;
             border: 0.1rem solid rgba(var(--rgb-bw), 0.2);
@@ -578,36 +738,96 @@
 </script>
 <script id="onLoadStartUp">
     function onLoadStartUp() {
-
-        //floDapps.addStartUpFunction('Sample', Promised Function)
-        //floDapps.setAppObjectStores({sampleObs1:{}, sampleObs2:{options{autoIncrement:true, keyPath:'SampleKey'}, Indexes:{sampleIndex:{}}}})
-        //floDapps.setCustomPrivKeyInput( () => { FUNCTION BODY *must return private key* } )
-
+        document.getElementById("loading-screen").classList.remove("hide")
+        clearElement(document.getElementById("startup-load-msg"))
+        floDapps.setCustomPrivKeyInput( () => { 
+            return new Promise((resolve, reject) => {
+                let signInBox = document.getElementById("sign-in-box")
+                signInBox.classList.remove('hide')
+                let buttons = signInBox.getElementsByTagName('button');
+                buttons[0].onclick = () => {
+                    let keyInput = signInBox.getElementsByTagName('input')[0];
+                    let key = keyInput.value;
+                    keyInput.value = '';
+                    buttons[0].onclick = null;
+                    buttons[1].onclick = null;
+                    signInBox.classList.add('hide')
+                    resolve(key)
+                }
+                buttons[1].onclick = () => {
+                    signInBox.getElementsByTagName('input')[0].value = '';
+                    buttons[0].onclick = null;
+                    buttons[1].onclick = null;
+                    signInBox.classList.add('hide')
+                    reject(null)
+                }
+            })
+        })
         floDapps.launchStartUp().then(result => {
             console.log(result)
+            document.getElementById("greet-tag").textContent = `Hi, ${myFloID}`
+            showMessage("SignIn Successful")
+            reactor.dispatchEvent("startUpSuccessLog",`Downloading objectData! Please Wait...`)
             logSheet.init().then(result => {
                 console.log(result)
-                alert(`Welcome FLO_ID: ${myFloID}`)
                 renderPersonList(logSheet.listPersons())
                 renderSheetList(Object.keys(logSheet.listSheets()))
-                //if(floGlobals.subAdmins.includes(myFloID))
-                   // document.getElementById("saveBtn").disabled = false
+                document.getElementById("loading-screen").classList.add("hide")
+                if(floGlobals.subAdmins.includes(myFloID)){
+                    document.getElementById("add-person").classList.remove('hide')
+                    document.getElementById("new-sheet").classList.remove('hide')
+                }else{
+                    document.getElementById("add-person").classList.add('hide')
+                    document.getElementById("new-sheet").classList.add('hide')
+                }
+            }).catch(error => {
+                reactor.dispatchEvent("startUpErrorLog",`Failed to download objectData`)
+                showMessage(error, "error")
             })
-            //App functions....
-        }).catch(error => console.error(error))
+        }).catch(error => showMessage(error, "error"))
     }
 </script>
 </head>
 
 <body onload="onLoadStartUp()">
 
-    <header>
+    <header class="appName">
         <h1>l</h1>
         <h2>ogSheet</h2>
-        <button id="signOutBtn">
+        <span id="greet-tag">
+        </span>
+        <button id="sign-out">
             &#x219A; Sign Out
         </button>
     </header>
+
+    <div id="loading-screen">
+        <div class="appName">
+            <h1>l</h1>
+            <h2>ogSheet</h2>
+        </div>
+        <div class="loader"><div></div><div></div></div>
+        <div id="sign-in-box" class="hide">
+            <div>
+                <div>
+                    <span>SIGN IN</span>
+                </div>
+                <div><input type="password"></div>
+                <div><button>&#x1F511; Sign In</button><button>&#x1F464; Guest</button></div>
+            </div>
+        </div>
+        <div id="startup-load-msg"></div>  
+    </div>
+
+    <div class="popup-container hide">
+        <div id="confirmation" class="container">
+            <div class="input-container i-1"></div>
+            <div class="input-container i-2">
+                <input type="submit" value="Ok" />
+                <input type="reset" value="Cancel" />
+            </div>
+        </div>
+    </div>
 
     <div class="popup-container hide">
         <form id="add-person-form" class="container" onsubmit="addPerson(); return false;">
@@ -689,7 +909,7 @@
             <div class="container vertical-list">
                 <div class="list-header">
                     <span>&#x1F465; &nbsp;Persons</span>
-                    <button data-title="Add Person" id="add-person"> &#x271A;</button>
+                    <button data-title="Add Person" id="add-person" class="hide"> &#x271A;</button>
                 </div>
                 <div id="person-list"></div>
             </div>
@@ -698,15 +918,15 @@
         <div id="rightPanel">
             <nav class="container horizontal-list">
                 <div class="list-header">
-                    <button data-title="New Sheet" id="new-sheet"> &#x271A;</button>
+                    <button data-title="New Sheet" id="new-sheet" class="hide"> &#x271A;</button>
                 </div>
                 <div id="sheet-list"></div>
             </nav>
             <div class="container">
                 <div id="sheet-details">
-                    <h4>TitleOfTable</h4>
-                    <h6>XYZ, ABC, OPQ</h6>
-                    <p>Lorem ipsum dolor sit amet, </p>
+                    <h4></h4>
+                    <h6></h6>
+                    <p></p>
                 </div>
                 <form class="table-container" id="sheet-view" onsubmit="enterLog(); return false;"></form>
                 <button type="submit" form="sheet-view" style="display: none;"></button>
@@ -729,9 +949,21 @@
                 else if (e.target.tagName === "TD" && e.target.parentElement.parentElement.tagName === "THEAD")
                     document.getElementById("group-by").parentNode.classList.remove("hide")
             } catch (error) {
-
+                //do nothing
             }
         };
+
+        document.getElementById("sign-out").addEventListener('click', function(e){
+            getConfirmation('Are you sure you want to Sign out?').then(result => {
+                try{
+                    floDapps.clearCredentials();
+                    showMessage("Successfully Signed out")
+                    setTimeout(onLoadStartUp, 2000)
+                }catch(error){
+                    showMessage(error, "error")
+                }
+            })
+        });
 
         document.getElementById("sheet-list").addEventListener('wheel', function (e) {
             e.preventDefault();
@@ -811,6 +1043,32 @@
         function clearElement(element) {
             element.innerHTML = '';
             return element;
+        }
+
+        function getConfirmation(message){
+            let confirmation = document.getElementById("confirmation");
+            confirmation.children[0].textContent = message;
+            confirmation.parentNode.classList.remove("hide")
+            return new Promise((resolve, reject) => {
+                let interval = setInterval(()=>{
+                    if(confirmation.parentNode.classList.contains("hide")){
+                        confirmation.children[1].children[0].onclick = null;
+                        confirmation.children[1].children[1].onclick = null;
+                        clearInterval(interval);
+                        reject(false);
+                    }
+                }, 1000)
+                confirmation.children[1].children[0].onclick = () => {
+                    clearInterval(interval);
+                    confirmation.parentNode.classList.add("hide")
+                    resolve(true)
+                }
+                confirmation.children[1].children[1].onclick = () => {
+                    clearInterval(interval);
+                    confirmation.parentNode.classList.add("hide")
+                    reject(true)
+                }
+            })
         }
 
         function showMessage(message, mode = "normal", fixed = false) {
@@ -9507,11 +9765,10 @@ Bitcoin.Util = {
                                 compactIDB.writeData("lastTx",result.totalTxs,floGlobals.SNStorageID);
                                 compactIDB.readAllData("supernodes").then(result => {
                                     floGlobals.supernodes = result;
-                                    
                                     floSupernode.kBucket.launch(Object.keys(floGlobals.supernodes),floGlobals.SNStorageID)
                                         .then(result => resolve("Loaded Supernode list\n"+result))                   
                                 })
-                            })
+                            }).catch(error => reject(error))
                         }).catch(error => reject(error))
                     })
                 },
@@ -9534,7 +9791,7 @@ Bitcoin.Util = {
                                     floGlobals.subAdmins = Object.keys(result);
                                     resolve("Read subAdmins from blockchain");                    
                                 })
-                            })
+                            }).catch(error => reject(error))
                         }).catch(error => reject(error))
                     })
                 },
@@ -9740,10 +9997,22 @@ Bitcoin.Util = {
     }
 
     reactor.registerEvent("startUpSuccessLog");
-    reactor.addEventListener("startUpSuccessLog", log => console.log(log))
+    reactor.addEventListener("startUpSuccessLog", log => {
+        console.log(log)
+        let element = document.createElement('div')
+        element.setAttribute("class", "success-log")
+        element.textContent = log
+        document.getElementById("startup-load-msg").appendChild(element)
+    })
 
     reactor.registerEvent("startUpErrorLog");
-    reactor.addEventListener("startUpErrorLog", log => console.error(log))
+    reactor.addEventListener("startUpErrorLog", log => {
+        console.error(log)
+        let element = document.createElement('div')
+        element.setAttribute("class", "error-log")
+        element.textContent = log
+        document.getElementById("startup-load-msg").appendChild(element)
+    })
 </script>
 
 <script id="logSheet">
