@@ -738,8 +738,13 @@
 </script>
 <script id="onLoadStartUp">
     function onLoadStartUp() {
+        //display loading screen
         document.getElementById("loading-screen").classList.remove("hide")
+        //clear Rendered Elements
         clearElement(document.getElementById("startup-load-msg"))
+        clearElement(document.getElementById('person-list'))
+        clearElement(document.getElementById('sheet-list'))
+        //set the custom Privkey input
         floDapps.setCustomPrivKeyInput( () => { 
             return new Promise((resolve, reject) => {
                 let signInBox = document.getElementById("sign-in-box")
@@ -763,16 +768,21 @@
                 }
             })
         })
+        //invoke the startup functions
         floDapps.launchStartUp().then(result => {
             console.log(result)
             document.getElementById("greet-tag").textContent = `Hi, ${myFloID}`
             showMessage("SignIn Successful")
             reactor.dispatchEvent("startUpSuccessLog",`Downloading objectData! Please Wait...`)
+            //request object data from Supernode
             logSheet.init().then(result => {
                 console.log(result)
+                //Render the personList and sheetList
                 renderPersonList(logSheet.listPersons())
                 renderSheetList(Object.keys(logSheet.listSheets()))
+                //hide loading screen
                 document.getElementById("loading-screen").classList.add("hide")
+                //display add buttons if subAdmin, else hide
                 if(floGlobals.subAdmins.includes(myFloID)){
                     document.getElementById("add-person").classList.remove('hide')
                     document.getElementById("new-sheet").classList.remove('hide')
@@ -1170,8 +1180,9 @@
                 for(let i=1;i<form.length-1;i++)
                     log.push(form[i].value)
                 logSheet.enterLog(title, floID, log).then(result => {
+                    form.reset();
                     showMessage('Log Entry Successful')
-                    let row = document.getElementById("sheet-view").getElementsByTagName("tbody")[0].insertRow(2)
+                    let row = document.getElementById("sheet-view").getElementsByTagName("tbody")[0].insertRow(1)
                     row.insertCell(0).textContent = floID
                     for(let k = 0; k < log.length; k++)
                         row.insertCell(k+1).textContent = log[k]
@@ -1234,7 +1245,6 @@
             //Create and add the sheet table
             let table = document.createElement("table")
             let thead = table.createTHead()
-            thead.setAttribute('data-title', 'click to groupBy')
             let head = thead.insertRow(0)
             head.insertCell(0).textContent = "FLO ID"
             attributes.forEach(a => head.insertCell().textContent = a)
