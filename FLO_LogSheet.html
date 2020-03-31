@@ -514,13 +514,14 @@
             margin: 0.5rem;
             padding: 0 0.5rem;
             overflow: hidden;
-            height: 3rem;
+            height: 1.5rem;
+            display: inline-block;
         }
 
         .table-container {
             margin: 0 1rem 1rem 1rem;
             overflow: scroll;
-            max-height: 18rem;
+            max-height: 19rem;
         }
 
         table {
@@ -657,6 +658,22 @@
             margin: 0.5rem;
         }
 
+        #view-group-by {
+            float: right;
+            margin-right: 0.5rem;
+            height: 1.5rem;
+            width: 5rem;
+            background: var(--alt-light);
+            color: var(--alt-dark);
+            border: 0.1rem solid var(--alt-dark);
+            border-radius: 0.2rem;
+        }
+
+        #view-group-by:hover {
+            background: var(--alt-dark);
+            color: var(--alt-light);
+        }
+
         #group-by>div:first-child {
             text-align: center;
             font-weight: bold;
@@ -744,8 +761,9 @@
         clearElement(document.getElementById("startup-load-msg"))
         clearElement(document.getElementById('person-list'))
         clearElement(document.getElementById('sheet-list'))
+        clearElement(document.getElementById('sheet-view'))
         //set the custom Privkey input
-        floDapps.setCustomPrivKeyInput( () => { 
+        floDapps.setCustomPrivKeyInput(() => {
             return new Promise((resolve, reject) => {
                 let signInBox = document.getElementById("sign-in-box")
                 signInBox.classList.remove('hide')
@@ -773,7 +791,7 @@
             console.log(result)
             document.getElementById("greet-tag").textContent = `Hi, ${myFloID}`
             showMessage("SignIn Successful")
-            reactor.dispatchEvent("startUpSuccessLog",`Downloading objectData! Please Wait...`)
+            reactor.dispatchEvent("startUpSuccessLog", `Downloading objectData! Please Wait...`)
             //request object data from Supernode
             logSheet.init().then(result => {
                 console.log(result)
@@ -783,15 +801,16 @@
                 //hide loading screen
                 document.getElementById("loading-screen").classList.add("hide")
                 //display add buttons if subAdmin, else hide
-                if(floGlobals.subAdmins.includes(myFloID)){
+                if (floGlobals.subAdmins.includes(myFloID)) {
                     document.getElementById("add-person").classList.remove('hide')
                     document.getElementById("new-sheet").classList.remove('hide')
-                }else{
+                } else {
                     document.getElementById("add-person").classList.add('hide')
                     document.getElementById("new-sheet").classList.add('hide')
                 }
+                document.getElementById("sheet-details").classList.add("hide")
             }).catch(error => {
-                reactor.dispatchEvent("startUpErrorLog",`Failed to download objectData`)
+                reactor.dispatchEvent("startUpErrorLog", `Failed to download objectData`)
                 showMessage(error, "error")
             })
         }).catch(error => showMessage(error, "error"))
@@ -933,10 +952,11 @@
                 <div id="sheet-list"></div>
             </nav>
             <div class="container">
-                <div id="sheet-details">
+                <div id="sheet-details" class="hide">
                     <h4></h4>
                     <h6></h6>
                     <p></p>
+                    <button id="view-group-by">Groupby</button>
                 </div>
                 <form class="table-container" id="sheet-view" onsubmit="enterLog(); return false;"></form>
                 <button type="submit" form="sheet-view" style="display: none;"></button>
@@ -957,19 +977,19 @@
                 else if (e.target.parentNode.parentNode.classList.contains("person-card"))
                     copyToLogInput(e.target.parentNode.parentNode.children[1].children[0].textContent)
                 else if (e.target.tagName === "TD" && e.target.parentElement.parentElement.tagName === "THEAD")
-                    document.getElementById("group-by").parentNode.classList.remove("hide")
+                    sortTable(e.target.parentElement.parentElement.parentElement, e.target.cellIndex)
             } catch (error) {
                 //do nothing
             }
         };
 
-        document.getElementById("sign-out").addEventListener('click', function(e){
+        document.getElementById("sign-out").addEventListener('click', function (e) {
             getConfirmation('Are you sure you want to Sign out?').then(result => {
-                try{
+                try {
                     floDapps.clearCredentials();
                     showMessage("Successfully Signed out")
                     setTimeout(onLoadStartUp, 2000)
-                }catch(error){
+                } catch (error) {
                     showMessage(error, "error")
                 }
             })
@@ -1012,6 +1032,10 @@
             document.getElementById("additional-fields").appendChild(field)
         })
 
+        document.getElementById('view-group-by').addEventListener("click", function (e) {
+            document.getElementById("group-by").parentNode.classList.remove("hide")
+        })
+
         document.getElementById('group-by-menu').children[0].addEventListener("change", function (e) {
 
             try {
@@ -1046,6 +1070,7 @@
             }
         })
 
+
         function removeElement(element) {
             element.parentNode.removeChild(element);
         }
@@ -1055,13 +1080,13 @@
             return element;
         }
 
-        function getConfirmation(message){
+        function getConfirmation(message) {
             let confirmation = document.getElementById("confirmation");
             confirmation.children[0].textContent = message;
             confirmation.parentNode.classList.remove("hide")
             return new Promise((resolve, reject) => {
-                let interval = setInterval(()=>{
-                    if(confirmation.parentNode.classList.contains("hide")){
+                let interval = setInterval(() => {
+                    if (confirmation.parentNode.classList.contains("hide")) {
                         confirmation.children[1].children[0].onclick = null;
                         confirmation.children[1].children[1].onclick = null;
                         clearInterval(interval);
@@ -1140,7 +1165,6 @@
             } catch (error) {
                 showMessage(error, "error")
             }
-
         }
 
         function createSheet() {
@@ -1174,18 +1198,18 @@
         function enterLog() {
             let title = document.getElementById("sheet-details").children[0].textContent;
             let form = document.forms['sheet-view']
-            if (form[0].tagName === 'INPUT'){
+            if (form[0].tagName === 'INPUT') {
                 let floID = form[0].value;
                 let log = []
-                for(let i=1;i<form.length-1;i++)
+                for (let i = 1; i < form.length - 1; i++)
                     log.push(form[i].value)
                 logSheet.enterLog(title, floID, log).then(result => {
                     form.reset();
                     showMessage('Log Entry Successful')
-                    let row = document.getElementById("sheet-view").getElementsByTagName("tbody")[0].insertRow(1)
+                    let row = document.getElementById("sheet-view").getElementsByTagName("tbody")[0].insertRow(1);
                     row.insertCell(0).textContent = floID
-                    for(let k = 0; k < log.length; k++)
-                        row.insertCell(k+1).textContent = log[k]
+                    for (let k = 0; k < log.length; k++)
+                        row.insertCell(k + 1).textContent = log[k]
                 }).catch(error => showMessage(error, "error"))
             }
         }
@@ -1237,8 +1261,16 @@
         }
 
         function renderSheetView(title, description, editors, attributes, sheet, isWriteable) {
+            const parseVectorClock = (vc) => {
+                vc = vc.split('_')
+                console.log(vc)
+                let time = new Date(parseInt(vc[0])).toString().slice(4, 24);
+                let floID = vc[1]
+                return `by ${floID} (${time})`
+            }
             //Add Sheet Details
             let sheetDetails = document.getElementById("sheet-details")
+            sheetDetails.classList.remove("hide")
             sheetDetails.children[0].textContent = title;
             sheetDetails.children[1].textContent = editors;
             sheetDetails.children[2].textContent = description;
@@ -1251,6 +1283,7 @@
             let tbody = document.createElement("tbody")
             sheet.forEach(data => {
                 let row = tbody.insertRow(0);
+                row.setAttribute("title", parseVectorClock(data.vc))
                 row.insertCell(0).textContent = data.floID
                 data.log.forEach(l => row.insertCell().textContent = l)
             })
@@ -1264,7 +1297,8 @@
             clearElement(document.getElementById("sheet-view")).appendChild(table);
             //Add options for groupBy 
             document.getElementById('group-by').children[0].textContent = `Group ${title} by`;
-            document.getElementById('group-by-view').innerHTML = `<table><thead><tr><td>FLO ID</td><td><i>null</i></td></tr></thead></table>`
+            document.getElementById('group-by-view').innerHTML =
+                `<table><thead><tr><td>FLO ID</td><td><i>null</i></td></tr></thead></table>`
             let colSelect = clearElement(document.getElementById('group-by-menu').children[1]);
             attributes.forEach(a => {
                 let opt = document.createElement('option');
@@ -1287,6 +1321,40 @@
             }
             table.appendChild(tbody);
             clearElement(document.getElementById("group-by-view")).appendChild(table);
+        }
+
+        function sortTable(table, n) {
+            console.log(table, n)
+            let dir = "DESC";
+            let flag = false;
+            let startRow = (table.getElementsByTagName("INPUT").length === 0) ? 1 : 2
+            while (true) {
+                let rows = table.rows;
+                let swapIndex = false;
+                console.log(rows)
+                for (let i = startRow; i < rows.length - 1; i++) {
+                    let x = rows[i].getElementsByTagName("TD")[n].textContent;
+                    let y = rows[i + 1].getElementsByTagName("TD")[n].textContent;
+                    let x_ = parseFloat(x)
+                    let y_ = parseFloat(y)
+                    if (isNaN(x_) || isNaN(y_)) {
+                        x_ = x.toLowerCase()
+                        y_ = y.toLowerCase()
+                    }
+                    if ((dir == "DESC" && x_ < y_) || (dir == "ASC" && x_ > y_)) {
+                        swapIndex = i;
+                        break;
+                    }
+                }
+                if (swapIndex !== false) {
+                    rows[swapIndex].parentNode.insertBefore(rows[swapIndex + 1], rows[swapIndex]);
+                    flag = true;
+                } else if (!flag && dir == 'DESC')
+                    dir = "ASC";
+                else
+                    break
+            }
+
         }
     </script>
 
