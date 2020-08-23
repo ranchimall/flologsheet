@@ -736,7 +736,7 @@
       FLO: ['https://explorer.mediciland.com/', 'https://livenet.flocha.in/', 'https://flosight.duckdns.org/', 'http://livenet-explorer.floexperiments.com/'],
       FLO_TEST: ['https://testnet-flosight.duckdns.org/', 'https://testnet.flocha.in/']
     },
-    adminID: "FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf", //"FRaBr5F665RVkQ1A1EYrMfbX2UF52vWjKr",
+    adminID: "FRaBr5F665RVkQ1A1EYrMfbX2UF52vWjKr",
     sendAmt: 0.001,
     fee: 0.0005,
 
@@ -746,7 +746,7 @@
 
     //for cloud apps
     subAdmins: [],
-    application: "TEST_MODE", //"LogSheet"
+    application: "LogSheet",
     vectorClock: {},
     appObjects: {},
     generalData: {},
@@ -10528,7 +10528,17 @@ Bitcoin.Util = {
     const logSheet = {
 
         init(){
-            return floCloudAPI.requestObjectData("logSheet")
+            return new Promise((resolve, reject) => {
+                floCloudAPI.requestObjectData("logSheet").then(result => {
+                    if(!floGlobals.appObjects.logSheet || typeof floGlobals.appObjects.logSheet !== "object")
+                        floGlobals.appObjects.logSheet = {};
+                    if(!floGlobals.appObjects.logSheet.personDetails || typeof floGlobals.appObjects.logSheet.personDetails !== "object")
+                        floGlobals.appObjects.logSheet.personDetails = {};
+                    if(!floGlobals.appObjects.logSheet.sheetList || typeof floGlobals.appObjects.logSheet.sheetList !== "object")
+                        floGlobals.appObjects.logSheet.sheetList = {};
+                    resolve(result)
+                }).catch(error => reject(error))
+            })
         },
         
         addPerson(floID, name, otherDetails = {}){
