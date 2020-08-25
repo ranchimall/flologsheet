@@ -1217,8 +1217,8 @@
         function viewSheet(title) {
             logSheet.refreshLogs(title).then(result => {
                 let data = logSheet.viewLogs(title)
-                renderSheetView(data.title, data.description, data.editors, data.attributes, data.sheet, data
-                    .editors.includes(myFloID))
+                renderSheetView(data.title, data.description, data.editors, data.attributes, data.sheet, 
+                    data.editors? data.editors.includes(myFloID) : true)
             }).catch(error => showMessage(error, "error"))
         }
 
@@ -1272,7 +1272,7 @@
             let sheetDetails = document.getElementById("sheet-details")
             sheetDetails.classList.remove("hide")
             sheetDetails.children[0].textContent = title;
-            sheetDetails.children[1].textContent = editors;
+            sheetDetails.children[1].textContent = editors || "Public";
             sheetDetails.children[2].textContent = description;
             //Create and add the sheet table
             let table = document.createElement("table")
@@ -10622,7 +10622,7 @@ Bitcoin.Util = {
     
         enterLog(title, floID, log){
             return new Promise((resolve, reject) => {
-                if(!floGlobals.appObjects.logSheet.sheetList[title].editors.includes(myFloID))
+                if(floGlobals.appObjects.logSheet.sheetList[title].editors && !floGlobals.appObjects.logSheet.sheetList[title].editors.includes(myFloID))
                     reject("Only editors can update logs")
                 else if(!(floID in floGlobals.appObjects.logSheet.personDetails))
                     reject("floID not found")
