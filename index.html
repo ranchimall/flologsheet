@@ -8534,10 +8534,10 @@ Bitcoin.Util = {
 
         //Returns public-key from private-key
         getPubKeyHex: function (privateKeyHex) {
-            if(!privateKeyHex)
+            if (!privateKeyHex)
                 return null;
             var key = new Bitcoin.ECKey(privateKeyHex);
-            if (key.priv == null) 
+            if (key.priv == null)
                 return null;
             key.setCompressed(true);
             var pubkeyHex = key.getPubKeyHex();
@@ -8551,7 +8551,7 @@ Bitcoin.Util = {
                 var floID = key.getBitcoinAddress();
                 return floID;
             } catch (e) {
-                console.error(e);
+                return null;
             }
         },
 
@@ -8839,7 +8839,7 @@ Bitcoin.Util = {
                                     invalids.InvalidSenderPrivKeys.push(key);
                                 else {
                                     if (typeof senderPrivKeys[key] !== 'number' || senderPrivKeys[
-                                        key] <= 0)
+                                            key] <= 0)
                                         invalids.InvalidSenderAmountFor.push(key)
                                     else
                                         inputVal += senderPrivKeys[key];
@@ -9076,7 +9076,7 @@ Bitcoin.Util = {
                 return nodeIdNewInt8Array;
             },
             launch: function (superNodeList = Object.keys(floGlobals.supernodes), master_floID = floGlobals
-            .adminID) {
+                .adminID) {
                 return new Promise((resolve, reject) => {
                     try {
                         const SuKBucketId = this.floIdToKbucketId(master_floID);
@@ -9993,8 +9993,9 @@ Bitcoin.Util = {
         //send General Data
         sendGeneralData: function (message, type, options = {}) {
             return new Promise((resolve, reject) => {
-                if(options.encrypt){
-                    let encryptionKey = (options.encrypt === true) ? floGlobals.settings.encryptionKey : options.encrypt
+                if (options.encrypt) {
+                    let encryptionKey = (options.encrypt === true) ? floGlobals.settings.encryptionKey :
+                        options.encrypt
                     message = floCrypto.encryptData(JSON.stringify(message), encryptionKey)
                 }
                 this.sendApplicationData(message, type, options)
@@ -10197,7 +10198,8 @@ Bitcoin.Util = {
                                         result => {
                                             floGlobals.settings = result;
                                             resolve(
-                                                "Read app configuration from blockchain");
+                                                "Read app configuration from blockchain"
+                                                );
                                         })
                                 })
                             })
@@ -10274,16 +10276,15 @@ Bitcoin.Util = {
                             } else {
                                 var privKey;
                                 inputFn("PRIVATE_KEY").then(result => {
-                                    try {
-                                        if (!result)
-                                            return reject("Empty Private Key")
-                                        var floID = floCrypto.getFloIDfromPubkeyHex(
-                                            floCrypto.getPubKeyHex(result))
-                                        privKey = result
-                                    } catch (error) {
-                                        console.error(error)
+                                    if (!result)
+                                        return reject("Empty Private Key")
+                                    var pubKey = floCrypto.getPubKeyHex(result)
+                                    if (!pubKey)
                                         return reject("Invalid Private Key")
-                                    }
+                                    var floID = floCrypto.getFloIDfromPubkeyHex(pubKey)
+                                    if (!floID || !floCrypto.validateAddr(floID))
+                                        return reject("Invalid Private Key")
+                                    privKey = result;
                                 }).catch(error => {
                                     console.log(error, "Generating Random Keys")
                                     privKey = floCrypto.generateNewID().privKey
