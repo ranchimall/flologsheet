@@ -781,10 +781,15 @@
                     let keyInput = signInBox.getElementsByTagName('input')[0];
                     let key = keyInput.value;
                     keyInput.value = '';
-                    buttons[0].onclick = null;
-                    buttons[1].onclick = null;
-                    signInBox.classList.add('hide')
-                    resolve(key)
+                    if(floCrypto.getPubKeyHex(keyInput)){
+                        buttons[0].onclick = null;
+                        buttons[1].onclick = null;
+                        signInBox.classList.add('hide')
+                        resolve(key)
+                    }
+                    else{
+                        showMessage('Incorrect Private Key! Please Enter correct key again', 'error')
+                    }
                 }
                 buttons[1].onclick = () => {
                     signInBox.getElementsByTagName('input')[0].value = '';
