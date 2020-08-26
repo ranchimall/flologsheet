@@ -781,7 +781,7 @@
                     let keyInput = signInBox.getElementsByTagName('input')[0];
                     let key = keyInput.value;
                     keyInput.value = '';
-                    if(floCrypto.getPubKeyHex(keyInput)){
+                    if(floCrypto.getPubKeyHex(key)){
                         buttons[0].onclick = null;
                         buttons[1].onclick = null;
                         signInBox.classList.add('hide')
