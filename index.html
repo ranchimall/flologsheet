@@ -3,6 +3,7 @@
 
 <head>
     <title>FLO LogSheet</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         :root {
             --accent-light: #20a878;
@@ -25,7 +26,7 @@
 
         /* width */
         ::-webkit-scrollbar {
-            width: 0.1rem;
+            width: 0.4rem;
             height: 0.2rem;
         }
 
@@ -36,12 +37,12 @@
 
         /* Handle */
         ::-webkit-scrollbar-thumb {
-            background: rgba(var(--rgb-bw), 0.2);
+            background: rgba(var(--rgb-bw), 0.4);
         }
 
         /* Handle on hover */
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(var(--rgb-bw), 0.3);
+            background: rgba(var(--rgb-bw), 0.6);
         }
 
         body {
@@ -63,6 +64,10 @@
             justify-content: center;
             background: var(--accent-light);
             z-index: 4;
+        }
+
+        .margin{
+            margin: 0.5rem;
         }
 
         #loading-screen .appName {
@@ -356,25 +361,23 @@
             position: relative;
             border-radius: 0.4rem;
         }
+        #main_container{
+            display: grid;
+            grid-template-columns: 16rem 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem
+        }
 
         #leftPanel {
             height: 34rem;
-            width: 16rem;
-            float: left;
-            margin: 0 0 0 2rem;
         }
 
         #leftPanel>div {
             height: 30rem;
-            width: 100%;
-            margin: 2rem 0;
         }
 
         #rightPanel {
             height: 34rem;
-            width: 56rem;
-            float: right;
-            margin: 1.5rem 2rem 0rem 2rem;
         }
 
         #rightPanel>nav {
@@ -419,15 +422,20 @@
             font-size: 1.1rem;
         }
 
+        .horizontal-list{
+           display: flex;
+           overflow-x: auto;
+           max-width: 100%;
+        }
         .horizontal-list div {
             display: inline-block;
             color: var(--alt-light);
         }
 
         #sheet-list {
-            width: 52rem;
-            overflow-x: scroll;
-            white-space: nowrap;
+            display: flex;
+            max-width: 100%;
+            overflow-x: auto;
             margin-right: 1rem;
         }
 
@@ -521,7 +529,7 @@
         .table-container {
             margin: 0 1rem 1rem 1rem;
             overflow: scroll;
-            max-height: 19rem;
+            max-height: 18rem;
         }
 
         table {
@@ -530,6 +538,7 @@
 
         table td {
             padding: 0.25rem;
+            overflow-wrap: break-word;
         }
 
         thead {
@@ -786,10 +795,15 @@
                     let keyInput = signInBox.getElementsByTagName('input')[0];
                     let key = keyInput.value;
                     keyInput.value = '';
-                    buttons[0].onclick = null;
-                    buttons[1].onclick = null;
-                    signInBox.classList.add('hide')
-                    resolve(key)
+                    if(floCrypto.getPubKeyHex(key)){
+                        buttons[0].onclick = null;
+                        buttons[1].onclick = null;
+                        signInBox.classList.add('hide')
+                        resolve(key)
+                    }
+                    else{
+                        showMessage('Incorrect Private Key! Please Enter correct key again', 'error')
+                    }
                 }
                 buttons[1].onclick = () => {
                     signInBox.getElementsByTagName('input')[0].value = '';
@@ -946,7 +960,7 @@
         <button> &#x2716;</span>
     </div>
 
-    <section>
+    <section id="main_container">
 
         <div id="leftPanel">
             <div class="container vertical-list">
@@ -971,6 +985,7 @@
                     <h6></h6>
                     <p></p>
                     <button id="view-group-by">Groupby</button>
+                    <h5 class="margin">*Press ENTER to save your edit.</h5>
                 </div>
                 <div class="table-container" id="sheet-view"></div>
                 <form id="new-log" style="display: none;" onsubmit="enterLog(); return false;"></form>
@@ -1212,20 +1227,26 @@
 
         function enterLog() {
             let title = document.getElementById("sheet-details").children[0].textContent;
-            let form = document.forms['new-log']
+            let form = document.forms['new-log'],
+                allFormElements = form.querySelectorAll('input')
+                allFormElements.forEach(element => element.disabled = true)
             if (form[0].tagName === 'INPUT') {
                 let floID = form[0].value;
                 let log = []
                 for (let i = 1; i < form.length - 1; i++)
                     log.push(form[i].value)
                 logSheet.enterLog(title, floID, log).then(result => {
+                    allFormElements.forEach(element => element.disabled = false)
                     form.reset();
                     showMessage('Log Entry Successful')
                     let row = document.getElementById("sheet-view").getElementsByTagName("tbody")[0].insertRow(1);
                     row.insertCell().textContent = floID
                     row.insertCell().innerHTML = `<input type="text" class="grade-input" disabled>`
                     log.forEach(l => row.insertCell().textContent = l)
-                }).catch(error => showMessage(error, "error"))
+                }).catch(error => {
+                    showMessage(error, "error")
+                    allFormElements.forEach(element => element.disabled = false)
+                })
             }
         }
 
