@@ -1229,15 +1229,15 @@
             let title = document.getElementById("sheet-details").children[0].textContent;
             let form = document.forms['new-log'],
                 allFormElements = document.querySelectorAll('input[form="new-log"]')
-                form.reset();
                 allFormElements.forEach(element => element.disabled = true)
-            if (form[0].tagName === 'INPUT') {
-                let floID = form[0].value;
-                let log = []
-                for (let i = 1; i < form.length - 1; i++)
+                if (form[0].tagName === 'INPUT') {
+                    let floID = form[0].value;
+                    let log = []
+                    for (let i = 1; i < form.length - 1; i++)
                     log.push(form[i].value)
-                logSheet.enterLog(title, floID, log).then(result => {
+                    logSheet.enterLog(title, floID, log).then(result => {
                     allFormElements.forEach(element => element.disabled = false)
+                    form.reset();
                     showMessage('Log Entry Successful')
                     let row = document.getElementById("sheet-view").getElementsByTagName("tbody")[0].insertRow(1);
                     row.insertCell().textContent = floID
