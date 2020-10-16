@@ -526,6 +526,11 @@ sm-input::part(input){
     }
     .flex:not(:first-of-type){
         margin-bottom: 0.3rem;
+        .icon{
+            cursor: pointer;
+            margin-right: 1rem;
+            height: 100%;
+        }
     }
     &.collapse{
         padding: 0.5rem 1rem;
@@ -563,6 +568,7 @@ table{
         width: 100%;
         border-radius: 0.3rem;
         background: rgba(var(--text-color), 0.06);
+        color: inherit;
         &:disabled{
             border: transparent;
         }
@@ -698,7 +704,14 @@ td{
         grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
     }
     #sheet_page{
-        grid-template-columns: 19rem 1fr;
+        &.toggle-side-bar{
+            grid-template-columns: 19rem 1fr;
+        }
+        &:not(.toggle-side-bar) #side_bar{
+            grid-template-columns: 1fr;
+            position: fixed;
+            transform: translateX(-100%);
+        }
     }
     #side_bar{
         position: relative;
