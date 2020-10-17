@@ -656,7 +656,7 @@
 
         document.getElementById('view-group_by').addEventListener("click", function (e) {
             document.getElementById("group_by").parentNode.classList.remove("hide")
-        })
+        })*/
 
         document.getElementById('group_by_menu').children[0].addEventListener("change", function (e) {
             try {
@@ -689,7 +689,7 @@
             } catch (error) {
                 notify(error, "error")
             }
-        })*/
+        })
 
         function removeElement(element) {
             element.parentNode.removeChild(element);
@@ -778,7 +778,7 @@
                     logSheet.enterLog(title, floID, log).then(result => {
                     allFormElements.forEach(element => element.disabled = false)
                     form.reset();
-                    notify('Log Entry Successful', 'success')
+                    notify('Log entry successful', 'success')
                     let row = sheetContainer.getElementsByTagName("tbody")[0].insertRow(1);
                     row.insertCell().textContent = floID
                     row.insertCell().innerHTML = `<input type="text" class="grade-input" disabled>`
@@ -793,7 +793,7 @@
         function viewSheet(title) {
             logSheet.refreshLogs(title).then(result => {
                 let data = logSheet.viewLogs(title)
-                renderSheetView(data.title, data.description, data.editors, data.attributes, data.sheet,
+                renderSheetView(data.title, data.description, data.editors, data.attributes, data.sheet.reverse(),
                     !data.editors || data.editors.includes(myFloID), floGlobals.subAdmins.includes(myFloID))
             }).catch(error => notify(error, "error"))
         }
@@ -854,8 +854,13 @@
             sheetHolder.append(frag)
         }
 
-        function createCell(text){
+        function createTh(text){
             let cell = document.createElement('th')
+            cell.textContent = text
+            return cell
+        }
+        function createCell(text){
+            let cell = document.createElement('td')
             cell.textContent = text
             return cell
         }
@@ -864,8 +869,10 @@
                 sheetHeading = document.getElementById('sheet_heading'),
                 sheetDescription = document.getElementById('sheet_description'),
                 sheetEditors = document.getElementById('sheet_editors')
+        let startingIndex = 0,
+            endingIndex = 0
 
-        function renderSheetView(title, description, editors, attributes, sheet, isWriteable, isSubAdmin, onlyRenderTable = false) {
+        function renderSheetView(title, description, editors, attributes, sheet, isWriteable, isSubAdmin, onlyRenderTable = false, lazyLoad = false) {
             floGlobals.currentSheet = {
                 title,
                 description,
@@ -873,7 +880,15 @@
                 attributes,
                 sheet,
                 isWriteable,
-                isSubAdmin
+                isSubAdmin,
+            }
+            if(lazyLoad){
+                startingIndex = sheet.length > endingIndex ? endingIndex : sheet.length
+                endingIndex = sheet.length - endingIndex > 20 ? endingIndex + 20 : sheet.length 
+                console.log('lazy...')
+            }else{
+                startingIndex = 0
+                endingIndex = sheet.length > 20 ? 20 : sheet.length 
             }
             const parseVectorClock = (vc) => {
                 vc = vc.split('_')
@@ -931,17 +946,20 @@
                 table = document.createElement("table")
                 let thead = table.createTHead()
                 let head = thead.insertRow(0)
-                head.append(createCell("FLO ID"), createCell("Grade"));
-                attributes.forEach(a => head.append(createCell(a)))
+                head.append(createTh("FLO ID"), createTh("Grade"));
+                attributes.forEach(a => head.append(createTh(a)))
             }
             let tbody = document.createElement("tbody")
-            sheet.forEach(data => {
-                let row = tbody.insertRow(0);
+            for(let i = startingIndex; i < endingIndex; i++){
+                let data = sheet[i]
+                let row = document.createElement('tr')
                 row.setAttribute("title", parseVectorClock(data.vc))
-                row.insertCell().textContent = data.floID
-                row.insertCell().appendChild(createGradeField(data.vc, data.grade));
-                data.log.forEach(l => row.insertCell().textContent = l)
-            })
+                row.append(createCell(data.floID))
+                row.append(createCell().appendChild(createGradeField(data.vc, data.grade)))
+                data.log.forEach(l => row.append(createCell(l)))
+                frag.append(row)
+            }
+            tbody.append(frag)
             //Add input fields if writable
             if (isWriteable) {
                 let row = tbody.insertRow(0);
@@ -949,7 +967,6 @@
                 row.insertCell().textContent = ``;
                 attributes.forEach(a => row.insertCell().innerHTML = `<input form="new-log" class="log-input" type="text">`);
             }
-
             table.appendChild(tbody);
             if(!onlyRenderTable){
                 clearElement(sheetContainer).appendChild(table);
@@ -983,16 +1000,10 @@
         }
 
         function sortTable(n, ascending) {
-            if(ascending)
+            console.log(n)
+            if(ascending){
                 if(n === 0)
-                    floGlobals.currentSheet.sheet.sort((a, b) => {
-                        if (a.floID.toLowerCase() === b.floID.toLowerCase()) {
-                            return 0;
-                        }
-                        else {
-                            return (a.floID.toLowerCase() < b.floID.toLowerCase()) ? -1 : 1;
-                        }
-                    })
+                    floGlobals.currentSheet.sheet.sort((a, b) => a.floID.toLowerCase().localeCompare(b.floID.toLowerCase()))
                 else if(n === 1)
                     floGlobals.currentSheet.sheet.sort((a, b) => {
                         if (a.grade === b.grade) {
@@ -1004,25 +1015,22 @@
                     })
                 else
                     floGlobals.currentSheet.sheet.sort((a, b) => {
-                        let x = a.log[n-2] ? a.log[n-2].toLowerCase() : a.log[n-2]
-                        let y = b.log[n-2] ? b.log[n-2].toLowerCase() : b.log[n-2]
-                        if (x === y) {
-                            return 0;
+                        if(isNaN(a.log[n-2])){
+                            let x = (a.log[n-2]) ? a.log[n-2].toLowerCase() : a.log[n-2]                           
+                            let y = (b.log[n-2]) ? b.log[n-2].toLowerCase() : b.log[n-2]                             
+                            if (x === y) {
+                                return 0;
+                            }
+                            else {
+                                return (x < y) ? -1 : 1;
+                            }
                         }
-                        else {
-                            return (x < y) ? -1 : 1;
-                        }
+                        else
+                            return a.log[n-2] - b.log[n-2]
                     })
-            else
+            }else{
                 if(n === 0)
-                    floGlobals.currentSheet.sheet.sort((a, b) => {
-                        if (a.floID.toLowerCase() === b.floID.toLowerCase()) {
-                            return 0;
-                        }
-                        else {
-                            return (a.floID.toLowerCase() > b.floID.toLowerCase()) ? -1 : 1;
-                        }
-                    })
+                    floGlobals.currentSheet.sheet.sort((a, b) => b.floID.toLowerCase().localeCompare(a.floID.toLowerCase()))
                 else if(n === 1)
                     floGlobals.currentSheet.sheet.sort((a, b) => {
                         if (a.grade === b.grade) {
@@ -1034,19 +1042,23 @@
                     })
                 else
                     floGlobals.currentSheet.sheet.sort((a, b) => {
-                        let x = a.log[n-2] ? a.log[n-2].toLowerCase() : a.log[n-2]
-                        let y = b.log[n-2] ? b.log[n-2].toLowerCase() : b.log[n-2]
-                        if (x === y) {
-                            return 0;
+                        if(isNaN(a.log[n-2])){
+                            let x = (a.log[n-2]) ? a.log[n-2].toLowerCase() : a.log[n-2]                           
+                            let y = (b.log[n-2]) ? b.log[n-2].toLowerCase() : b.log[n-2]                           
+                            if (x === y) {
+                                return 0;
+                            }
+                            else {
+                                return (x > y) ? -1 : 1;
+                            }
                         }
-                        else {
-                            return (x > y) ? -1 : 1;
-                        }
+                        else
+                            return b.log[n-2] - a.log[n-2]
                     })
-                
-            console.log(floGlobals.currentSheet.sheet)
+            }    
+            console.log(floGlobals.currentSheet.sheet[0])
             let {title, description, editors, attributes, sheet, isWriteable, isSubAdmin} = floGlobals.currentSheet
-            renderSheetView(title, description, editors, attributes, sheet, isWriteable, isSubAdmin, true)
+            renderSheetView(title, description, editors, attributes, sheet, isWriteable, isSubAdmin, true, false)
         }
     </script>
     <script id="init_lib">
