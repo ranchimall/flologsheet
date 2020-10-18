@@ -47,8 +47,7 @@
             //document.getElementById("loading-screen").classList.remove("hide")
             //clear Rendered Elements
             /*clearElement(document.getElementById('person-list'))*/
-            clearElement(document.getElementById('sheets_container'))
-            clearElement(document.getElementById('sheet_container'))
+            clearElement(sheetsContainer)
             //set the custom Privkey input
             floDapps.setCustomPrivKeyInput(() => {
                 return new Promise((resolve, reject) => {
@@ -155,9 +154,15 @@
                     <path d="M.5,47.52V6.5a6,6,0,0,1,6-6h41" />
                 </svg>
             </div>
+            <sm-button id="sign_out_btn" onclick="signOut()">Sign out</sm-button>
         </section>
-        <sm-switch id="theme_switcher"></sm-switch>
-        <sm-button id="sign_out_btn" onclick="signOut()">Sign out</sm-button>
+        <section>            
+            <h4>Theme</h4>
+            <div class="flex align-center space-between">
+                <p>Turn dark theme on/off.</p>
+                <sm-switch id="theme_switcher"></sm-switch>
+            </div>
+        </section>
     </sm-popup>
     <sm-popup id="new_sheet_popup">
         <header class="popup-header" slot="header">
@@ -169,10 +174,12 @@
             <h4>
                 Create new sheet
             </h4>
-            <sm-button variant="primary">Create</sm-button>
+            <button onclick="createSheet()" class="primary-btn expand" type="submit" disabled>
+                Create
+            </button>
         </header>
-        <sm-input placeholder="Name"></sm-input>
-        <sm-textarea placeholder="Description"></sm-textarea>
+        <sm-input placeholder="Name" required></sm-input>
+        <sm-textarea placeholder="Description" required></sm-textarea>
     </sm-popup>
     <sm-popup id="group_by">
         <div>Group Title By</div>
@@ -183,7 +190,8 @@
                 <option value="avg">Avg</option>
                 <option value="max">Max</option>
                 <option value="min">Min</option>
-            </select><select></select>
+            </select>
+            <select></select>
         </div>
         <div class="table-container" id="group_by_view"></div>
     </sm-popup>
@@ -206,7 +214,7 @@
             <section id="main_section">
                 <header class="flex align-center space-between section-header">
                     <h4>Sheets</h4>
-                    <sm-input placeholder="Search sheets" type="search"></sm-input>
+                    <sm-input id="search_sheets" placeholder="Search sheets" type="search"></sm-input>
                 </header>
                 <section id="sheets_container" class="grid"></section>
             </section>
@@ -234,6 +242,7 @@
                             <line y1="45.5" x2="42" y2="45.5"/>
                         </svg>
                         <h3 id="sheet_heading"></h3>
+                        <h5 id="sheet_type"></h5>
                         <svg id="toggle_details" class="icon justify-right" onclick="toggleDetails()" viewBox="0 0 64 64">
                             <title>expand/collapse</title>
                             <polyline points="63.65 15.99 32 47.66 0.35 15.99"/>
@@ -242,7 +251,12 @@
                     <div id="sheet_editors" class="flex align-center"></div>
                     <p id="sheet_description"></p>
                 </section>
-                <div id="sheet_container"></div>
+                <div id="sheet_container">
+                    <table>                        
+                        <thead><tr></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
                 <form id="new-log" style="display: none;" onsubmit="enterLog(event); return false;"></form>
                 <button type="submit" form="new-log" style="display: none;"></button>
             </section>
@@ -501,6 +515,7 @@
             document.addEventListener('input', e => {
                 if (e.target.closest('sm-input')) {
                     let input = e.target.closest('sm-input')
+                    if(!input.closest('sm-popup')) return
                     formValidation(input)
                     if(input.value === '')
                         input.setValidity('')
@@ -555,11 +570,42 @@
                     else if (e.target.closest(".person-card"))
                         copyToLogInput(e.target.closest(".person-card").dataset.floId)
                     else if (e.target.closest("th")){
-                        sortTable(e.target.cellIndex, e.target.closest('th').classList.contains('descending'))
+                        sortTable(e.target.closest("th").cellIndex, e.target.closest('th').classList.contains('descending'))
                         e.target.closest('th').classList.toggle('descending')
                     }
                 } catch (error) {
                     //do nothing
+                }
+            })
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if(entry.isIntersecting){
+                        let {title, description, editors, attributes, sheet, isWriteable, isSubAdmin} = floGlobals.currentSheet
+                        renderSheetView(title, description, editors, attributes, sheet, isWriteable, isSubAdmin, true, true)
+                        observer.disconnect()
+                    }
+                })
+            })
+            const watchLastElement = new MutationObserver(mutations => {
+                mutations.forEach(mutation => {
+                    if(mutation.addedNodes.length){
+                        observer.observe(mutation.addedNodes[mutation.addedNodes.length - 1])
+                    }
+                })  
+            })
+            watchLastElement.observe(tableBody, {childList: true, subtree: true})
+
+            document.getElementById('search_sheets').addEventListener('input', function() {
+                if(this.value.trim !== ''){
+                    for(child of sheetsContainer.children) {
+                        if(child.id === 'add_new_sheet') continue
+                        if(child.dataset.name.toUpperCase().indexOf(this.value.toUpperCase()) > -1){
+                            child.classList.remove('hide-completely')
+                        }
+                        else{
+                            child.classList.add('hide-completely')
+                        }
+                    }
                 }
             })
         })
@@ -570,11 +616,16 @@
 
         const render = {
             sheetCard(sheetName, editors){
-                let card = document.createElement('div')
+                let card = document.createElement('div'),
+                    type = 'Public'
                 card.classList.add('sheet-card')
                 card.setAttribute('data-name', sheetName)
+                if(editors)
+                    type = 'Private'
                 card.innerHTML = `
-                    <div class="card"></div>
+                    <div class="card">
+                        <h5>${type}</h5>
+                    </div>
                     <h4>${removeUnderscore(sheetName)}</h4>
                 `
                 return card
@@ -615,7 +666,7 @@
             else
                 mainHeader.classList.remove('hide-completely')
             if(page === 'home_page')
-                sheetContainer.innerHTML = ''
+                tableBody.innerHTML = ''
         }
 
         function signOut() {
@@ -779,7 +830,7 @@
                     allFormElements.forEach(element => element.disabled = false)
                     form.reset();
                     notify('Log entry successful', 'success')
-                    let row = sheetContainer.getElementsByTagName("tbody")[0].insertRow(1);
+                    let row = tableBody.insertRow(0);
                     row.insertCell().textContent = floID
                     row.insertCell().innerHTML = `<input type="text" class="grade-input" disabled>`
                     log.forEach(l => row.insertCell().textContent = l)
@@ -830,8 +881,8 @@
             peopleContainer.append(frag)           
         }
 
-        function renderSheetList(sheetList = {}) {
-            let sheetHolder = document.getElementById("sheets_container")
+        const sheetsContainer = document.getElementById("sheets_container")
+        function renderSheetList(sheetList) {
             for(sheet in sheetList){
                 frag.append(render.sheetCard(sheet, sheetList[sheet].editors))
             }
@@ -851,7 +902,7 @@
                 ` 
                 frag.prepend(firstCard)
             }
-            sheetHolder.append(frag)
+            sheetsContainer.append(frag)
         }
 
         function createTh(text){
@@ -867,12 +918,16 @@
 
         const   sheetContainer = document.getElementById('sheet_container'),
                 sheetHeading = document.getElementById('sheet_heading'),
+                sheetType = document.getElementById('sheet_type'),
                 sheetDescription = document.getElementById('sheet_description'),
-                sheetEditors = document.getElementById('sheet_editors')
+                sheetEditors = document.getElementById('sheet_editors'),
+                tableHeader = sheetContainer.firstElementChild.firstElementChild,
+                tableBody = sheetContainer.firstElementChild.children[1]
         let startingIndex = 0,
             endingIndex = 0
 
         function renderSheetView(title, description, editors, attributes, sheet, isWriteable, isSubAdmin, onlyRenderTable = false, lazyLoad = false) {
+            if(!lazyLoad)
             floGlobals.currentSheet = {
                 title,
                 description,
@@ -881,14 +936,6 @@
                 sheet,
                 isWriteable,
                 isSubAdmin,
-            }
-            if(lazyLoad){
-                startingIndex = sheet.length > endingIndex ? endingIndex : sheet.length
-                endingIndex = sheet.length - endingIndex > 20 ? endingIndex + 20 : sheet.length 
-                console.log('lazy...')
-            }else{
-                startingIndex = 0
-                endingIndex = sheet.length > 20 ? 20 : sheet.length 
             }
             const parseVectorClock = (vc) => {
                 vc = vc.split('_')
@@ -917,12 +964,19 @@
                 }
                 return gradeField
             }
+            if(lazyLoad){
+                startingIndex = sheet.length > endingIndex ? endingIndex : sheet.length
+                endingIndex = sheet.length - endingIndex > 20 ? endingIndex + 20 : sheet.length 
+            }else{
+                startingIndex = 0
+                endingIndex = sheet.length > 20 ? 20 : sheet.length 
+            }
             if(!onlyRenderTable){
                 showPage('sheet_page')
-
                 //Add Sheet Details
                 sheetHeading.textContent = removeUnderscore(title);
                 if(editors){
+                    sheetType.textContent = 'Private'
                     editors.forEach(editor =>{
                         let card = document.createElement('div')
                         card.className = 'editor'
@@ -932,24 +986,27 @@
                     sheetEditors.innerHTML = 'Maintained by: '
                     sheetEditors.append(frag)
                 }
-                else
-                    sheetEditors.textContent = "Public";
+                else{
+                    sheetType.textContent = 'Public'
+                    sheetEditors.innerHTML = ''
+                }
                 sheetDescription.textContent = description;
+                clearElement(tableHeader)
+                let row = tableHeader.insertRow();
+                row.append(createTh("FLO ID"), createTh("Grade"));
+                attributes.forEach(a => row.append(createTh(a)))
+                //Add input fields if writable
+                if (isWriteable && !lazyLoad) {
+                    let row = tableHeader.insertRow();
+                    row.insertCell().innerHTML = `<input form="new-log" class="log-input" type="text">`;
+                    row.insertCell().textContent = ``;
+                    attributes.forEach(a => row.insertCell().innerHTML = `<input form="new-log" class="log-input" type="text">`);
+                }
             }
-            let table
             if(onlyRenderTable){
-                table = sheetContainer.querySelector('table')
-                sheetContainer.querySelector('tbody').remove()
+                if(!lazyLoad)
+                    tableBody.innerHTML = ''
             }
-            else{
-                //Create and add the sheet table
-                table = document.createElement("table")
-                let thead = table.createTHead()
-                let head = thead.insertRow(0)
-                head.append(createTh("FLO ID"), createTh("Grade"));
-                attributes.forEach(a => head.append(createTh(a)))
-            }
-            let tbody = document.createElement("tbody")
             for(let i = startingIndex; i < endingIndex; i++){
                 let data = sheet[i]
                 let row = document.createElement('tr')
@@ -959,17 +1016,8 @@
                 data.log.forEach(l => row.append(createCell(l)))
                 frag.append(row)
             }
-            tbody.append(frag)
-            //Add input fields if writable
-            if (isWriteable) {
-                let row = tbody.insertRow(0);
-                row.insertCell().innerHTML = `<input form="new-log" class="log-input" type="text">`;
-                row.insertCell().textContent = ``;
-                attributes.forEach(a => row.insertCell().innerHTML = `<input form="new-log" class="log-input" type="text">`);
-            }
-            table.appendChild(tbody);
+            tableBody.append(frag)
             if(!onlyRenderTable){
-                clearElement(sheetContainer).appendChild(table);
                 //Add options for groupBy 
                 document.getElementById('group_by').children[0].textContent = `Group ${title} by`;
                 document.getElementById('group_by_view').innerHTML =
@@ -1056,7 +1104,6 @@
                             return b.log[n-2] - a.log[n-2]
                     })
             }    
-            console.log(floGlobals.currentSheet.sheet[0])
             let {title, description, editors, attributes, sheet, isWriteable, isSubAdmin} = floGlobals.currentSheet
             renderSheetView(title, description, editors, attributes, sheet, isWriteable, isSubAdmin, true, false)
         }

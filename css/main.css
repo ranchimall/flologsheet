@@ -188,12 +188,6 @@ sm-popup sm-input:not(:last-of-type) {
 sm-popup sm-textarea {
   margin-top: 1rem;
 }
-sm-popup sm-textarea::part(textarea) {
-  border-radius: 0.4rem;
-}
-sm-popup p {
-  margin-block-end: 1rem;
-}
 
 .popup-header {
   padding: 1.5rem;
@@ -208,7 +202,7 @@ sm-popup p {
   stroke-width: 10;
   cursor: pointer;
 }
-.popup-header sm-button {
+.popup-header sm-button, .popup-header button {
   width: auto;
   margin-left: auto;
 }
@@ -251,6 +245,9 @@ button:disabled {
   font-weight: 500;
   margin-bottom: 1.5rem;
 }
+#confirmation .flex {
+  margin-top: 1rem;
+}
 #confirmation .flex sm-button:first-of-type {
   margin-right: 0.6em;
   margin-left: auto;
@@ -282,6 +279,7 @@ button:disabled {
   width: auto;
 }
 .copy-row h4 {
+  font-family: "Roboto", sans-serif;
   margin-bottom: 0;
   font-weight: 400;
 }
@@ -402,13 +400,9 @@ button:disabled {
   border-radius: 2rem;
 }
 
-sm-input::part(input) {
-  border-radius: 0.4rem;
-}
-
 #sheets_container {
   gap: 2rem 1.5rem;
-  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
   margin-bottom: 3rem;
   animation: slide-up 0.6s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -452,7 +446,8 @@ sm-input::part(input) {
   transform: scale(0.95);
 }
 .sheet-card .card {
-  border-radius: 0.8rem;
+  position: relative;
+  border-radius: 0.4rem;
   background: url(card-bg2.svg) center, rgba(var(--text-color), 0.06);
   background-size: contain;
   padding: 1rem;
@@ -468,6 +463,18 @@ sm-input::part(input) {
   text-align: center;
   max-width: 90%;
 }
+.sheet-card h5 {
+  font-family: "Roboto", sans-serif;
+  background: rgba(var(--text-color), 0.1);
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0.5rem 0;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.2rem 0 0 0.2rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
 
 #sheet_page {
   width: 100vw;
@@ -478,6 +485,15 @@ sm-input::part(input) {
 #sheet_heading {
   font-weight: 600;
   opacity: 0.9;
+}
+
+#sheet_type {
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.3rem;
+  margin: 0 1rem;
+  font-weight: 500;
+  opacity: 0.8;
+  background: rgba(var(--text-color), 0.1);
 }
 
 #sheet_description {
@@ -526,6 +542,9 @@ sm-input::part(input) {
 #sheet_details .flex:first-of-type {
   margin-bottom: 1rem;
 }
+#sheet_details .flex:nth-of-type(2) {
+  margin-bottom: 1rem;
+}
 #sheet_details .flex:not(:first-of-type) {
   margin-bottom: 0.3rem;
 }
@@ -550,7 +569,8 @@ sm-input::part(input) {
   opacity: 0.9;
 }
 #sheet_details.collapse #sheet_description,
-#sheet_details.collapse #sheet_editors {
+#sheet_details.collapse #sheet_editors,
+#sheet_details.collapse #sheet_type {
   display: none;
 }
 
@@ -576,10 +596,6 @@ table input {
 }
 table input:disabled {
   border: transparent;
-}
-
-thead {
-  background-color: rgba(var(--text-color), 0.1);
 }
 
 th {
@@ -692,6 +708,13 @@ td {
   font-weight: 400;
 }
 
+#user_popup sm-button {
+  margin-top: 0.5rem;
+}
+#user_popup section:not(:last-of-type) {
+  margin-bottom: 1.5rem;
+}
+
 @media screen and (min-width: 640px) {
   sm-popup::part(popup) {
     width: 24rem;
@@ -728,6 +751,12 @@ td {
   #side_bar {
     position: relative;
     transform: none;
+  }
+}
+@media screen and (min-width: 1920px) {
+  #home_page, #main_header {
+    grid-template-columns: 1fr 60vw 1fr;
+    grid-template-areas: ". main .";
   }
 }
 @media (any-hover: hover) {
