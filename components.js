@@ -1197,6 +1197,8 @@ customElements.define('sm-switch', class extends HTMLElement {
     connectedCallback() {
         if (this.hasAttribute('disabled'))
             this.switch.classList.add('disabled')
+        if (this.hasAttribute('checked'))
+            this.input.checked = true
         this.addEventListener('keyup', e => {
             if ((e.code === "Enter" || e.code === "Space") && !this.isDisabled) {
                 this.input.click()
@@ -1325,7 +1327,7 @@ smSelect.innerHTML = `
             <polyline points="63.65 15.99 32 47.66 0.35 15.99"/>
         </svg>
     </div>
-    <div class="options hide">
+    <div part="options" class="options hide">
         <slot></slot> 
     </div>
 </div>`;

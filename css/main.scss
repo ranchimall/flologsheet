@@ -11,6 +11,7 @@ body {
     --foreground-color: 255, 255, 255;
     --background-color: rgba(var(--foreground-color), 1);
     --dark-shade: #f8f8f8;
+    --error-color: #E53935;
     --hue: 255;
     --saturation: 61%;
     --lightness: 39%;
@@ -177,7 +178,7 @@ strong{
 }
 
 sm-popup{  
-    sm-input:not(:last-of-type) {
+    & > sm-input:not(:last-of-type) {
         margin-bottom: 1rem;
     }
     sm-textarea{
@@ -575,9 +576,14 @@ button {
     bottom: 0;
     max-width: 100%;
 }
+sm-select::part(options){
+    max-height: 50vh;
+}
 table{
+    border-collapse: collapse;
     position: relative;
     input{
+        position: relative;
         padding: 0.4rem;
         border: thin solid rgba(var(--text-color), 0.3);
         font-size: 1rem;
@@ -615,12 +621,23 @@ td{
     width: 10ch;
 }
 
+#group_by{
+    &::part(popup){
+        min-height: 80vh;
+    }
+    sm-select:last-of-type{
+        margin-left: 0.5rem;
+    }
+}
+
 #side_bar{
     position: fixed;
     transform: translateX(-100%);
     background: var(--dark-shade);
+    & > .flex:first-of-type{
+        padding: 0 1rem;
+    }
     .section-header{
-        padding: 1rem;
         margin-bottom: 0;
         background: inherit;
     }
@@ -705,6 +722,109 @@ td{
     }
 }
 
+#new_sheet_popup{
+    p{
+        font-size: 0.9rem;
+    }
+}
+
+#specify_columns,
+#specify_editors,
+#specify_details{
+    h4{
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-bottom: 0.2rem;
+    }
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+#columns_container{
+    flex-wrap: wrap;
+}
+#editors_container,
+#columns_container,
+#additional_fields{
+    gap: 0.4rem;
+}
+#specify_editors{
+    border-top: solid 1px rgba(var(--text-color), 0.2);
+}
+#add_editor,
+#add_column,
+#add_detail{
+    sm-input{
+        width: 100%;
+    }
+    .icon{
+        height: 3rem;
+        width: 3rem;
+        padding: 1rem;
+        cursor: pointer;
+    }
+}
+#add_detail{
+    gap: 0.2rem;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: '. add' '. add';
+    .icon{
+        grid-area: add;
+        align-self: flex-end;
+    }
+}
+.editor-card,
+.column-card,
+.details-card{
+    border-radius: 0.3rem;
+    background: rgba(var(--text-color), 0.06);
+    .icon{
+        padding: 0.3rem;
+        cursor: pointer;
+    }
+    .editor-address{
+        font-family: 'Roboto', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 400;
+        opacity: 0.8;
+    }
+}
+.editor-card{
+    padding: 0.4rem 0.8rem;
+}
+.column-card{
+    padding: 0.4rem 0.6rem;
+    .icon{
+        margin-left: 0.4rem;
+    }
+}
+.details-card{
+    gap: 0.2rem;
+    padding: 0.6rem 0.8rem;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: '. close' '. close';
+    h4, h5{
+        font-family: 'Roboto', sans-serif;
+        margin: 0 !important;
+    }
+    h5{
+        font-weight: 400;
+        opacity: 0.8;
+    }
+    h4{
+        font-size: 1rem !important;
+    }
+    .icon{
+        grid-area: close;
+    }
+}
+
+@media screen and (max-width: 640px){
+    #group_by_view{
+        overflow: auto;
+        max-width: calc(100vw - 3rem);
+    }
+}
 @media screen and (min-width: 640px){
     sm-popup::part(popup){
         width: 24rem;
@@ -738,6 +858,11 @@ td{
     #side_bar{
         position: relative;
         transform: none;
+    }
+    #group_by{
+        &::part(popup){
+            width: 80vw;
+        }
     }
 }
 @media screen and (min-width: 1920px){

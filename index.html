@@ -77,9 +77,9 @@
                     hideLoader()
                     //display add buttons if subAdmin, else hide
                     if (floGlobals.subAdmins.includes(myFloID)) {
-                        document.querySelectorAll('sub-admin-option').forEach(option => option.classList.remove('hide-completely'))
+                        document.querySelectorAll('.sub-admin-option').forEach(option => option.classList.remove('hide-completely'))
                     } else {
-                        document.querySelectorAll('sub-admin-option').forEach(option => option.classList.add('hide-completely'))
+                        document.querySelectorAll('.sub-admin-option').forEach(option => option.classList.add('hide-completely'))
                     }
                 }).catch(error => {
                     reactor.dispatchEvent("startUpErrorLog", `Failed to download objectData`)
@@ -133,6 +133,8 @@
             Sign In
         </button>
     </sm-popup>
+
+    <!-- User settings popup -->
     <sm-popup id="user_popup">
         <header class="popup-header" slot="header">
             <svg class="icon" onclick="this.closest('sm-popup').hide()" viewBox="0 0 64 64">
@@ -164,10 +166,45 @@
             </div>
         </section>
     </sm-popup>
+
+    <!-- Add a person popup -->
+    <sm-popup id="add_person_popup">
+        <header class="popup-header" slot="header">
+            <svg class="icon" onclick="this.closest('sm-popup').hide()" viewBox="0 0 64 64">
+                <title>close popup</title>
+                <line x1="64" y1="0" x2="0" y2="64" />
+                <line x1="64" y1="64" x2="0" y2="0" />
+            </svg>
+            <h4>
+                Add new person
+            </h4>
+            <button onclick="addPerson()" class="primary-btn expand" type="submit" disabled>
+                Add
+            </button>
+        </header>
+        <sm-input id="person_flo_id_input" floId placeholder="FLO ID*" animate required></sm-input>
+        <sm-input id="person_name_input" placeholder="Name*" animate required></sm-input>
+        <div id="specify_details" class="grid">
+            <div class="flex direction-column">
+                <h4>Additional details</h4>
+                <p>Add more details about a person. Specify type of information and actual detail.</p>
+            </div>
+            <div id="additional_fields" class="grid"></div>
+            <div id="add_detail" class="grid align-center">
+                <sm-input id="add_detail_type_input" exclude placeholder="Type"></sm-input>
+                <sm-input id="add_detail_value_input" exclude placeholder="Value"></sm-input>
+                <svg class="icon" onclick="addDetails()" viewBox="0 0 64 64">
+                    <title>Add detail</title>
+                    <polyline points="0.35 31.82 21.45 52.98 63.65 10.66"/>
+                </svg>
+            </div>
+        </div>
+    </sm-popup>
+    <!-- Create new sheet popup -->
     <sm-popup id="new_sheet_popup">
         <header class="popup-header" slot="header">
             <svg class="icon" onclick="this.closest('sm-popup').hide()" viewBox="0 0 64 64">
-                <title>close</title>
+                <title>close popup</title>
                 <line x1="64" y1="0" x2="0" y2="64" />
                 <line x1="64" y1="64" x2="0" y2="0" />
             </svg>
@@ -178,20 +215,62 @@
                 Create
             </button>
         </header>
-        <sm-input placeholder="Name" required></sm-input>
-        <sm-textarea placeholder="Description" required></sm-textarea>
+        <sm-input id="sheet_title_input" placeholder="Name*" animate required></sm-input>
+        <sm-textarea id="sheet_description_input" placeholder="Description" animate required></sm-textarea>
+        <div id="specify_columns" class="grid">
+            <div class="flex direction-column">
+                <h4>Add Columns</h4>
+                <p>Columns will be added as the order you added them.</p>
+            </div>
+            <div id="columns_container" class="flex"></div>
+            <div id="add_column" class="flex align-center space-between">
+                <sm-input id="add_column_input" exclude placeholder="Column title"></sm-input>
+                <svg class="icon" onclick="addColumn()" viewBox="0 0 64 64">
+                    <title>Add this column</title>
+                    <polyline points="0.35 31.82 21.45 52.98 63.65 10.66"/>
+                </svg>
+            </div>
+        </div>
+        <div class="flex align-center space-between top-margin">
+            Make sheet private
+            <sm-switch onchange="toggleEditors()"></sm-switch>
+        </div>
+        <div id="specify_editors" class="grid hide-completely">
+            <div class="flex direction-column">
+                <h4>Add editors</h4>
+                <p>Only specified editors will be able to update this sheet.</p>
+            </div>
+            <div id="editors_container" class="grid"></div>
+            <div id="add_editor" class="flex align-center space-between">
+                <sm-input id="add_editor_input" exclude placeholder="Editor's FLO Address"></sm-input>
+                <svg class="icon" onclick="addEditor()" viewBox="0 0 64 64">
+                    <title>Add this editor</title>
+                    <polyline points="0.35 31.82 21.45 52.98 63.65 10.66"/>
+                </svg>
+            </div>
+        </div>
     </sm-popup>
+
+    <!-- Group by popup -->
     <sm-popup id="group_by">
-        <div>Group Title By</div>
-        <div class="i-2" id="group_by_menu">
-            <select>
-                <option value="count">Count</option>
-                <option value="total" selected>Total</option>
-                <option value="avg">Avg</option>
-                <option value="max">Max</option>
-                <option value="min">Min</option>
-            </select>
-            <select></select>
+        <header class="popup-header" slot="header">
+            <svg class="icon" onclick="this.closest('sm-popup').hide()" viewBox="0 0 64 64">
+                <title>close popup</title>
+                <line x1="64" y1="0" x2="0" y2="64" />
+                <line x1="64" y1="64" x2="0" y2="0" />
+            </svg>
+            <h4 id="group_by_title">
+            </h4>
+        </header>
+        <div class="flex align-center" id="group_by_menu">
+            <sm-select id="first_select" class="justify-right">
+                <sm-option value="count">Count</sm-option>
+                <sm-option value="total" selected>Total</sm-option>
+                <sm-option value="avg">Avg</sm-option>
+                <sm-option value="max">Max</sm-option>
+                <sm-option value="min">Min</sm-option>
+            </sm-select>
+            <sm-select id="second_select"></sm-select>
         </div>
         <div class="table-container" id="group_by_view"></div>
     </sm-popup>
@@ -221,19 +300,21 @@
         </section>
         <section id="sheet_page" class="page toggle-side-bar grid hide-completely">
             <nav id="side_bar">
-                <div class="flex align-center">
+                <div class="flex align-center space-between">
                     <h4 class="section-header">People</h4>
+                    <sm-button class="small sub-admin-option" onclick="showPopup('add_person_popup')">Add person</sm-button>
                 </div>
                 <div id="people_container" class="grid"></div>
             </nav>
             <section id="right">
                 <section id="sheet_details" class="collapse">
-                    <div class="flex align-center" onclick="showPage('home_page')">
-                        <svg class="icon" id="go_to_home" viewBox="0 0 64 64">
+                    <div class="flex align-center">
+                        <svg class="icon" onclick="showPage('home_page')" id="go_to_home" viewBox="0 0 64 64">
                             <title>Go back to homepage</title>
                             <polyline points="48.01 0.35 16.35 32 48.01 63.65"/>
                         </svg>
                         <h5>Sheets</h5>
+                        <sm-button class="small justify-right" onclick="showPopup('group_by')">Group by</sm-button>
                     </div>
                     <div class="flex align-center">
                         <svg class="icon" onclick="toggleSideBar()" viewBox="0 0 64 64">
@@ -339,6 +420,16 @@
                 return;
             popupStack.peek().popup.hide()
         }
+
+        document.addEventListener('popupclosed', e => {
+            let popup = e.detail.popup
+            switch(popup.id){
+                case 'new_sheet_popup':
+                    columnsContainer.innerHTML = ''
+                    editorsContainer.innerHTML = ''
+                break;
+            }
+        })
 
         const loaderPage = document.getElementById('main_loader'),
                 mainHeader = document.getElementById('main_header')
@@ -554,7 +645,7 @@
                 }
             })
             document.addEventListener('keyup', (e) => {
-                if (e.target.closest('sm-input')) {
+                if (e.target.closest('sm-input:not([exclude])')) {
                     if (e.key === 'Enter') {
                         e.target.closest('sm-popup').querySelector("[type='submit']")
                             .click();
@@ -644,17 +735,117 @@
                     <h5 class="person-flo-id overflow-ellipsis">${floId}</h5>
                 `
                 return card
+            },
+            editorCard(floId){
+                let card = document.createElement('div')
+                card.classList.add('editor-card', 'flex', 'space-between', 'align-center')
+                setAttributes(card, {
+                    'data-flo-id': floId
+                })
+                card.innerHTML = `
+                    <h4 class="editor-address">${floId}</h4>
+                    <svg class="icon" onclick="this.parentNode.remove()" viewBox="0 0 64 64">
+                        <title>Remove editor</title>
+                        <line x1="64" y1="0" x2="0" y2="64" />
+                        <line x1="64" y1="64" x2="0" y2="0" />
+                    </svg>
+                `
+                return card
+            },
+            columnCard(title){
+                let card = document.createElement('div')
+                card.classList.add('column-card', 'flex', 'space-between', 'align-center')
+                setAttributes(card, {
+                    'data-column-title': title
+                })
+                card.innerHTML = `
+                    <h5 class="column-title">${title}</h5>
+                    <svg class="icon" onclick="this.parentNode.remove()" viewBox="0 0 64 64">
+                        <title>Remove column</title>
+                        <line x1="64" y1="0" x2="0" y2="64" />
+                        <line x1="64" y1="64" x2="0" y2="0" />
+                    </svg>
+                `
+                return card
+            },
+            detailsCard(type, value){
+                let card = document.createElement('div')
+                card.classList.add('details-card', 'grid', 'align-center')
+                setAttributes(card, {
+                    'data-type': type,
+                    'data-value': value
+                })
+                card.innerHTML = `
+                    <h5 class="type">${type}</h5>
+                    <h4 class="value">${value}</h4>
+                    <svg class="icon" onclick="this.parentNode.remove()" viewBox="0 0 64 64">
+                        <title>Remove this field</title>
+                        <line x1="64" y1="0" x2="0" y2="64" />
+                        <line x1="64" y1="64" x2="0" y2="0" />
+                    </svg>
+                `
+                return card
             }
         }
 
         const sheetDetails = document.getElementById('sheet_details')
         const sheetPage = document.getElementById('sheet_page')
+        
+        const addEditorInput = document.getElementById('add_editor_input')
+        const specifyEditors = document.getElementById('specify_editors')
+        const editorsContainer = document.getElementById('editors_container')
+        
+        const addColumnInput = document.getElementById('add_column_input')
+        const columnsContainer = document.getElementById('columns_container')
+        
+        const additionalFields = document.getElementById('additional_fields')
+        const personFloIdInput = document.getElementById('person_flo_id_input')
+        const personNameInput = document.getElementById('person_name_input')
+        const addDetailTypeInput = document.getElementById('add_detail_type_input')
+        const addDetailValueInput = document.getElementById('add_detail_value_input')
 
+        function addEditor(){
+            let address = addEditorInput.value.trim()
+            if(address === '') return;
+            if(floCrypto.validateAddr(address)){
+                editorsContainer.append(render.editorCard(address))
+                addEditorInput.value = ''
+            }
+            else{
+                notify('Invalid editor FLO address', 'error')
+            }
+        }
+        function addColumn(){
+            let columnTitle = addColumnInput.value.trim()
+            if(columnTitle !== ''){
+                columnsContainer.append(render.columnCard(columnTitle))
+                addColumnInput.value = ''
+
+            }
+            else
+                notify("Column name should be specified.", 'error')
+        }
+
+        function addDetails(){
+            let type = addDetailTypeInput.value.trim()
+            let value = addDetailValueInput.value.trim()
+            if(type !== '' && value !== ''){
+                additionalFields.append(render.detailsCard(type, value))
+                addDetailTypeInput.value = ''
+                addDetailValueInput.value = ''
+            }
+            else
+                notify('Please enter both type and value', 'error')
+        }
+        
         function toggleDetails(){
             sheetDetails.classList.toggle('collapse')
         }
         function toggleSideBar(){
             sheetPage.classList.toggle('toggle-side-bar')
+        }
+        function toggleEditors(){
+            specifyEditors.classList.toggle('hide-completely')
         }
 
         const allPages = document.querySelectorAll('.page')
@@ -689,38 +880,24 @@
                 this.parentNode.dataset["unsaved"] = '0'
                 notify("Save Successful")
             }).catch(error => notify(`Save Unsuccessful [${error}]`, error))
-        })
-
-        document.getElementById('add-person').addEventListener("click", function (e) {
-            document.getElementById("add-person-form").parentNode.classList.remove('hide')
         })*/
 
-        /*document.forms['add-person-form']['add-field'].addEventListener("click", function (e) {
-            let field = document.createElement("div")
-            field.classList.add("input-container")
-            field.classList.add("i-2b")
-            field.innerHTML = `<input type="text" placeholder="Type" />: 
-                <input type="text" placeholder="Value" /> 
-                <input type="button" value="&#x2717;" onclick="removeElement(this.parentNode)"/>`
-            document.getElementById("additional-fields").appendChild(field)
-        })
+        const firstSelect = document.getElementById('first_select')
+        const secondSelect = document.getElementById('second_select')
 
-        document.getElementById('view-group_by').addEventListener("click", function (e) {
-            document.getElementById("group_by").parentNode.classList.remove("hide")
-        })*/
-
-        document.getElementById('group_by_menu').children[0].addEventListener("change", function (e) {
+        document.getElementById('first_select').addEventListener("change", function (e) {
             try {
                 let title = floGlobals.currentSheet.title;
                 let sheet = floGlobals.currentSheet.sheet;
                 let type = this.value;
+                console.log(this)
                 if (type === 'count') {
-                    this.nextSibling.classList.add("hide")
+                    secondSelect.classList.add("hide-completely")
                     let data = logSheet.groupLogsBy.count(title, sheet)
                     renderGroupByView("count", data)
                 } else {
-                    this.nextSibling.classList.remove("hide")
-                    let column = this.nextSibling.value;
+                    secondSelect.classList.remove("hide-completely")
+                    let column = secondSelect.value;
                     let data = logSheet.groupLogsBy[type](title, sheet, column);
                     renderGroupByView(`${type}(${column})`, data)
                 }
@@ -729,11 +906,12 @@
             }
         })
 
-        document.getElementById('group_by_menu').children[1].addEventListener("change", function (e) {
+        document.getElementById('second_select').addEventListener("change", function (e) {
             try {
+                console.log(this)
                 let title = floGlobals.currentSheet.title;
                 let sheet = floGlobals.currentSheet.sheet;
-                let type = this.previousSibling.value;
+                let type = firstSelect.value;
                 let column = this.value;
                 let data = logSheet.groupLogsBy[type](title, sheet, column);
                 renderGroupByView(`${type}(${column})`, data)
@@ -765,19 +943,17 @@
 
         function addPerson() {
             try {
-                let form = document.forms["add-person-form"]
-                let floID = form.floID.value.trim();
-                let name = form.name.value.trim();
-                let otherDetails = {
-                    "Gender": form.gender.value,
-                    "Contact": form.contact.value,
-                }
-                let fields = document.getElementById("additional-fields").getElementsByTagName("input")
-                for (let i = 0; i < fields.length; i += 3)
-                    otherDetails[fields[i].value] = fields[i + 1].value
+                let floID = personFloIdInput.value.trim();
+                let name = personNameInput.value.trim();
+                let otherDetails = {}
+                let fields = additionalFields.querySelectorAll('.type, .value')
+                for (let i = 0; i < fields.length; i += 2)
+                    otherDetails[fields[i].textContent] = fields[i + 1].textContent
+                console.log(fields, otherDetails)
+                return
                 logSheet.addPerson(floID, name, otherDetails)
                 renderPersonCard(floID, logSheet.viewPerson(floID))
-                form.reset()
+                hidePopup()
                 notify(`Added Person: ${floID}`)
                 showSave()
             } catch (error) {
@@ -785,22 +961,25 @@
             }
         }
 
+        const   sheetTitleInput = document.getElementById('sheet_title_input'),
+                sheetDescriptionInput = document.getElementById('sheet_description_input')
+
         function createSheet() {
             try {
-                let form = document.forms["new-sheet-form"]
-                let title = form.title.value.trim().replace(" ", "_");
-                let description = form.description.value.trim();
-                let columns = form.columns.value.trim().split('\n');
-                let writers = form.writers.value.trim();
-                if (writers === '')
-                    writers = floGlobals.subAdmins;
-                else if (writers.toUpperCase() === 'PUBLIC')
-                    writers = null;
-                else
-                    writers = writers.split('\n').filter(i => floCrypto.validateAddr(i))
-                logSheet.createNewSheet(title, description, columns, writers)
+                let title = sheetTitleInput.value.trim().replace(" ", "_");
+                let description = sheetDescriptionInput.value.trim();
+                let columns = []
+                let editors = []
+                columnsContainer.querySelectorAll('.column-title').forEach(column => columns.push(column.textContent))
+                editorsContainer.querySelectorAll('.editor-address').forEach(editor => editors.push(editor.textContent))
+                return
+                if (editors === '')
+                    editors = floGlobals.subAdmins;
+                else if (editors.toUpperCase() === 'PUBLIC')
+                    editors = null;
+                logSheet.createNewSheet(title, description, columns, editors)
                 renderSheetList([title])
-                form.reset()
+                hidePopup()
                 notify(`Created New Sheet: ${title}`)
                 showSave()
             } catch (error) {
@@ -1012,19 +1191,21 @@
                 let row = document.createElement('tr')
                 row.setAttribute("title", parseVectorClock(data.vc))
                 row.append(createCell(data.floID))
-                row.append(createCell().appendChild(createGradeField(data.vc, data.grade)))
+                let gradeF = document.createElement('td')
+                gradeF.append(createGradeField(data.vc, data.grade))
+                row.append(gradeF)
                 data.log.forEach(l => row.append(createCell(l)))
                 frag.append(row)
             }
             tableBody.append(frag)
             if(!onlyRenderTable){
                 //Add options for groupBy 
-                document.getElementById('group_by').children[0].textContent = `Group ${title} by`;
+                document.getElementById('group_by_title').textContent = `Group ${removeUnderscore(title)} by`;
                 document.getElementById('group_by_view').innerHTML =
-                    `<table><th><tr><td>FLO ID</td><td><i>null</i></td></tr></th></table>`
+                    `<table><thead><tr><th>FLO ID</th><th><i>null</i></th></tr></thead></table>`
                 let colSelect = clearElement(document.getElementById('group_by_menu').children[1]);
                 attributes.forEach(a => {
-                    let opt = document.createElement('option');
+                    let opt = document.createElement('sm-option');
                     opt.setAttribute('value', a);
                     opt.textContent = a;
                     colSelect.appendChild(opt)
