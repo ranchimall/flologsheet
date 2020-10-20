@@ -259,17 +259,17 @@ button:disabled {
 }
 #sign_in_popup h3 {
   margin-top: 2rem;
+  margin-bottom: 0.5rem;
 }
 #sign_in_popup h4 {
   font-weight: 500;
-  margin-bottom: 3rem;
+  margin-bottom: 1rem;
 }
 #sign_in_popup button {
   margin: 1rem 0;
 }
 #sign_in_popup p {
-  margin-top: 1rem;
-  margin-bottom: 0 !important;
+  margin: 1rem 0;
 }
 
 .copy-row {
@@ -392,6 +392,10 @@ button:disabled {
   font-weight: 500;
 }
 
+#main_section > header sm-input {
+  margin-left: 1rem;
+}
+
 #user_icon {
   width: 2.4rem;
   height: 2.4rem;
@@ -481,6 +485,11 @@ button:disabled {
   width: 100vw;
   height: 100vh;
   overflow-x: hidden;
+}
+#sheet_page.toggle-side-bar #side_bar {
+  transition: transform 0.3s;
+  z-index: 10;
+  transform: none;
 }
 
 #sheet_heading {
@@ -816,6 +825,10 @@ td {
 .column-card {
   padding: 0.4rem 0.6rem;
 }
+.column-card h5 {
+  font-weight: 500;
+  font-family: "Roboto", sans-serif;
+}
 .column-card .icon {
   margin-left: 0.4rem;
 }
@@ -841,6 +854,32 @@ td {
   grid-area: close;
 }
 
+#save_button {
+  position: fixed;
+  overflow: hidden;
+  bottom: 0;
+  left: 0;
+  width: calc(100% - 2rem);
+  padding: 1rem;
+  margin: 1rem;
+  border-radius: 0.4rem;
+  background: rgba(var(--foreground-color), 1);
+  z-index: 20;
+  box-shadow: 0 0.1rem 0.1rem #00000010, 0 0 1rem #00000016;
+  transform: translateY(1rem);
+  transition: transform 0.3s, opacity 0.3s;
+}
+#save_button #changes_indicator {
+  position: absolute;
+  left: 0;
+  width: 0.5rem;
+  height: 100%;
+  background: red;
+}
+#save_button sm-button {
+  margin-left: 1rem;
+}
+
 @media screen and (max-width: 640px) {
   #group_by_view {
     overflow: auto;
@@ -848,6 +887,10 @@ td {
   }
 }
 @media screen and (min-width: 640px) {
+  .hide-on-desktop {
+    display: none;
+  }
+
   sm-popup::part(popup) {
     width: 24rem;
   }
@@ -874,6 +917,9 @@ td {
   #sheet_page.toggle-side-bar {
     grid-template-columns: 19rem 1fr;
   }
+  #sheet_page.toggle-side-bar #side_bar {
+    z-index: initial;
+  }
   #sheet_page:not(.toggle-side-bar) #side_bar {
     grid-template-columns: 1fr;
     position: fixed;
@@ -887,6 +933,10 @@ td {
 
   #group_by::part(popup) {
     width: 80vw;
+  }
+
+  #save_button {
+    width: auto;
   }
 }
 @media screen and (min-width: 1920px) {

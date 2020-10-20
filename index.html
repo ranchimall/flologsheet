@@ -125,8 +125,9 @@
         <div class="container-header">
             <h3>Sign In</h3>
         </div>
-        <h4 class="expand light-text">Welcome to RanchiMall Pay.<br>Please enter your FLO private key to
-            continue.</h4>
+        <h4 class="expand light-text">Welcome to RanchiMall FLO LogSheet.</h4>
+        <p>Please enter your FLO private key to
+            continue.</p>
         <sm-input id="get_priv_key_field" privateKey placeholder="Private Key" type="password" required animate>
         </sm-input>
         <button id="sign_in_btn" class="primary-btn expand" type="submit" disabled>
@@ -233,7 +234,7 @@
         </div>
         <div class="flex align-center space-between top-margin">
             Make sheet private
-            <sm-switch onchange="toggleEditors()"></sm-switch>
+            <sm-switch id="sheet_type_switch" onchange="toggleEditors()"></sm-switch>
         </div>
         <div id="specify_editors" class="grid hide-completely">
             <div class="flex direction-column">
@@ -274,6 +275,13 @@
         </div>
         <div class="table-container" id="group_by_view"></div>
     </sm-popup>
+
+    <div id="save_button" class="hide flex align-center space-between" data-unsaved="0">
+        <span id="changes_indicator"></span>
+        <span>Changes needs to be saved!</span>
+        <sm-button>Save</sm-button>
+    </div>
+
     <main>
         <header id="main_header" class="grid">
             <div class="flex align-center space-between">
@@ -300,9 +308,13 @@
         </section>
         <section id="sheet_page" class="page toggle-side-bar grid hide-completely">
             <nav id="side_bar">
-                <div class="flex align-center space-between">
+                <div class="flex align-center">
+                    <svg class="icon hide-on-desktop" onclick="toggleSideBar()" viewBox="0 0 64 64">
+                        <title>Go back to sheet</title>
+                        <polyline points="48.01 0.35 16.35 32 48.01 63.65"/>
+                    </svg>
                     <h4 class="section-header">People</h4>
-                    <sm-button class="small sub-admin-option" onclick="showPopup('add_person_popup')">Add person</sm-button>
+                    <sm-button class="small sub-admin-option justify-right" onclick="showPopup('add_person_popup')">Add person</sm-button>
                 </div>
                 <div id="people_container" class="grid"></div>
             </nav>
@@ -873,14 +885,14 @@
             })
         }
 
-        /*document.getElementById('save-button').children[1].addEventListener("click", function (e) {
+        document.getElementById('save_button').children[2].addEventListener("click", function (e) {
             logSheet.commitUpdates().then(result => {
                 this.parentNode.classList.add('hide')
                 this.parentNode.classList.remove('no-transformations')
                 this.parentNode.dataset["unsaved"] = '0'
                 notify("Save Successful")
             }).catch(error => notify(`Save Unsuccessful [${error}]`, error))
-        })*/
+        })
 
         const firstSelect = document.getElementById('first_select')
         const secondSelect = document.getElementById('second_select')
@@ -929,16 +941,16 @@
             return element;
         }
 
+        let banner = document.getElementById('save_button')
         function showSave() {
-            let banner = document.getElementById('save-button')
             banner.dataset["unsaved"] = parseInt(banner.dataset["unsaved"]) + 1
-            banner.classList.add('hide');
             banner.classList.remove('no-transformations');
+            banner.classList.add('hide');
             setTimeout(() => {
-                banner.style.background = `#F${Math.max(9 - parseInt(banner.dataset["unsaved"]), 0)}0`;
+                banner.children[0].style.background = `#F${Math.max(9 - parseInt(banner.dataset["unsaved"]), 0)}0`;
                 banner.classList.add('no-transformations');
                 banner.classList.remove('hide');
-            }, 500)
+            }, 300)
         }
 
         function addPerson() {
@@ -950,9 +962,8 @@
                 for (let i = 0; i < fields.length; i += 2)
                     otherDetails[fields[i].textContent] = fields[i + 1].textContent
                 console.log(fields, otherDetails)
-                return
                 logSheet.addPerson(floID, name, otherDetails)
-                renderPersonCard(floID, logSheet.viewPerson(floID))
+                peopleContainer.append(render.personCard(floID, logSheet.viewPerson(floID)))
                 hidePopup()
                 notify(`Added Person: ${floID}`)
                 showSave()
@@ -962,7 +973,8 @@
         }
 
         const   sheetTitleInput = document.getElementById('sheet_title_input'),
-                sheetDescriptionInput = document.getElementById('sheet_description_input')
+                sheetDescriptionInput = document.getElementById('sheet_description_input'),
+                sheetTypeSwitch = document.getElementById('sheet_type_switch')
 
         function createSheet() {
             try {
@@ -971,14 +983,20 @@
                 let columns = []
                 let editors = []
                 columnsContainer.querySelectorAll('.column-title').forEach(column => columns.push(column.textContent))
+                if(!columns.length){
+                    notify('Every LogSheet should contain atleast 1 column.', 'error')
+                    return
+                }
                 editorsContainer.querySelectorAll('.editor-address').forEach(editor => editors.push(editor.textContent))
-                return
-                if (editors === '')
-                    editors = floGlobals.subAdmins;
-                else if (editors.toUpperCase() === 'PUBLIC')
+                if(!sheetTypeSwitch.checked)
                     editors = null;
+                else
+                    if(!editors.length)
+                        editors = floGlobals.subAdmins;
                 logSheet.createNewSheet(title, description, columns, editors)
-                renderSheetList([title])
+                let sheet = {}
+                sheet[title] = {editors}
+                renderSheetList(sheet)
                 hidePopup()
                 notify(`Created New Sheet: ${title}`)
                 showSave()
@@ -1062,10 +1080,11 @@
 
         const sheetsContainer = document.getElementById("sheets_container")
         function renderSheetList(sheetList) {
+            console.log(sheetList)
             for(sheet in sheetList){
                 frag.append(render.sheetCard(sheet, sheetList[sheet].editors))
             }
-            if(floGlobals.subAdmins.includes(myFloID)){
+            if(floGlobals.subAdmins.includes(myFloID) && !document.getElementById('add_new_sheet')){
                 let firstCard = document.createElement('div')
                 firstCard.id = 'add_new_sheet'
                 firstCard.classList.add('sheet-card')

@@ -2210,7 +2210,7 @@ customElements.define('sm-popup', class extends HTMLElement {
             setTimeout(() => {
                 this.threshold = this.popup.getBoundingClientRect().height * 0.3
             }, 200);
-            this.inputFields = this.querySelectorAll('sm-input', 'sm-checkbox', 'textarea', 'radio')
+            this.inputFields = this.querySelectorAll('sm-input', 'sm-checkbox', 'textarea', 'sm-textarea', 'radio')
         })
 
         this.popupHeader.addEventListener('touchstart', (e) => {
