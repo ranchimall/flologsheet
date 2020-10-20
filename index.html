@@ -54,11 +54,17 @@
                     hideLoader()
                     showPopup('sign_in_popup', true)
                     let signInBtn = document.getElementById('sign_in_btn'),
+                        guestButton = document.getElementById('guest_btn'),
                         privateKeyInput = document.getElementById('get_priv_key_field')
                     signInBtn.onclick = () => {
                         hidePopup()
                         showLoader()
                         resolve(privateKeyInput.value)
+                    }
+                    guestButton.onclick = () => {
+                        hidePopup()
+                        showLoader()
+                        reject(null)
                     }
                 })
             })
@@ -133,6 +139,8 @@
         <button id="sign_in_btn" class="primary-btn expand" type="submit" disabled>
             Sign In
         </button>
+        <h5>OR</h5>
+        <sm-button id="guest_btn">Login as guest</sm-button>
     </sm-popup>
 
     <!-- User settings popup -->
