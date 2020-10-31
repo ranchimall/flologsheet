@@ -247,10 +247,28 @@ button {
         }
     }
 }
-#sign_in_popup {
-    &::part(background){
-        background: rgba(var(--foreground-color), 1);
+#sign_in_page{
+    background: url(sign-in-bg.svg) no-repeat center, linear-gradient(rgba(var(--foreground-color), 1), rgba(var(--foreground-color), 1));
+    background-size: cover;
+    min-height: 100vh;
+    justify-content: flex-start;
+    align-content: center;
+    padding: 0 6vw;
+    h1{
+        line-height: 1.1em;
+        font-weight: 800;
+        font-size: clamp(1.5rem, 8vw, 4rem);
+        color: rgba(var(--text-color), 0.8);
     }
+    sm-button{
+        margin-top: 2rem;
+    }
+    p{
+        margin-top: 1rem;
+    }
+}
+#sign_in_popup {
+    text-align: center;
     h3 {
         margin-top: 2rem;
         margin-bottom: 0.5rem;

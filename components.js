@@ -341,6 +341,7 @@ input{
     color: var(--error-color);
     background: rgba(var(--foreground-color), 1);
     padding: 0.6rem 1rem;
+    text-align: left;
 }
 .feedback-text:empty{
     padding: 0;

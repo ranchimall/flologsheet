@@ -52,7 +52,7 @@
             floDapps.setCustomPrivKeyInput(() => {
                 return new Promise((resolve, reject) => {
                     hideLoader()
-                    showPopup('sign_in_popup', true)
+                    showPage('sign_in_page')
                     let signInBtn = document.getElementById('sign_in_btn'),
                         guestButton = document.getElementById('guest_btn'),
                         privateKeyInput = document.getElementById('get_priv_key_field')
@@ -81,6 +81,7 @@
                     renderSheetList(logSheet.listSheets())
                     //hide loading screen
                     hideLoader()
+                    showPage('home_page')
                     //display add buttons if subAdmin, else hide
                     if (floGlobals.subAdmins.includes(myFloID)) {
                         document.querySelectorAll('.sub-admin-option').forEach(option => option.classList.remove('hide-completely'))
@@ -139,8 +140,6 @@
         <button id="sign_in_btn" class="primary-btn expand" type="submit" disabled>
             Sign In
         </button>
-        <h5>OR</h5>
-        <sm-button id="guest_btn">Login as guest</sm-button>
     </sm-popup>
 
     <!-- User settings popup -->
@@ -291,6 +290,15 @@
     </div>
 
     <main>
+        <div id="sign_in_page" class="page grid">
+            <h4>RanchiMall</h4>
+            <h1>LogSheet</h1>
+            <p>Open &bull; Distributed &bull; Reliable</p>
+            <div>
+                <sm-button variant="primary" onclick="showPopup('sign_in_popup')">Sign In</sm-button>
+                <sm-button id="guest_btn">Sign in as guest</sm-button>
+            </div>
+        </div>
         <header id="main_header" class="grid">
             <div class="flex align-center space-between">
                 <div class="flex direction-column">
@@ -305,7 +313,7 @@
                 </svg>
             </div>
         </header>
-        <section id="home_page" class="page grid">
+        <section id="home_page" class="page grid hide-completely">
             <section id="main_section">
                 <header class="flex align-center space-between section-header">
                     <h4>Sheets</h4>
@@ -652,13 +660,13 @@
                         if (floCrypto.getPubKeyHex(input.value.trim()) || input.value.trim() === '')
                             input.setValidity('')
                         else
-                            input.setValidity('Invalid FLO private key.')   
+                            input.setValidity('Invalid FLO private key!')   
                     }
                     else{
                         if(validityState.patternMismatch)
                             input.setValidity('Invalid UPI address.') 
                         if(validityState.tooShort || validityState.tooLong)
-                            input.setValidity('UPI transaction Id should be 12digits long.') 
+                            input.setValidity('UPI transaction Id should be 12 digits long.') 
                         else
                             input.setValidity('') 
                     }
@@ -872,12 +880,12 @@
         function showPage(page){
             allPages.forEach(page => page.classList.add('hide-completely'))
             document.getElementById(page).classList.remove('hide-completely')
-            if(page === 'sheet_page')
-                mainHeader.classList.add('hide-completely')
-            else
-                mainHeader.classList.remove('hide-completely')
-            if(page === 'home_page')
+            if(page === 'home_page'){
                 tableBody.innerHTML = ''
+                mainHeader.classList.remove('hide-completely')
+            }
+            else
+                mainHeader.classList.add('hide-completely')
         }
 
         function signOut() {
