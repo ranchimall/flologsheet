@@ -234,6 +234,7 @@ border: none;
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
+    cursor: text;
     -webkit-box-align: center;
         -ms-flex-align: center;
             align-items: center;
@@ -246,9 +247,6 @@ border: none;
     -o-transition: opacity 0.3s;
     transition: opacity 0.3s;
     background: rgba(var(--text-color), 0.06);
-    -webkit-box-shadow: 0 0 0.2rem rgba(var(--text-color), 0.2) inset;
-            box-shadow: 0 0 0.2rem rgba(var(--text-color), 0.2) inset;
-    font-family: var(--font-family);
     width: 100%;
     outline: none;
     min-width: 0;
@@ -611,7 +609,6 @@ smTextarea.innerHTML = `
     -webkit-box-shadow: 0 0 0.2rem rgba(var(--text-color), 0.2) inset;
             box-shadow: 0 0 0.2rem rgba(var(--text-color), 0.2) inset;
     background: rgba(var(--text-color), 0.06);
-    font-family: var(--font-family);
     width: 100%;
     outline: none;
     min-width: 0;
@@ -2655,10 +2652,11 @@ smNotifications.innerHTML = `
     }
     @media screen and (min-width: 640px){
     .notification-panel{
-        width: 40vw;
+        max-width: 40vw;
+        width: max-content;
         -webkit-box-pack: end;
             -ms-flex-pack: end;
-                justify-content: flex-end;
+        justify-content: flex-end;
     }
     .notification{
         -ms-grid-column-align: end;

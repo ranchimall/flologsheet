@@ -54,18 +54,19 @@
                     hideLoader()
                     showPage('sign_in_page')
                     let signInBtn = document.getElementById('sign_in_btn'),
-                        guestButton = document.getElementById('guest_btn'),
+                        //guestButton = document.getElementById('guest_btn'),
                         privateKeyInput = document.getElementById('get_priv_key_field')
                     signInBtn.onclick = () => {
                         hidePopup()
                         showLoader()
                         resolve(privateKeyInput.value)
+                        privateKeyInput.value = ''
                     }
-                    guestButton.onclick = () => {
+                    /*guestButton.onclick = () => {
                         hidePopup()
                         showLoader()
                         reject(null)
-                    }
+                    }*/
                 })
             })
             //invoke the startup functions
@@ -127,20 +128,6 @@
         <h4 id="tip_container">Loading RanchiMall FLO LogSheet</h4>
         <sm-button onclick="signOut()">Sign Out</sm-button>
     </section>
-    <!-- Sign in popup-->
-    <sm-popup id="sign_in_popup">
-        <div class="container-header">
-            <h3>Sign In</h3>
-        </div>
-        <h4 class="expand light-text">Welcome to RanchiMall FLO LogSheet.</h4>
-        <p>Please enter your FLO private key to
-            continue.</p>
-        <sm-input id="get_priv_key_field" privateKey placeholder="Private Key" type="password" required animate>
-        </sm-input>
-        <button id="sign_in_btn" class="primary-btn expand" type="submit" disabled>
-            Sign In
-        </button>
-    </sm-popup>
 
     <!-- User settings popup -->
     <sm-popup id="user_popup">
@@ -290,13 +277,55 @@
     </div>
 
     <main>
-        <div id="sign_in_page" class="page grid">
-            <h4>RanchiMall</h4>
-            <h1>LogSheet</h1>
-            <p>Open &bull; Distributed &bull; Reliable</p>
-            <div>
-                <sm-button variant="primary" onclick="showPopup('sign_in_popup')">Sign In</sm-button>
-                <sm-button id="guest_btn">Sign in as guest</sm-button>
+        <div id="sign_in_page" class="page grid space-between">
+            <div class="info">
+                <h4>RanchiMall</h4>
+                <h1>LogSheet</h1>
+                <p>Open &bull; Distributed &bull; Reliable</p>
+            </div>
+            <div class="sign-in-box flex direction-column"> 
+                <sm-tab-header target="user_entry">
+                    <sm-tab>Sign In</sm-tab>
+                    <sm-tab>Sign Up</sm-tab>
+                </sm-tab-header>
+                <sm-tab-panels id="user_entry">
+                    <sm-panel>
+                        <h3>Welcome back</h3>
+                        <p>Just enter your FLO private key to continue.</p>
+                        <form action="" onsubmit="return false">        
+                            <sm-input id="get_priv_key_field" privateKey placeholder="FLO Private Key" type="password" required animate>
+                            </sm-input>
+                            <button id="sign_in_btn" class="primary-btn expand" type="submit" disabled>
+                                Sign In
+                            </button>
+                        </form>
+                    </sm-panel>
+                    <sm-panel>
+                        <h3>Get started</h3>
+                        <p>Create your FLO public and private key pair. <Strong>Don't forget to store them securely!</Strong></p>
+                        <sm-button id="generate_flo_id" onclick="generateId()" variant="primary">Get FLO credentials</sm-button>
+                        <section id="credentials_section" class="hide-completely">
+                            <h5>FLO ID</h5>
+                            <div class="copy-row">
+                                <h4 id="generated_id" class="copy"></h4>
+                                <svg class="icon" onclick="copyToClipboard(this.parentNode)" viewBox="0 0 64 64">
+                                    <title>Copy</title>
+                                    <rect x="16" y="16" width="48" height="48" rx="6" />
+                                    <path d="M.5,47.52V6.5a6,6,0,0,1,6-6h41" />
+                                </svg>
+                            </div>
+                            <h5>Private key</h5>
+                            <div class="copy-row">
+                                <h4 id="generated_key" class="copy"></h4>
+                                <svg class="icon" onclick="copyToClipboard(this.parentNode)" viewBox="0 0 64 64">
+                                    <title>Copy</title>
+                                    <rect x="16" y="16" width="48" height="48" rx="6" />
+                                    <path d="M.5,47.52V6.5a6,6,0,0,1,6-6h41" />
+                                </svg>
+                            </div>
+                        </section>
+                    </sm-panel>
+                </sm-tab-panels>
             </div>
         </div>
         <header id="main_header" class="grid">
@@ -621,7 +650,7 @@
         }
 
         function formValidation(formElement) {
-            let parent = formElement.closest('sm-popup'),
+            let parent = formElement.closest('sm-popup') || formElement.closest('form'),
                 submitBtn = parent.querySelector("[type='submit']");
             if (!submitBtn) return;
             if (areInputsValid(parent))
@@ -634,7 +663,7 @@
             document.addEventListener('input', e => {
                 if (e.target.closest('sm-input')) {
                     let input = e.target.closest('sm-input')
-                    if(!input.closest('sm-popup')) return
+                    if(!input.closest('sm-popup') && !input.closest('form')) return
                     formValidation(input)
                     if(input.value === '')
                         input.setValidity('')
@@ -673,9 +702,10 @@
                 }
             })
             document.addEventListener('keyup', (e) => {
-                if (e.target.closest('sm-input:not([exclude])')) {
+                if (e.target.closest('sm-input')) {
                     if (e.key === 'Enter') {
-                        e.target.closest('sm-popup').querySelector("[type='submit']")
+                        let parent = e.target.closest('sm-popup') || e.target.closest('form') 
+                        parent.querySelector("button[type='submit']")
                             .click();
                     }
                 }
@@ -832,6 +862,8 @@
         const addDetailTypeInput = document.getElementById('add_detail_type_input')
         const addDetailValueInput = document.getElementById('add_detail_value_input')
 
+
+        
         function addEditor(){
             let address = addEditorInput.value.trim()
             if(address === '') return;
@@ -888,13 +920,29 @@
                 mainHeader.classList.add('hide-completely')
         }
 
+        const   credentialsSection = document.getElementById('credentials_section'),
+                generateFloId = document.getElementById('generate_flo_id'),
+                generatedId = document.getElementById('generated_id'),
+                generatedKey = document.getElementById('generated_key')
+
+        function generateId(){
+            generateFloId.classList.add('hide-completely')
+            credentialsSection.classList.remove('hide-completely')
+            let {floID, privKey} = floCrypto.generateNewID()
+            generatedId.textContent = floID
+            generatedKey.textContent = privKey
+        }
+
         function signOut() {
             getConfirmation('Are you sure you want to Sign out?').then(result => {
                 try {
                     hidePopup()
+                    generateFloId.classList.remove('hide-completely')
+                    credentialsSection.classList.add('hide-completely')
+                    generatedId.textContent = ''
+                    generatedKey.textContent = ''
                     floDapps.clearCredentials();
-                    notify("Successfully Signed out")
-                    setTimeout(onLoadStartUp, 2000)
+                    setTimeout(onLoadStartUp, 1000)
                 } catch (error) {
                     notify(error, "error")
                 }
@@ -1055,6 +1103,7 @@
         }
 
         function viewSheet(title) {
+            showPage('sheet_page')
             logSheet.refreshLogs(title).then(result => {
                 let data = logSheet.viewLogs(title)
                 renderSheetView(data.title, data.description, data.editors, data.attributes, data.sheet.reverse(),
@@ -1186,7 +1235,6 @@
                 endingIndex = sheet.length > 20 ? 20 : sheet.length 
             }
             if(!onlyRenderTable){
-                showPage('sheet_page')
                 //Add Sheet Details
                 sheetHeading.textContent = removeUnderscore(title);
                 if(editors){
@@ -10253,7 +10301,7 @@
                                             return reject("Invalid Private Key")
                                         privKey = result;
                                     }).catch(error => {
-                                        console.log(error, "Generating Random Keys")
+                                            console.log(error, "Generating Random Keys")
                                         privKey = floCrypto.generateNewID().privKey
                                     }).finally(_ => {
                                         var threshold = floCrypto.randInt(10, 20)

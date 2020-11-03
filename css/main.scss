@@ -12,24 +12,24 @@ body {
     --background-color: rgba(var(--foreground-color), 1);
     --dark-shade: #f8f8f8;
     --error-color: #E53935;
-    --hue: 255;
-    --saturation: 61%;
-    --lightness: 39%;
+    --hue: 172;
+    --saturation: 74%;
+    --lightness: 34%;
     color: rgba(var(--text-color), 1);
     font-size: 16px;
     background: var(--dark-shade);
     background-size: cover;
 }
 body[data-theme="dark"]{
-    --accent-color: #00BFA6;
+    --accent-color: #00e2c4;
     --text-color: 238, 238, 238;
     --text-color-light: 170, 170, 170;
     --foreground-color: 26, 26, 26;
     --background-color: #111;
     --dark-shade: #080808;
-    --hue: 255;
-    --saturation: 39%;
-    --lightness: 70%;
+    --hue: 172;
+    --saturation: 70%;
+    --lightness: 44%;
 }
 
 a {
@@ -248,47 +248,97 @@ button {
     }
 }
 #sign_in_page{
-    background: url(sign-in-bg.svg) no-repeat center, linear-gradient(rgba(var(--foreground-color), 1), rgba(var(--foreground-color), 1));
+    background: url(sign-in-bg.svg) no-repeat center, linear-gradient(rgba(var(--text-color), 0.04), rgba(var(--text-color), 0.04)), linear-gradient(rgba(var(--foreground-color), 1), rgba(var(--foreground-color), 1));
     background-size: cover;
     min-height: 100vh;
-    justify-content: flex-start;
-    align-content: center;
+    align-items: center;
     padding: 0 6vw;
-    h1{
-        line-height: 1.1em;
-        font-weight: 800;
-        font-size: clamp(1.5rem, 8vw, 4rem);
-        color: rgba(var(--text-color), 0.8);
+    .info{
+        h1{
+            font-weight: 800;
+            font-size: clamp(1.5rem, 8vw, 4rem);
+        }
+        h4{
+            font-weight: 500;
+            font-family: 'Roboto', sans-serif;
+            opacity: 0.8;
+        }
     }
-    sm-button{
-        margin-top: 2rem;
-    }
-    p{
-        margin-top: 1rem;
+    .sign-in-box{
+        background: rgba(var(--foreground-color), 1);
+        z-index: 1;
+        padding: 2rem; 
+        border-radius: 0.5rem;
+        box-shadow: 0 0 0.3rem #00000016, 0 6rem 2rem -2rem #00000016;
+        justify-self: center;ś
+        sm-input{
+            text-align: left;
+        }
+        sm-panel{
+            width: 100%;
+        }
+        sm-tab-header{
+            align-self: flex-start;
+            &::part(tab-header){
+                padding-bottom: 0.4rem;
+                gap: 1.5rem;
+            }
+        }
+        sm-tab::part(tab){
+            padding: 0.4rem 0;
+        }
+        sm-tab-panels{
+            margin-top: 3rem;
+        }
+        form{
+            width: 100%;
+        }
+        h2{
+            margin-bottom: 0.5rem;
+        }
+        h3{
+            font-weight: 500;
+        }
+        h4 {
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+        h5{
+            opacity: 0.8;
+            font-weight: 500;
+        }
+        .copy-row{
+            h4{
+                max-width: 34ch;
+            }
+        }
+        .copy-row:not(:last-of-type){
+            margin-bottom: 1rem;
+        }
+        button {
+            margin-top: 1rem;
+            padding: 0.6rem 1.6rem;
+        }
+        p {
+            margin-bottom: 0.5rem;
+            max-width: 35ch;
+            margin-top: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        #credentials_section{
+            border-top: 1px rgba(var(--text-color), 0.2) solid;
+            margin-top: 1rem;
+            padding-top: 1.5rem;
+            animation: slide-down 0.3s forwards;
+        }
     }
 }
-#sign_in_popup {
-    text-align: center;
-    h3 {
-        margin-top: 2rem;
-        margin-bottom: 0.5rem;
+@keyframes slide-down{
+    from{
+        transform: translateY(-1rem);
     }
-
-    h4 {
-        font-weight: 500;
-        margin-bottom: 1rem;
-    }
-
-    button {
-        margin: 1rem 0;
-    }
-
-    p {
-        margin: 1rem 0;
-    }
-    h5{
-        text-align: center;
-        margin-bottom: 1rem;
+    to{
+        transform: none;
     }
 }
 .copy-row {
@@ -301,6 +351,7 @@ button {
         font-family: 'Roboto', sans-serif;
         margin-bottom: 0;
         font-weight: 400;
+        margin: 0 !important;
     }
     .icon {
         cursor: pointer;
@@ -637,6 +688,7 @@ th{
     background: linear-gradient(rgba(var(--text-color), 0.06), rgba(var(--text-color), 0.06)), rgba(var(--foreground-color), 1);
     text-align: left;
     line-height: 1;
+    vertical-align: middle;
     font-weight: 500;
     z-index: 1;
     padding: 1rem 0.8rem;
@@ -654,6 +706,18 @@ td{
 }
 .grade-input{
     width: 10ch;
+}
+th.descending::after{
+    position: absolute;
+    right: 0.5rem;
+    content: " \25BC";
+    font-size: 0.8rem;
+}
+th:not(.descending)::after{
+    position: absolute;
+    right: 0.5rem;
+    content: ' \25B2';
+    font-size: 0.8rem;
 }
 
 #group_by{
@@ -896,6 +960,13 @@ td{
     }
     sm-popup::part(popup){
         width: 24rem;
+    }
+    #sign_in_page{
+        grid-auto-flow: column;
+        .sign-in-box{
+            min-height: 80vh;
+            min-width: 26rem;
+        }
     }
     #main_header{
         padding: 1.2rem 3rem;
