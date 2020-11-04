@@ -40,6 +40,7 @@ smButton.innerHTML = `
     border-radius: 10rem;
 }
 .button {
+    position: relative;
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -65,6 +66,13 @@ smButton.innerHTML = `
     background: rgba(var(--text-color), 0.1); 
     -webkit-tap-highlight-color: transparent;
     outline: none;
+    overflow: hidden;
+}
+span.ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    border: 1.5rem solid rgba(var(--text-color), 0.2);
 }
 :host(:not([disabled])) .button:focus{
     -webkit-box-shadow: 0 0.1rem 0.1rem rgba(0, 0, 0, 0.1), 0 0.2rem 0.8rem rgba(0, 0, 0, 0.2);
@@ -75,14 +83,6 @@ smButton.innerHTML = `
             box-shadow: 0 0 0 1px rgba(var(--text-color), 0.2) inset, 0 0.1rem 0.1rem rgba(0, 0, 0, 0.1), 0 0.4rem 0.8rem rgba(0, 0, 0, 0.2);
 }
 @media (hover: hover){
-    :host(:not([disabled])) .button:active{
-        -webkit-box-shadow: none !important;
-                box-shadow: none !important;
-    }
-    :host([variant='outlined']) .button:active{
-        -webkit-box-shadow: 0 0 0 1px rgba(var(--text-color), 0.2) inset !important;
-                box-shadow: 0 0 0 1px rgba(var(--text-color), 0.2) inset !important;
-    }
     :host(:not([disabled])) .button:hover{
         -webkit-box-shadow: 0 0.1rem 0.1rem rgba(0, 0, 0, 0.1), 0 0.2rem 0.8rem rgba(0, 0, 0, 0.12);
                 box-shadow: 0 0.1rem 0.1rem rgba(0, 0, 0, 0.1), 0 0.2rem 0.8rem rgba(0, 0, 0, 0.12);
@@ -90,9 +90,6 @@ smButton.innerHTML = `
     :host([variant='outlined']) .button:hover{
         -webkit-box-shadow: 0 0 0 1px rgba(var(--text-color), 0.2) inset, 0 0.1rem 0.1rem rgba(0, 0, 0, 0.1), 0 0.4rem 0.8rem rgba(0, 0, 0, 0.12);
                 box-shadow: 0 0 0 1px rgba(var(--text-color), 0.2) inset, 0 0.1rem 0.1rem rgba(0, 0, 0, 0.1), 0 0.4rem 0.8rem rgba(0, 0, 0, 0.12);
-    }
-    :host([variant="primary"]:not([disabled])) .button:active{
-        background: hsl(var(--hue), var(--saturation), calc(var(--lightness) - 20%)) !important;
     }
     :host([variant="primary"]:not([disabled])) .button:hover{
         background: hsl(var(--hue), var(--saturation), calc(var(--lightness) - 10%));
@@ -149,6 +146,33 @@ customElements.define('sm-button',
                 }))
             }
         }
+        createRipple(event){
+            const target = this.shadowRoot.querySelector('.button')
+            const ripple = target.querySelector('.ripple');
+            const circle = document.createElement("span");
+            const diameter = Math.max(target.clientWidth, target.clientHeight);
+            const radius = diameter / 2;
+            circle.style.width = circle.style.height = `${diameter}px`;
+            circle.style.left = `${event.clientX - (target.offsetLeft + radius)}px`;
+            circle.style.top = `${event.clientY - (target.offsetTop + radius)}px`;
+            circle.classList.add("ripple"); 
+            const rippleAnimation =  circle.animate([
+
+                {
+                    transform: 'scale(4)',
+                    opacity: 0
+                }
+            ],
+                {
+                    duration: 400,
+                    fill: "forwards",
+                    easing: 'ease-in'
+                })
+            target.append(circle);
+            rippleAnimation.onfinish = () => {
+                circle.remove()
+            }
+        }
 
         connectedCallback() {
             this.isDisabled = false
@@ -156,6 +180,7 @@ customElements.define('sm-button',
             if (this.hasAttribute('disabled') && !this.isDisabled)
                 this.isDisabled = true
             this.addEventListener('click', (e) => {
+                this.createRipple(e)
                 this.dispatch()
             })
             this.addEventListener('keyup', (e) => {

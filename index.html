@@ -281,7 +281,7 @@
             <div class="info">
                 <h4>RanchiMall</h4>
                 <h1>LogSheet</h1>
-                <p>Open &bull; Distributed &bull; Reliable</p>
+                <p>Open &bull; Distributed &bull; Reliable</p>  
             </div>
             <div class="sign-in-box flex direction-column"> 
                 <sm-tab-header target="user_entry">
@@ -710,6 +710,7 @@
                     }
                 }
             })
+            let currentTableHeader
             document.addEventListener('click', e => {
                 try {
                     if(e.target.closest('#add_new_sheet'))
@@ -719,13 +720,45 @@
                     else if (e.target.closest(".person-card"))
                         copyToLogInput(e.target.closest(".person-card").dataset.floId)
                     else if (e.target.closest("th")){
-                        sortTable(e.target.closest("th").cellIndex, e.target.closest('th').classList.contains('descending'))
-                        e.target.closest('th').classList.toggle('descending')
+                        let trgt = e.target.closest('th')
+                        if(currentTableHeader && currentTableHeader !== trgt)
+                            currentTableHeader.classList.remove('ascending', 'descending')
+                        sortTable(trgt.cellIndex, trgt.classList.contains('descending'))
+                        if(trgt.classList.contains('descending'))
+                            trgt.classList.add('ascending')
+                        else
+                            trgt.classList.remove('ascending')
+                        trgt.classList.toggle('descending')
+                        currentTableHeader = trgt
+                    }
+                    else if(e.target.closest('h4')){
+                        createRipple(e)
                     }
                 } catch (error) {
                     //do nothing
                 }
             })
+            function createRipple(event){
+                const target = event.target.closest('h4')
+                const ripple = target.querySelector('.ripple');
+                if (ripple) {
+                    ripple.remove();
+                }
+                const ogOverflow = target.style.overflow
+                target.style.overflow = 'hidden'
+                console.log(target.getBoundingClientRect(), event)
+                const circle = document.createElement("span");
+                const diameter = Math.max(target.clientWidth, target.clientHeight);
+                const radius = diameter / 2;
+                circle.style.width = circle.style.height = `${diameter}px`;
+                circle.style.left = `${event.clientX - radius}px`;
+                circle.style.top = `${event.clientY - radius}px`;
+                circle.classList.add("ripple"); 
+                target.append(circle);
+                circle.onanimationend = () => {
+                    target.style.overflow = ogOverflow
+                }
+            }
             const observer = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
                     if(entry.isIntersecting){
@@ -914,6 +947,9 @@
             document.getElementById(page).classList.remove('hide-completely')
             if(page === 'home_page'){
                 tableBody.innerHTML = ''
+                sheetHeading.textContent = ''
+                sheetType.textContent = ''
+                sheetDescription.textContent = ''
                 mainHeader.classList.remove('hide-completely')
             }
             else
@@ -1103,8 +1139,18 @@
         }
 
         function viewSheet(title) {
+            sheetContainer.classList.add('placeholder')
+            sheetHeading.classList.add('placeholder')
+            sheetType.classList.add('placeholder')
+            sheetDescription.classList.add('placeholder')
+            tableHeader.classList.add('hide')
             showPage('sheet_page')
             logSheet.refreshLogs(title).then(result => {
+                sheetContainer.classList.remove('placeholder')
+                sheetHeading.classList.remove('placeholder')
+                sheetType.classList.remove('placeholder')
+                sheetDescription.classList.remove('placeholder')
+                tableHeader.classList.remove('hide')
                 let data = logSheet.viewLogs(title)
                 renderSheetView(data.title, data.description, data.editors, data.attributes, data.sheet.reverse(),
                     !data.editors || data.editors.includes(myFloID), floGlobals.subAdmins.includes(myFloID))
