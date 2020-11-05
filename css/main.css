@@ -273,6 +273,7 @@ button:disabled {
   background: url(sign-in-bg.svg) no-repeat center, linear-gradient(rgba(var(--text-color), 0.04), rgba(var(--text-color), 0.04)), linear-gradient(rgba(var(--foreground-color), 1), rgba(var(--foreground-color), 1));
   background-size: cover;
   min-height: 100vh;
+  width: 100vw;
   align-items: center;
   padding: 0 6vw;
 }
@@ -286,20 +287,17 @@ button:disabled {
   opacity: 0.8;
 }
 #sign_in_page .sign-in-box {
-  background: rgba(var(--foreground-color), 1);
+  width: calc(100vw - 4rem);
   z-index: 1;
-  padding: 2rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 0 0.3rem #00000016, 0 6rem 2rem -2rem #00000016;
-  justify-self: center;
 }
-#sign_in_page .sign-in-box ś sm-input {
+#sign_in_page .sign-in-box sm-input {
   text-align: left;
 }
 #sign_in_page .sign-in-box sm-panel {
   width: 100%;
 }
 #sign_in_page .sign-in-box sm-tab-header {
+  background: none;
   align-self: flex-start;
 }
 #sign_in_page .sign-in-box sm-tab-header::part(tab-header) {
@@ -1028,8 +1026,13 @@ th.ascending::after {
     grid-auto-flow: column;
   }
   #sign_in_page .sign-in-box {
+    width: 26rem;
+    padding: 2rem;
     min-height: 80vh;
     min-width: 26rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 0.3rem #00000016, 0 6rem 2rem -2rem #00000016;
+    background: rgba(var(--foreground-color), 1);
   }
 
   #main_header {
