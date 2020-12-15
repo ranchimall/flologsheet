@@ -20,7 +20,7 @@ smButton.innerHTML = `
     color: rgba(var(--foreground-color), 1);
 }
 :host([variant='primary']) .button{
-    background: hsl(var(--hue), var(--saturation), var(--lightness));
+    background: var(--accent-color);
     color: rgba(var(--foreground-color), 1);
 }
 :host([variant='outlined']) .button{
@@ -72,7 +72,7 @@ span.ripple {
     position: absolute;
     border-radius: 50%;
     transform: scale(0);
-    border: 1.5rem solid rgba(var(--text-color), 0.2);
+    background: rgba(var(--text-color), 0.2);
 }
 :host(:not([disabled])) .button:focus{
     -webkit-box-shadow: 0 0.1rem 0.1rem rgba(0, 0, 0, 0.1), 0 0.2rem 0.8rem rgba(0, 0, 0, 0.2);
@@ -90,9 +90,6 @@ span.ripple {
     :host([variant='outlined']) .button:hover{
         -webkit-box-shadow: 0 0 0 1px rgba(var(--text-color), 0.2) inset, 0 0.1rem 0.1rem rgba(0, 0, 0, 0.1), 0 0.4rem 0.8rem rgba(0, 0, 0, 0.12);
                 box-shadow: 0 0 0 1px rgba(var(--text-color), 0.2) inset, 0 0.1rem 0.1rem rgba(0, 0, 0, 0.1), 0 0.4rem 0.8rem rgba(0, 0, 0, 0.12);
-    }
-    :host([variant="primary"]:not([disabled])) .button:hover{
-        background: hsl(var(--hue), var(--saturation), calc(var(--lightness) - 10%));
     }
 }
 @media (hover: none){
@@ -146,33 +143,6 @@ customElements.define('sm-button',
                 }))
             }
         }
-        createRipple(event){
-            const target = this.shadowRoot.querySelector('.button')
-            const ripple = target.querySelector('.ripple');
-            const circle = document.createElement("span");
-            const diameter = Math.max(target.clientWidth, target.clientHeight);
-            const radius = diameter / 2;
-            circle.style.width = circle.style.height = `${diameter}px`;
-            circle.style.left = `${event.clientX - (target.offsetLeft + radius)}px`;
-            circle.style.top = `${event.clientY - (target.offsetTop + radius)}px`;
-            circle.classList.add("ripple"); 
-            const rippleAnimation =  circle.animate([
-
-                {
-                    transform: 'scale(4)',
-                    opacity: 0
-                }
-            ],
-                {
-                    duration: 400,
-                    fill: "forwards",
-                    easing: 'ease-in'
-                })
-            target.append(circle);
-            rippleAnimation.onfinish = () => {
-                circle.remove()
-            }
-        }
 
         connectedCallback() {
             this.isDisabled = false
@@ -180,7 +150,6 @@ customElements.define('sm-button',
             if (this.hasAttribute('disabled') && !this.isDisabled)
                 this.isDisabled = true
             this.addEventListener('click', (e) => {
-                this.createRipple(e)
                 this.dispatch()
             })
             this.addEventListener('keyup', (e) => {
@@ -240,14 +209,14 @@ border: none;
 }
 .icon {
     fill: none;
-    height: 1.6em;
-    width: 1.6em;
-    padding: 0.5em;
+    height: 1.6rem;
+    width: 1.6rem;
+    padding: 0.5rem;
     stroke: rgba(var(--text-color), 0.7);
     stroke-width: 10;
     overflow: visible;
     stroke-linecap: round;
-    border-radius: 1em;
+    border-radius: 1rem;
     stroke-linejoin: round;
     cursor: pointer;
     min-width: 0;
@@ -265,9 +234,9 @@ border: none;
             align-items: center;
     text-align: left;
     position: relative;
-    gap: 1em;
-    padding: 0.7em 1em;
-    border-radius: 0.3em;
+    gap: 1rem;
+    padding: 0.7rem 1rem;
+    border-radius: 0.3rem;
     -webkit-transition: opacity 0.3s;
     -o-transition: opacity 0.3s;
     transition: opacity 0.3s;
@@ -278,7 +247,7 @@ border: none;
 }
 .input.readonly .clear{
     opacity: 0 !important;
-    margin-right: -2em;
+    margin-right: -2rem;
     pointer-events: none !important;
 }
 .readonly{
@@ -288,7 +257,7 @@ input:focus{
     caret-color: var(--accent-color);
 }
 .input:focus-within:not(.readonly){
-    background: rgba(var(--text-color), 0.1);
+    box-shadow: 0 0 0 0.1rem var(--accent-color) inset;
 }
 .disabled{
     pointer-events: none;
@@ -301,7 +270,7 @@ input:focus{
             user-select: none;
     opacity: .7;
     font-weight: 400;
-    font-size: 1em;
+    font-size: 1rem;
     position: absolute;
     top: 0;
     -webkit-transition: -webkit-transform 0.3s;
@@ -338,7 +307,7 @@ input:focus{
             flex: 1;
 }    
 input{
-    font-size: 1em;
+    font-size: 1rem;
     border: none;
     background: transparent;
     outline: none;
@@ -346,15 +315,15 @@ input{
     width: 100%;
 }
 .animate-label .container input {
-    -webkit-transform: translateY(0.6em);
-            -ms-transform: translateY(0.6em);
-        transform: translateY(0.6em);
+    -webkit-transform: translateY(0.6rem);
+            -ms-transform: translateY(0.6rem);
+        transform: translateY(0.6rem);
     }
   
 .animate-label .container .label {
-    -webkit-transform: translateY(-0.6em) scale(0.8);
-            -ms-transform: translateY(-0.6em) scale(0.8);
-        transform: translateY(-0.6em) scale(0.8);
+    -webkit-transform: translateY(-0.6rem) scale(0.8);
+            -ms-transform: translateY(-0.6rem) scale(0.8);
+        transform: translateY(-0.6rem) scale(0.8);
     opacity: 1;
     color: var(--accent-color)
 }
@@ -513,7 +482,7 @@ customElements.define('sm-input',
             this.shadowRoot.querySelector('.label').textContent = this.getAttribute('placeholder')
             if (this.hasAttribute('value')) {
                 this.input.value = this.getAttribute('value')
-                this.checkInput(e)
+                this.checkInput()
             }
             if (this.hasAttribute('required')) {
                 this.input.setAttribute('required', '')
@@ -603,14 +572,14 @@ smTextarea.innerHTML = `
 }
 .icon {
     fill: none;
-    height: 1.6em;
-    width: 1.6em;
-    padding: 0.5em;
+    height: 1.6rem;
+    width: 1.6rem;
+    padding: 0.5rem;
     stroke: rgba(var(--text-color), 0.7);
     stroke-width: 10;
     overflow: visible;
     stroke-linecap: round;
-    border-radius: 1em;
+    border-radius: 1rem;
     stroke-linejoin: round;
     cursor: pointer;
     min-width: 0;
@@ -626,8 +595,8 @@ smTextarea.innerHTML = `
         -ms-flex-align: center;
             align-items: center;
     position: relative;
-    padding: 0.7em 1em;
-    border-radius: 0.3em;
+    padding: 0.7rem 1rem;
+    border-radius: 0.3rem;
     -webkit-transition: opacity 0.3s;
     -o-transition: opacity 0.3s;
     transition: opacity 0.3s;
@@ -653,9 +622,9 @@ textarea:focus{
             user-select: none;
     opacity: .7;
     font-weight: 400;
-    font-size: 1em;
+    font-size: 1rem;
     position: absolute;
-    top: 0.9em;
+    top: 0.9rem;
     -webkit-transition: -webkit-transform 0.3s;
     transition: -webkit-transform 0.3s;
     -o-transition: transform 0.3s;
@@ -673,7 +642,7 @@ textarea:focus{
     will-change: transform;
 }   
 textarea{
-    font-size: 1em;
+    font-size: 1rem;
     border: none;
     background: transparent;
     outline: none;
@@ -683,15 +652,15 @@ textarea{
     line-height: 1.6;
 }
 .animate-label textarea {
-    -webkit-transform: translateY(0.6em);
-            -ms-transform: translateY(0.6em);
-        transform: translateY(0.6em);
+    -webkit-transform: translateY(0.6rem);
+            -ms-transform: translateY(0.6rem);
+        transform: translateY(0.6rem);
 }
   
 .animate-label .label {
-    -webkit-transform: translateY(-0.6em) scale(0.8);
-            -ms-transform: translateY(-0.6em) scale(0.8);
-        transform: translateY(-0.6em) scale(0.8);
+    -webkit-transform: translateY(-0.6rem) scale(0.8);
+            -ms-transform: translateY(-0.6rem) scale(0.8);
+        transform: translateY(-0.6rem) scale(0.8);
     opacity: 1;
     color: var(--accent-color)
 }
@@ -844,7 +813,7 @@ smTab.innerHTML = `
         white-space: nowrap;
         padding: 0.4rem 0.8rem;
         font-weight: 500;
-        word-spacing: 0.1em;
+        word-spacing: 0.1rem;
         text-align: center;
         -webkit-transition: color 0.3s;
         -o-transition: color 0.3s;
@@ -1861,6 +1830,7 @@ smStripOption.innerHTML = `
     padding: 0.4rem 0.8rem;
     cursor: pointer;
     overflow-wrap: break-word;
+    white-space: nowrap;
     outline: none;
     border-radius: 2rem;
     text-transform: capitalize;
@@ -1948,14 +1918,13 @@ smPopup.innerHTML = `
     right: 0;
     place-items: center;
     background: rgba(0, 0, 0, 0.6);
-    -webkit-transition: opacity 0.3s ease;
-    -o-transition: opacity 0.3s ease;
-    transition: opacity 0.3s ease;
+    -webkit-transition: opacity 0.3s;
+    -o-transition: opacity 0.3s;
+    transition: opacity 0.3s;
     z-index: 10;
 }
 :host(.stacked) .popup{
     -webkit-transform: scale(0.9) translateY(-2rem) !important;
-        -ms-transform: scale(0.9) translateY(-2rem) !important;
             transform: scale(0.9) translateY(-2rem) !important;
 }
 .popup{
@@ -1964,7 +1933,6 @@ smPopup.innerHTML = `
     display: flex;
     -webkit-box-orient: vertical;
     -webkit-box-direction: normal;
-        -ms-flex-direction: column;
             flex-direction: column;
     position: relative;
     -ms-flex-item-align: end;
@@ -1974,14 +1942,13 @@ smPopup.innerHTML = `
             align-items: flex-start;
     width: 100%;
     border-radius: 0.8rem 0.8rem 0 0;
-    -webkit-transform: translateY(100%);
-        -ms-transform: translateY(100%);
-            transform: translateY(100%);
+    -webkit-transform: scale(1) translateY(100%);
+            transform: scale(1) translateY(100%);
     -webkit-transition: -webkit-transform 0.3s;
     transition: -webkit-transform 0.3s;
     -o-transition: transform 0.3s;
-    transition: transform 0.3s;
     transition: transform 0.3s, -webkit-transform 0.3s;
+    transition: transform 0.3s;
     background: rgba(var(--foreground-color), 1);
     -webkit-box-shadow: 0 -1rem 2rem #00000020;
             box-shadow: 0 -1rem 2rem #00000020;
@@ -1989,7 +1956,6 @@ smPopup.innerHTML = `
 }
 .container-header{
     display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
     width: 100%;
     -webkit-box-align: center;
@@ -1998,13 +1964,11 @@ smPopup.innerHTML = `
 }
 .popup-top{
     display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
     width: 100%;
 }
 .popup-body{
     display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
     -webkit-box-orient: vertical;
     -webkit-box-direction: normal;
@@ -2031,35 +1995,32 @@ smPopup.innerHTML = `
             align-self: center;
         border-radius: 0.4rem;
         height: auto;
-        -webkit-transform: translateY(1rem);
-            -ms-transform: translateY(1rem);
-                transform: translateY(1rem);
+        -webkit-transform: scale(1) translateY(3rem);
+                transform: scale(1) translateY(3rem);
         -webkit-box-shadow: 0 3rem 2rem -0.5rem #00000040;
                 box-shadow: 0 3rem 2rem -0.5rem #00000040;
     }
 }
 @media screen and (max-width: 640px){
-.popup-top{
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-            flex-direction: column;
-    -webkit-box-align: center;
-        -ms-flex-align: center;
-            align-items: center;
-}
-.handle{
-    height: 0.3rem;
-    width: 2rem;
-    background: rgba(var(--text-color), .2);
-    border-radius: 1rem;
-    margin: 0.5rem 0;
-}
+    .popup-top{
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+                flex-direction: column;
+        -webkit-box-align: center;
+                align-items: center;
+    }
+    .handle{
+        height: 0.3rem;
+        width: 2rem;
+        background: rgba(var(--text-color), .2);
+        border-radius: 1rem;
+        margin: 0.5rem 0;
+    }
 }
 </style>
 <div part="background" class="popup-container hide" role="dialog">
     <div part="popup" class="popup">
-        <div class="popup-top">
+        <div part="popup-header" class="popup-top">
             <div class="handle"></div>
             <slot name="header"></slot>
         </div>
@@ -2111,7 +2072,7 @@ customElements.define('sm-popup', class extends HTMLElement {
             this.pinned = pinned
         }
         this.popupContainer.classList.remove('hide')
-        this.popup.style.transform = 'translateY(0)';
+        this.popup.style.transform = 'none';
         document.body.setAttribute('style', `overflow: hidden; top: -${window.scrollY}px`)
         return this.popupStack
     }
@@ -2119,7 +2080,7 @@ customElements.define('sm-popup', class extends HTMLElement {
         if (window.innerWidth < 640)
             this.popup.style.transform = 'translateY(100%)';
         else
-            this.popup.style.transform = 'translateY(1rem)';
+            this.popup.style.transform = 'translateY(3rem)';
         this.popupContainer.classList.add('hide')
         this.removeAttribute('open')
         if (typeof this.popupStack !== 'undefined') {
@@ -2998,9 +2959,9 @@ smMenu.innerHTML = `
 .moveUp{
     top: auto;
     bottom: 100%;
-    -webkit-transform: translateY(1rem);
-        -ms-transform: translateY(1rem);
-            transform: translateY(1rem);
+    -webkit-transform: translateY(3rem);
+        -ms-transform: translateY(3rem);
+            transform: translateY(3rem);
 }
 .moveLeft{
     left: auto;

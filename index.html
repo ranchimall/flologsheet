@@ -1078,7 +1078,7 @@
 
         function createSheet() {
             try {
-                let title = sheetTitleInput.value.trim().replace(" ", "_");
+                let title = sheetTitleInput.value.trim().replace(/ /g, "_");
                 let description = sheetDescriptionInput.value.trim();
                 let columns = []
                 let editors = []
@@ -1221,6 +1221,8 @@
         }
         function createCell(text){
             let cell = document.createElement('td')
+            /*if(text.split(/,|:| /).length > 5)
+                cell.classList.add('text-field')*/
             cell.textContent = text
             return cell
         }

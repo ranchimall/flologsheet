@@ -725,6 +725,11 @@ td {
   opacity: 0.9;
 }
 
+.text-field {
+  min-width: 20ch;
+  max-width: 30ch;
+}
+
 .grade-input {
   width: 10ch;
 }
