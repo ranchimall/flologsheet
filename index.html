@@ -434,7 +434,7 @@
 
         #sheet-list {
             display: flex;
-            max-width: 100%;
+            max-width: calc(100vw - 24rem);
             overflow-x: auto;
             margin-right: 1rem;
         }
@@ -756,7 +756,7 @@
 
     //Required for blockchain API operators
     apiURL: {
-      FLO: ['https://explorer.mediciland.com/', 'https://livenet.flocha.in/', 'https://flosight.duckdns.org/', 'http://livenet-explorer.floexperiments.com/'],
+      FLO: ['https://explorer.mediciland.com/', 'https://flosight1.duckdns.org/', 'http://livenet-explorer.floexperiments.com/'],
       FLO_TEST: ['https://testnet-flosight.duckdns.org/', 'https://testnet.flocha.in/']
     },
     adminID: "FRaBr5F665RVkQ1A1EYrMfbX2UF52vWjKr",
@@ -1228,14 +1228,14 @@
         function enterLog() {
             let title = document.getElementById("sheet-details").children[0].textContent;
             let form = document.forms['new-log'],
-                allFormElements = form.querySelectorAll('input')
+                allFormElements = document.querySelectorAll('input[form="new-log"]')
                 allFormElements.forEach(element => element.disabled = true)
-            if (form[0].tagName === 'INPUT') {
-                let floID = form[0].value;
-                let log = []
-                for (let i = 1; i < form.length - 1; i++)
+                if (form[0].tagName === 'INPUT') {
+                    let floID = form[0].value;
+                    let log = []
+                    for (let i = 1; i < form.length - 1; i++)
                     log.push(form[i].value)
-                logSheet.enterLog(title, floID, log).then(result => {
+                    logSheet.enterLog(title, floID, log).then(result => {
                     allFormElements.forEach(element => element.disabled = false)
                     form.reset();
                     showMessage('Log Entry Successful')
