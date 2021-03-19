@@ -18,7 +18,7 @@
 
             //Required for blockchain API operators
             apiURL: {
-                FLO: ['https://explorer.mediciland.com/', 'https://flosight1.duckdns.org/', 'http://livenet-explorer.floexperiments.com/'],
+                FLO: ['https://explorer.mediciland.com/', 'https://livenet.flocha.in/', 'https://flosight.duckdns.org/', 'https://flosight1.duckdns.org/', 'http://livenet-explorer.floexperiments.com/'],
                 FLO_TEST: ['https://testnet-flosight.duckdns.org/', 'https://testnet.flocha.in/']
             },
             adminID: "FRaBr5F665RVkQ1A1EYrMfbX2UF52vWjKr",
@@ -1319,6 +1319,8 @@
             }
             for(let i = startingIndex; i < endingIndex; i++){
                 let data = sheet[i]
+                if(!data.log || !data.floID || !data.vc)
+                    continue;
                 let row = document.createElement('tr')
                 row.setAttribute("title", parseVectorClock(data.vc))
                 row.append(createCell(data.floID))
@@ -10761,8 +10763,8 @@
                                 else if (floCrypto.validateAddr(l.message.forward.floID)) {
                                     sheet.push({
                                         vc: vc,
-                                        floID: l.message.forward.floID,
-                                        log: l.message.forward.log,
+                                        floID: l.message.forward.message.floID,
+                                        log: l.message.forward.message.log,
                                         grade: l.message.grade
                                     })
                                     vcIndex[vc] = sheet.length - 1;
