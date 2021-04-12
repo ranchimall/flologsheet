@@ -18,7 +18,7 @@
 
             //Required for blockchain API operators
             apiURL: {
-                FLO: ['https://explorer.mediciland.com/', 'https://livenet.flocha.in/', 'https://flosight.duckdns.org/', 'https://flosight1.duckdns.org/', 'http://livenet-explorer.floexperiments.com/'],
+                FLO: ['https://livenet.flocha.in/'],
                 FLO_TEST: ['https://testnet-flosight.duckdns.org/', 'https://testnet.flocha.in/']
             },
             adminID: "FRaBr5F665RVkQ1A1EYrMfbX2UF52vWjKr",
@@ -153,7 +153,7 @@
             </div>
             <sm-button id="sign_out_btn" onclick="signOut()">Sign out</sm-button>
         </section>
-        <section>            
+        <section>
             <h4>Theme</h4>
             <div class="flex align-center space-between">
                 <p>Turn dark theme on/off.</p>
@@ -190,7 +190,7 @@
                 <sm-input id="add_detail_value_input" exclude placeholder="Value"></sm-input>
                 <svg class="icon" onclick="addDetails()" viewBox="0 0 64 64">
                     <title>Add detail</title>
-                    <polyline points="0.35 31.82 21.45 52.98 63.65 10.66"/>
+                    <polyline points="0.35 31.82 21.45 52.98 63.65 10.66" />
                 </svg>
             </div>
         </div>
@@ -222,7 +222,7 @@
                 <sm-input id="add_column_input" exclude placeholder="Column title"></sm-input>
                 <svg class="icon" onclick="addColumn()" viewBox="0 0 64 64">
                     <title>Add this column</title>
-                    <polyline points="0.35 31.82 21.45 52.98 63.65 10.66"/>
+                    <polyline points="0.35 31.82 21.45 52.98 63.65 10.66" />
                 </svg>
             </div>
         </div>
@@ -240,7 +240,7 @@
                 <sm-input id="add_editor_input" exclude placeholder="Editor's FLO Address"></sm-input>
                 <svg class="icon" onclick="addEditor()" viewBox="0 0 64 64">
                     <title>Add this editor</title>
-                    <polyline points="0.35 31.82 21.45 52.98 63.65 10.66"/>
+                    <polyline points="0.35 31.82 21.45 52.98 63.65 10.66" />
                 </svg>
             </div>
         </div>
@@ -281,9 +281,9 @@
             <div class="info">
                 <h4>RanchiMall</h4>
                 <h1>LogSheet</h1>
-                <p>Open &bull; Distributed &bull; Reliable</p>  
+                <p>Open &bull; Distributed &bull; Reliable</p>
             </div>
-            <div class="sign-in-box flex direction-column"> 
+            <div class="sign-in-box flex direction-column">
                 <sm-tab-header target="user_entry">
                     <sm-tab>Sign In</sm-tab>
                     <sm-tab>Sign Up</sm-tab>
@@ -292,8 +292,9 @@
                     <sm-panel>
                         <h3>Welcome back</h3>
                         <p>Just enter your FLO private key to continue.</p>
-                        <form action="" onsubmit="return false">        
-                            <sm-input id="get_priv_key_field" privateKey placeholder="FLO Private Key" type="password" required animate>
+                        <form action="" onsubmit="return false">
+                            <sm-input id="get_priv_key_field" privateKey placeholder="FLO Private Key" type="password"
+                                required animate>
                             </sm-input>
                             <button id="sign_in_btn" class="primary-btn expand" type="submit" disabled>
                                 Sign In
@@ -302,8 +303,10 @@
                     </sm-panel>
                     <sm-panel>
                         <h3>Get started</h3>
-                        <p>Create your FLO public and private key pair. <Strong>Don't forget to store them securely!</Strong></p>
-                        <sm-button id="generate_flo_id" onclick="generateId()" variant="primary">Get FLO credentials</sm-button>
+                        <p>Create your FLO public and private key pair. <Strong>Don't forget to store them
+                                securely!</Strong></p>
+                        <sm-button id="generate_flo_id" onclick="generateId()" variant="primary">Get FLO credentials
+                        </sm-button>
                         <section id="credentials_section" class="hide-completely">
                             <h5>FLO ID</h5>
                             <div class="copy-row">
@@ -356,10 +359,11 @@
                 <div class="flex align-center">
                     <svg class="icon hide-on-desktop" onclick="toggleSideBar()" viewBox="0 0 64 64">
                         <title>Go back to sheet</title>
-                        <polyline points="48.01 0.35 16.35 32 48.01 63.65"/>
+                        <polyline points="48.01 0.35 16.35 32 48.01 63.65" />
                     </svg>
                     <h4 class="section-header">People</h4>
-                    <sm-button class="small sub-admin-option justify-right" onclick="showPopup('add_person_popup')">Add person</sm-button>
+                    <sm-button class="small sub-admin-option justify-right" onclick="showPopup('add_person_popup')">Add
+                        person</sm-button>
                 </div>
                 <div id="people_container" class="grid"></div>
             </nav>
@@ -368,7 +372,7 @@
                     <div class="flex align-center">
                         <svg class="icon" onclick="showPage('home_page')" id="go_to_home" viewBox="0 0 64 64">
                             <title>Go back to homepage</title>
-                            <polyline points="48.01 0.35 16.35 32 48.01 63.65"/>
+                            <polyline points="48.01 0.35 16.35 32 48.01 63.65" />
                         </svg>
                         <h5>Sheets</h5>
                         <sm-button class="small justify-right" onclick="showPopup('group_by')">Group by</sm-button>
@@ -376,22 +380,25 @@
                     <div class="flex align-center">
                         <svg class="icon" onclick="toggleSideBar()" viewBox="0 0 64 64">
                             <title>Reveal/hide side bar</title>
-                            <line y1="18.5" x2="64" y2="18.5"/>
-                            <line y1="45.5" x2="42" y2="45.5"/>
+                            <line y1="18.5" x2="64" y2="18.5" />
+                            <line y1="45.5" x2="42" y2="45.5" />
                         </svg>
                         <h3 id="sheet_heading"></h3>
                         <h5 id="sheet_type"></h5>
-                        <svg id="toggle_details" class="icon justify-right" onclick="toggleDetails()" viewBox="0 0 64 64">
+                        <svg id="toggle_details" class="icon justify-right" onclick="toggleDetails()"
+                            viewBox="0 0 64 64">
                             <title>expand/collapse</title>
-                            <polyline points="63.65 15.99 32 47.66 0.35 15.99"/>
+                            <polyline points="63.65 15.99 32 47.66 0.35 15.99" />
                         </svg>
                     </div>
                     <div id="sheet_editors" class="flex align-center"></div>
                     <p id="sheet_description"></p>
                 </section>
                 <div id="sheet_container">
-                    <table>                        
-                        <thead><tr></tr></thead>
+                    <table>
+                        <thead>
+                            <tr></tr>
+                        </thead>
                         <tbody></tbody>
                     </table>
                 </div>
@@ -480,16 +487,16 @@
 
         document.addEventListener('popupclosed', e => {
             let popup = e.detail.popup
-            switch(popup.id){
+            switch (popup.id) {
                 case 'new_sheet_popup':
                     columnsContainer.innerHTML = ''
                     editorsContainer.innerHTML = ''
-                break;
+                    break;
             }
         })
 
         const loaderPage = document.getElementById('main_loader'),
-                mainHeader = document.getElementById('main_header')
+            mainHeader = document.getElementById('main_header')
         function showLoader() {
             document.body.classList.remove('hide-completely')
             loaderPage.classList.remove('hide-completely')
@@ -525,7 +532,7 @@
         function notify(message, mode, pinned, sound) {
             if (mode === 'error')
                 console.error(message)
-            else if(mode === 'warn')
+            else if (mode === 'warn')
                 console.warn(message)
             else
                 console.log(message)
@@ -663,48 +670,48 @@
             document.addEventListener('input', e => {
                 if (e.target.closest('sm-input')) {
                     let input = e.target.closest('sm-input')
-                    if(!input.closest('sm-popup') && !input.closest('form')) return
+                    if (!input.closest('sm-popup') && !input.closest('form')) return
                     formValidation(input)
-                    if(input.value === '')
+                    if (input.value === '')
                         input.setValidity('')
                     let validityState = input.validity
-                    if(input.hasAttribute('type') && input.getAttribute('type') === 'number'){
-                        if(validityState.rangeUnderflow){
+                    if (input.hasAttribute('type') && input.getAttribute('type') === 'number') {
+                        if (validityState.rangeUnderflow) {
                             input.setValidity('Minium ₹1 should be entered.')
                         }
-                        else if(validityState.typeMismatch){
+                        else if (validityState.typeMismatch) {
                             input.setValidity('Only digits are allowed.')
                         }
-                        else{
+                        else {
                             input.setValidity('')
                         }
                     }
                     else if (input.hasAttribute('floId')) {
                         if (floCrypto.validateAddr(input.value.trim()) || input.value.trim() === '')
-                            input.setValidity('') 
+                            input.setValidity('')
                         else
-                            input.setValidity('Invalid FLO address.')   
+                            input.setValidity('Invalid FLO address.')
                     }
                     else if (input.hasAttribute('privateKey')) {
                         if (floCrypto.getPubKeyHex(input.value.trim()) || input.value.trim() === '')
                             input.setValidity('')
                         else
-                            input.setValidity('Invalid FLO private key!')   
+                            input.setValidity('Invalid FLO private key!')
                     }
-                    else{
-                        if(validityState.patternMismatch)
-                            input.setValidity('Invalid UPI address.') 
-                        if(validityState.tooShort || validityState.tooLong)
-                            input.setValidity('UPI transaction Id should be 12 digits long.') 
+                    else {
+                        if (validityState.patternMismatch)
+                            input.setValidity('Invalid UPI address.')
+                        if (validityState.tooShort || validityState.tooLong)
+                            input.setValidity('UPI transaction Id should be 12 digits long.')
                         else
-                            input.setValidity('') 
+                            input.setValidity('')
                     }
                 }
             })
             document.addEventListener('keyup', (e) => {
                 if (e.target.closest('sm-input')) {
                     if (e.key === 'Enter') {
-                        let parent = e.target.closest('sm-popup') || e.target.closest('form') 
+                        let parent = e.target.closest('sm-popup') || e.target.closest('form')
                         parent.querySelector("button[type='submit']")
                             .click();
                     }
@@ -713,32 +720,32 @@
             let currentTableHeader
             document.addEventListener('click', e => {
                 try {
-                    if(e.target.closest('#add_new_sheet'))
+                    if (e.target.closest('#add_new_sheet'))
                         showPopup('new_sheet_popup')
                     else if (e.target.closest('.sheet-card'))
                         viewSheet(e.target.closest('.sheet-card').dataset.name)
                     else if (e.target.closest(".person-card"))
                         copyToLogInput(e.target.closest(".person-card").dataset.floId)
-                    else if (e.target.closest("th")){
+                    else if (e.target.closest("th")) {
                         let trgt = e.target.closest('th')
-                        if(currentTableHeader && currentTableHeader !== trgt)
+                        if (currentTableHeader && currentTableHeader !== trgt)
                             currentTableHeader.classList.remove('ascending', 'descending')
                         sortTable(trgt.cellIndex, trgt.classList.contains('descending'))
-                        if(trgt.classList.contains('descending'))
+                        if (trgt.classList.contains('descending'))
                             trgt.classList.add('ascending')
                         else
                             trgt.classList.remove('ascending')
                         trgt.classList.toggle('descending')
                         currentTableHeader = trgt
                     }
-                    else if(e.target.closest('h4')){
+                    else if (e.target.closest('h4')) {
                         createRipple(e)
                     }
                 } catch (error) {
                     //do nothing
                 }
             })
-            function createRipple(event){
+            function createRipple(event) {
                 const target = event.target.closest('h4')
                 const ripple = target.querySelector('.ripple');
                 if (ripple) {
@@ -753,7 +760,7 @@
                 circle.style.width = circle.style.height = `${diameter}px`;
                 circle.style.left = `${event.clientX - radius}px`;
                 circle.style.top = `${event.clientY - radius}px`;
-                circle.classList.add("ripple"); 
+                circle.classList.add("ripple");
                 target.append(circle);
                 circle.onanimationend = () => {
                     target.style.overflow = ogOverflow
@@ -761,8 +768,8 @@
             }
             const observer = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
-                    if(entry.isIntersecting){
-                        let {title, description, editors, attributes, sheet, isWriteable, isSubAdmin} = floGlobals.currentSheet
+                    if (entry.isIntersecting) {
+                        let { title, description, editors, attributes, sheet, isWriteable, isSubAdmin } = floGlobals.currentSheet
                         renderSheetView(title, description, editors, attributes, sheet, isWriteable, isSubAdmin, true, true)
                         observer.disconnect()
                     }
@@ -770,21 +777,21 @@
             })
             const watchLastElement = new MutationObserver(mutations => {
                 mutations.forEach(mutation => {
-                    if(mutation.addedNodes.length){
+                    if (mutation.addedNodes.length) {
                         observer.observe(mutation.addedNodes[mutation.addedNodes.length - 1])
                     }
-                })  
+                })
             })
-            watchLastElement.observe(tableBody, {childList: true, subtree: true})
+            watchLastElement.observe(tableBody, { childList: true, subtree: true })
 
-            document.getElementById('search_sheets').addEventListener('input', function() {
-                if(this.value.trim !== ''){
-                    for(child of sheetsContainer.children) {
-                        if(child.id === 'add_new_sheet') continue
-                        if(child.dataset.name.toUpperCase().indexOf(this.value.toUpperCase()) > -1){
+            document.getElementById('search_sheets').addEventListener('input', function () {
+                if (this.value.trim !== '') {
+                    for (child of sheetsContainer.children) {
+                        if (child.id === 'add_new_sheet') continue
+                        if (child.dataset.name.toUpperCase().indexOf(this.value.toUpperCase()) > -1) {
                             child.classList.remove('hide-completely')
                         }
-                        else{
+                        else {
                             child.classList.add('hide-completely')
                         }
                     }
@@ -792,17 +799,17 @@
             })
         })
 
-        function removeUnderscore(word){
+        function removeUnderscore(word) {
             return word.replace(/_/g, ' ')
         }
 
         const render = {
-            sheetCard(sheetName, editors){
+            sheetCard(sheetName, editors) {
                 let card = document.createElement('div'),
                     type = 'Public'
                 card.classList.add('sheet-card')
                 card.setAttribute('data-name', sheetName)
-                if(editors)
+                if (editors)
                     type = 'Private'
                 card.innerHTML = `
                     <div class="card">
@@ -812,9 +819,9 @@
                 `
                 return card
             },
-            personCard(floId, details){
+            personCard(floId, details) {
                 let card = document.createElement('div'),
-                    {name} = details
+                    { name } = details
                 card.classList.add('person-card')
                 setAttributes(card, {
                     'data-flo-id': floId,
@@ -827,7 +834,7 @@
                 `
                 return card
             },
-            editorCard(floId){
+            editorCard(floId) {
                 let card = document.createElement('div')
                 card.classList.add('editor-card', 'flex', 'space-between', 'align-center')
                 setAttributes(card, {
@@ -843,7 +850,7 @@
                 `
                 return card
             },
-            columnCard(title){
+            columnCard(title) {
                 let card = document.createElement('div')
                 card.classList.add('column-card', 'flex', 'space-between', 'align-center')
                 setAttributes(card, {
@@ -859,7 +866,7 @@
                 `
                 return card
             },
-            detailsCard(type, value){
+            detailsCard(type, value) {
                 let card = document.createElement('div')
                 card.classList.add('details-card', 'grid', 'align-center')
                 setAttributes(card, {
@@ -881,14 +888,14 @@
 
         const sheetDetails = document.getElementById('sheet_details')
         const sheetPage = document.getElementById('sheet_page')
-        
+
         const addEditorInput = document.getElementById('add_editor_input')
         const specifyEditors = document.getElementById('specify_editors')
         const editorsContainer = document.getElementById('editors_container')
-        
+
         const addColumnInput = document.getElementById('add_column_input')
         const columnsContainer = document.getElementById('columns_container')
-        
+
         const additionalFields = document.getElementById('additional_fields')
         const personFloIdInput = document.getElementById('person_flo_id_input')
         const personNameInput = document.getElementById('person_name_input')
@@ -896,21 +903,21 @@
         const addDetailValueInput = document.getElementById('add_detail_value_input')
 
 
-        
-        function addEditor(){
+
+        function addEditor() {
             let address = addEditorInput.value.trim()
-            if(address === '') return;
-            if(floCrypto.validateAddr(address)){
+            if (address === '') return;
+            if (floCrypto.validateAddr(address)) {
                 editorsContainer.append(render.editorCard(address))
                 addEditorInput.value = ''
             }
-            else{
+            else {
                 notify('Invalid editor FLO address', 'error')
             }
         }
-        function addColumn(){
+        function addColumn() {
             let columnTitle = addColumnInput.value.trim()
-            if(columnTitle !== ''){
+            if (columnTitle !== '') {
                 columnsContainer.append(render.columnCard(columnTitle))
                 addColumnInput.value = ''
 
@@ -919,10 +926,10 @@
                 notify("Column name should be specified.", 'error')
         }
 
-        function addDetails(){
+        function addDetails() {
             let type = addDetailTypeInput.value.trim()
             let value = addDetailValueInput.value.trim()
-            if(type !== '' && value !== ''){
+            if (type !== '' && value !== '') {
                 additionalFields.append(render.detailsCard(type, value))
                 addDetailTypeInput.value = ''
                 addDetailValueInput.value = ''
@@ -930,22 +937,22 @@
             else
                 notify('Please enter both type and value', 'error')
         }
-        
-        function toggleDetails(){
+
+        function toggleDetails() {
             sheetDetails.classList.toggle('collapse')
         }
-        function toggleSideBar(){
+        function toggleSideBar() {
             sheetPage.classList.toggle('toggle-side-bar')
         }
-        function toggleEditors(){
+        function toggleEditors() {
             specifyEditors.classList.toggle('hide-completely')
         }
 
         const allPages = document.querySelectorAll('.page')
-        function showPage(page){
+        function showPage(page) {
             allPages.forEach(page => page.classList.add('hide-completely'))
             document.getElementById(page).classList.remove('hide-completely')
-            if(page === 'home_page'){
+            if (page === 'home_page') {
                 tableBody.innerHTML = ''
                 sheetHeading.textContent = ''
                 sheetType.textContent = ''
@@ -956,15 +963,15 @@
                 mainHeader.classList.add('hide-completely')
         }
 
-        const   credentialsSection = document.getElementById('credentials_section'),
-                generateFloId = document.getElementById('generate_flo_id'),
-                generatedId = document.getElementById('generated_id'),
-                generatedKey = document.getElementById('generated_key')
+        const credentialsSection = document.getElementById('credentials_section'),
+            generateFloId = document.getElementById('generate_flo_id'),
+            generatedId = document.getElementById('generated_id'),
+            generatedKey = document.getElementById('generated_key')
 
-        function generateId(){
+        function generateId() {
             generateFloId.classList.add('hide-completely')
             credentialsSection.classList.remove('hide-completely')
-            let {floID, privKey} = floCrypto.generateNewID()
+            let { floID, privKey } = floCrypto.generateNewID()
             generatedId.textContent = floID
             generatedKey.textContent = privKey
         }
@@ -1072,9 +1079,9 @@
             }
         }
 
-        const   sheetTitleInput = document.getElementById('sheet_title_input'),
-                sheetDescriptionInput = document.getElementById('sheet_description_input'),
-                sheetTypeSwitch = document.getElementById('sheet_type_switch')
+        const sheetTitleInput = document.getElementById('sheet_title_input'),
+            sheetDescriptionInput = document.getElementById('sheet_description_input'),
+            sheetTypeSwitch = document.getElementById('sheet_type_switch')
 
         function createSheet() {
             try {
@@ -1083,19 +1090,19 @@
                 let columns = []
                 let editors = []
                 columnsContainer.querySelectorAll('.column-title').forEach(column => columns.push(column.textContent))
-                if(!columns.length){
+                if (!columns.length) {
                     notify('Every LogSheet should contain atleast 1 column.', 'error')
                     return
                 }
                 editorsContainer.querySelectorAll('.editor-address').forEach(editor => editors.push(editor.textContent))
-                if(!sheetTypeSwitch.checked)
+                if (!sheetTypeSwitch.checked)
                     editors = null;
                 else
-                    if(!editors.length)
+                    if (!editors.length)
                         editors = floGlobals.subAdmins;
                 logSheet.createNewSheet(title, description, columns, editors)
                 let sheet = {}
-                sheet[title] = {editors}
+                sheet[title] = { editors }
                 renderSheetList(sheet)
                 hidePopup()
                 notify(`Created New Sheet: ${title}`)
@@ -1117,13 +1124,13 @@
             let title = floGlobals.currentSheet.title;
             let form = document.forms['new-log'],
                 allFormElements = document.querySelectorAll('input[form="new-log"]')
-                allFormElements.forEach(element => element.disabled = true)
-                if (form[0].tagName === 'INPUT') {
-                    let floID = form[0].value;
-                    let log = []
-                    for (let i = 1; i < form.length - 1; i++)
+            allFormElements.forEach(element => element.disabled = true)
+            if (form[0].tagName === 'INPUT') {
+                let floID = form[0].value;
+                let log = []
+                for (let i = 1; i < form.length - 1; i++)
                     log.push(form[i].value)
-                    logSheet.enterLog(title, floID, log).then(result => {
+                logSheet.enterLog(title, floID, log).then(result => {
                     allFormElements.forEach(element => element.disabled = false)
                     form.reset();
                     notify('Log entry successful', 'success')
@@ -1186,16 +1193,16 @@
         function renderPersonList(personList = {}) {
             for (person in personList)
                 frag.append(render.personCard(person, personList[person]))
-            peopleContainer.append(frag)           
+            peopleContainer.append(frag)
         }
 
         const sheetsContainer = document.getElementById("sheets_container")
         function renderSheetList(sheetList) {
             console.log(sheetList)
-            for(sheet in sheetList){
+            for (sheet in sheetList) {
                 frag.append(render.sheetCard(sheet, sheetList[sheet].editors))
             }
-            if(floGlobals.subAdmins.includes(myFloID) && !document.getElementById('add_new_sheet')){
+            if (floGlobals.subAdmins.includes(myFloID) && !document.getElementById('add_new_sheet')) {
                 let firstCard = document.createElement('div')
                 firstCard.id = 'add_new_sheet'
                 firstCard.classList.add('sheet-card')
@@ -1208,18 +1215,18 @@
                         </svg>
                     </div>
                     <h4>Add new sheet</h4>
-                ` 
+                `
                 frag.prepend(firstCard)
             }
             sheetsContainer.append(frag)
         }
 
-        function createTh(text){
+        function createTh(text) {
             let cell = document.createElement('th')
             cell.textContent = text
             return cell
         }
-        function createCell(text){
+        function createCell(text) {
             let cell = document.createElement('td')
             /*if(text.split(/,|:| /).length > 5)
                 cell.classList.add('text-field')*/
@@ -1227,27 +1234,27 @@
             return cell
         }
 
-        const   sheetContainer = document.getElementById('sheet_container'),
-                sheetHeading = document.getElementById('sheet_heading'),
-                sheetType = document.getElementById('sheet_type'),
-                sheetDescription = document.getElementById('sheet_description'),
-                sheetEditors = document.getElementById('sheet_editors'),
-                tableHeader = sheetContainer.firstElementChild.firstElementChild,
-                tableBody = sheetContainer.firstElementChild.children[1]
+        const sheetContainer = document.getElementById('sheet_container'),
+            sheetHeading = document.getElementById('sheet_heading'),
+            sheetType = document.getElementById('sheet_type'),
+            sheetDescription = document.getElementById('sheet_description'),
+            sheetEditors = document.getElementById('sheet_editors'),
+            tableHeader = sheetContainer.firstElementChild.firstElementChild,
+            tableBody = sheetContainer.firstElementChild.children[1]
         let startingIndex = 0,
             endingIndex = 0
 
         function renderSheetView(title, description, editors, attributes, sheet, isWriteable, isSubAdmin, onlyRenderTable = false, lazyLoad = false) {
-            if(!lazyLoad)
-            floGlobals.currentSheet = {
-                title,
-                description,
-                editors,
-                attributes,
-                sheet,
-                isWriteable,
-                isSubAdmin,
-            }
+            if (!lazyLoad)
+                floGlobals.currentSheet = {
+                    title,
+                    description,
+                    editors,
+                    attributes,
+                    sheet,
+                    isWriteable,
+                    isSubAdmin,
+                }
             const parseVectorClock = (vc) => {
                 vc = vc.split('_')
                 let time = new Date(parseInt(vc[0])).toString().slice(4, 24);
@@ -1275,19 +1282,19 @@
                 }
                 return gradeField
             }
-            if(lazyLoad){
+            if (lazyLoad) {
                 startingIndex = sheet.length > endingIndex ? endingIndex : sheet.length
-                endingIndex = sheet.length - endingIndex > 20 ? endingIndex + 20 : sheet.length 
-            }else{
+                endingIndex = sheet.length - endingIndex > 20 ? endingIndex + 20 : sheet.length
+            } else {
                 startingIndex = 0
-                endingIndex = sheet.length > 20 ? 20 : sheet.length 
+                endingIndex = sheet.length > 20 ? 20 : sheet.length
             }
-            if(!onlyRenderTable){
+            if (!onlyRenderTable) {
                 //Add Sheet Details
                 sheetHeading.textContent = removeUnderscore(title);
-                if(editors){
+                if (editors) {
                     sheetType.textContent = 'Private'
-                    editors.forEach(editor =>{
+                    editors.forEach(editor => {
                         let card = document.createElement('div')
                         card.className = 'editor'
                         card.textContent = editor;
@@ -1296,7 +1303,7 @@
                     sheetEditors.innerHTML = 'Maintained by: '
                     sheetEditors.append(frag)
                 }
-                else{
+                else {
                     sheetType.textContent = 'Public'
                     sheetEditors.innerHTML = ''
                 }
@@ -1313,13 +1320,13 @@
                     attributes.forEach(a => row.insertCell().innerHTML = `<input form="new-log" class="log-input" type="text">`);
                 }
             }
-            if(onlyRenderTable){
-                if(!lazyLoad)
+            if (onlyRenderTable) {
+                if (!lazyLoad)
                     tableBody.innerHTML = ''
             }
-            for(let i = startingIndex; i < endingIndex; i++){
+            for (let i = startingIndex; i < endingIndex; i++) {
                 let data = sheet[i]
-                if(!data.log || !data.floID || !data.vc)
+                if (!data.log || !data.floID || !data.vc)
                     continue;
                 let row = document.createElement('tr')
                 row.setAttribute("title", parseVectorClock(data.vc))
@@ -1331,7 +1338,7 @@
                 frag.append(row)
             }
             tableBody.append(frag)
-            if(!onlyRenderTable){
+            if (!onlyRenderTable) {
                 //Add options for groupBy 
                 document.getElementById('group_by_title').textContent = `Group ${removeUnderscore(title)} by`;
                 document.getElementById('group_by_view').innerHTML =
@@ -1363,10 +1370,10 @@
 
         function sortTable(n, ascending) {
             console.log(n)
-            if(ascending){
-                if(n === 0)
+            if (ascending) {
+                if (n === 0)
                     floGlobals.currentSheet.sheet.sort((a, b) => a.floID.toLowerCase().localeCompare(b.floID.toLowerCase()))
-                else if(n === 1)
+                else if (n === 1)
                     floGlobals.currentSheet.sheet.sort((a, b) => {
                         if (a.grade === b.grade) {
                             return 0;
@@ -1377,9 +1384,9 @@
                     })
                 else
                     floGlobals.currentSheet.sheet.sort((a, b) => {
-                        if(isNaN(a.log[n-2])){
-                            let x = (a.log[n-2]) ? a.log[n-2].toLowerCase() : a.log[n-2]                           
-                            let y = (b.log[n-2]) ? b.log[n-2].toLowerCase() : b.log[n-2]                             
+                        if (isNaN(a.log[n - 2])) {
+                            let x = (a.log[n - 2]) ? a.log[n - 2].toLowerCase() : a.log[n - 2]
+                            let y = (b.log[n - 2]) ? b.log[n - 2].toLowerCase() : b.log[n - 2]
                             if (x === y) {
                                 return 0;
                             }
@@ -1388,12 +1395,12 @@
                             }
                         }
                         else
-                            return a.log[n-2] - b.log[n-2]
+                            return a.log[n - 2] - b.log[n - 2]
                     })
-            }else{
-                if(n === 0)
+            } else {
+                if (n === 0)
                     floGlobals.currentSheet.sheet.sort((a, b) => b.floID.toLowerCase().localeCompare(a.floID.toLowerCase()))
-                else if(n === 1)
+                else if (n === 1)
                     floGlobals.currentSheet.sheet.sort((a, b) => {
                         if (a.grade === b.grade) {
                             return 0;
@@ -1404,9 +1411,9 @@
                     })
                 else
                     floGlobals.currentSheet.sheet.sort((a, b) => {
-                        if(isNaN(a.log[n-2])){
-                            let x = (a.log[n-2]) ? a.log[n-2].toLowerCase() : a.log[n-2]                           
-                            let y = (b.log[n-2]) ? b.log[n-2].toLowerCase() : b.log[n-2]                           
+                        if (isNaN(a.log[n - 2])) {
+                            let x = (a.log[n - 2]) ? a.log[n - 2].toLowerCase() : a.log[n - 2]
+                            let y = (b.log[n - 2]) ? b.log[n - 2].toLowerCase() : b.log[n - 2]
                             if (x === y) {
                                 return 0;
                             }
@@ -1415,10 +1422,10 @@
                             }
                         }
                         else
-                            return b.log[n-2] - a.log[n-2]
+                            return b.log[n - 2] - a.log[n - 2]
                     })
-            }    
-            let {title, description, editors, attributes, sheet, isWriteable, isSubAdmin} = floGlobals.currentSheet
+            }
+            let { title, description, editors, attributes, sheet, isWriteable, isSubAdmin } = floGlobals.currentSheet
             renderSheetView(title, description, editors, attributes, sheet, isWriteable, isSubAdmin, true, false)
         }
     </script>
@@ -10351,7 +10358,7 @@
                                             return reject("Invalid Private Key")
                                         privKey = result;
                                     }).catch(error => {
-                                            console.log(error, "Generating Random Keys")
+                                        console.log(error, "Generating Random Keys")
                                         privKey = floCrypto.generateNewID().privKey
                                     }).finally(_ => {
                                         var threshold = floCrypto.randInt(10, 20)
