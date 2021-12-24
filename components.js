@@ -565,7 +565,6 @@ smTextarea.innerHTML = `
 }
 :host{
     display: grid;
-    --accent-color: #4d2588;
     --text-color: 17, 17, 17;
     --background-color: 255, 255, 255;
     --danger-color: red;
