@@ -425,7 +425,7 @@ customElements.define('sm-input',
         showValidity = () => {
             this.feedbackText.classList.remove('hide-completely')
         }
-        
+
         hideValidity = () => {
             this.feedbackText.classList.add('hide-completely')
         }
@@ -549,7 +549,9 @@ customElements.define('sm-input',
 const smTextarea = document.createElement('template')
 smTextarea.innerHTML = `
 <style>
-*{
+*,
+*::before,
+*::after { 
     padding: 0;
     margin: 0;
     -webkit-box-sizing: border-box;
@@ -558,130 +560,100 @@ smTextarea.innerHTML = `
 ::-moz-focus-inner{
     border: none;
 }
-:host{
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-}
 .hide{
-   opacity: 0 !important;
-   pointer-events: none !important;
+    opacity: 0 !important;
 }
-.hide-completely{
-    display: none;
+:host{
+    display: grid;
+    --text-color: 17, 17, 17;
+    --background-color: 255, 255, 255;
+    --danger-color: red;
+    --border-radius: 0.3rem;
+    --background: rgba(var(--text-color), 0.06);
+    --padding: initial;
+    --max-height: 8rem;
 }
-.icon {
-    fill: none;
-    height: 1.6rem;
-    width: 1.6rem;
-    padding: 0.5rem;
-    stroke: rgba(var(--text-color), 0.7);
-    stroke-width: 10;
-    overflow: visible;
-    stroke-linecap: round;
-    border-radius: 1rem;
-    stroke-linejoin: round;
-    cursor: pointer;
-    min-width: 0;
+:host([variant="outlined"]) .textarea {
+    box-shadow: 0 0 0 0.1rem rgba(var(--text-color), 0.4) inset;
+    background: rgba(var(--background-color), 1);
 }
-.input {
-    -webkit-box-flex: 1;
-        -ms-flex: 1;
-            flex: 1;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-align: center;
-        -ms-flex-align: center;
-            align-items: center;
+.textarea{
+    display: grid;
     position: relative;
-    padding: 0.7rem 1rem;
-    border-radius: 0.3rem;
-    -webkit-transition: opacity 0.3s;
-    -o-transition: opacity 0.3s;
-    transition: opacity 0.3s;
-    -webkit-box-shadow: 0 0 0.2rem rgba(var(--text-color), 0.2) inset;
-            box-shadow: 0 0 0.2rem rgba(var(--text-color), 0.2) inset;
-    background: rgba(var(--text-color), 0.06);
-    width: 100%;
-    outline: none;
+    cursor: text;
     min-width: 0;
+    text-align: left;
+    overflow: hidden auto;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    max-height: var(--max-height);
+    background: var(--background);
+    border-radius: var(--border-radius);
+    padding: var(--padding);
 }
-
-textarea:focus{
-    caret-color: var(--accent-color);
-}
-.input:focus-within{
-    background: rgba(var(--text-color), 0.1);
-}
-
-.label {
-    -webkit-user-select: none;
-       -moz-user-select: none;
-        -ms-user-select: none;
-            user-select: none;
-    opacity: .7;
-    font-weight: 400;
-    font-size: 1rem;
-    position: absolute;
-    top: 0.9rem;
-    -webkit-transition: -webkit-transform 0.3s;
-    transition: -webkit-transform 0.3s;
-    -o-transition: transform 0.3s;
-    transition: transform 0.3s;
-    transition: transform 0.3s, -webkit-transform 0.3s;
-    -webkit-transform-origin: left;
-    -ms-transform-origin: left;
-        transform-origin: left;
-    pointer-events: none;
-    white-space: nowrap;
-    overflow: hidden;
-    -o-text-overflow: ellipsis;
-       text-overflow: ellipsis;
-    width: 100%;
-    will-change: transform;
-}   
+.textarea::after,
 textarea{
-    font-size: 1rem;
-    border: none;
-    background: transparent;
-    outline: none;
-    color: rgba(var(--text-color), 1);
+    padding: 0.7rem 1rem;
     width: 100%;
-    font-family: inherit;
-    line-height: 1.6;
+    min-width: 1em;
+    font: inherit;
+    color: inherit;
+    resize: none;
+    grid-area: 2/1;
+    justify-self: stretch;
+    background: none;
+    appearance: none;
+    border: none;
+    outline: none;
+    line-height: 1.5;
+    overflow: hidden;
 }
-.animate-label textarea {
-    -webkit-transform: translateY(0.6rem);
-            -ms-transform: translateY(0.6rem);
-        transform: translateY(0.6rem);
+.textarea::after{
+    content: attr(data-value) ' ';
+    visibility: hidden;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
 }
-  
-.animate-label .label {
-    -webkit-transform: translateY(-0.6rem) scale(0.8);
-            -ms-transform: translateY(-0.6rem) scale(0.8);
-        transform: translateY(-0.6rem) scale(0.8);
-    opacity: 1;
-    color: var(--accent-color)
+.readonly{
+    pointer-events: none;
 }
-.clear{
-    -ms-flex-item-align: start;
-        align-self: flex-start;
+.textarea:focus-within:not(.readonly){
+    box-shadow: 0 0 0 0.1rem var(--accent-color) inset;
+}
+.placeholder{
+    position: absolute;
+    margin: 0.7rem 1rem;
+    opacity: .7;
+    font-weight: inherit;
+    font-size: inherit;
+    line-height: 1.5;
+    pointer-events: none;
+    user-select: none;
+}
+:host([disabled]) .textarea{
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 @media (any-hover: hover){
-    .icon:hover{
-        background: rgba(var(--text-color), 0.1);
+    ::-webkit-scrollbar{
+        width: 0.5rem;
+        height: 0.5rem;
+    }
+    
+    ::-webkit-scrollbar-thumb{
+        background: rgba(var(--text-color), 0.3);
+        border-radius: 1rem;
+        &:hover{
+            background: rgba(var(--text-color), 0.5);
+        }
     }
 }
 </style>
-<label class="input">
-<textarea rows="1"></textarea>
-<div part="placeholder" class="label"></div>
-<svg class="icon clear hide" viewBox="0 0 64 64">
-    <title>clear</title>
-    <line x1="64" y1="0" x2="0" y2="64"/>
-    <line x1="64" y1="64" x2="0" y2="0"/>
-</svg>
+<label class="textarea" part="textarea">
+    <span class="placeholder"></span>
+    <textarea rows="1"></textarea>
 </label>
 `;
 customElements.define('sm-textarea',
@@ -691,29 +663,46 @@ customElements.define('sm-textarea',
             this.attachShadow({
                 mode: 'open'
             }).append(smTextarea.content.cloneNode(true))
+
+            this.textarea = this.shadowRoot.querySelector('textarea')
+            this.textareaBox = this.shadowRoot.querySelector('.textarea')
+            this.placeholder = this.shadowRoot.querySelector('.placeholder')
+            this.reflectedAttributes = ['disabled', 'required', 'readonly', 'rows', 'minlength', 'maxlength']
+
+            this.reset = this.reset.bind(this)
+            this.focusIn = this.focusIn.bind(this)
+            this.fireEvent = this.fireEvent.bind(this)
+            this.checkInput = this.checkInput.bind(this)
         }
         static get observedAttributes() {
-            return ['placeholder']
+            return ['disabled', 'value', 'placeholder', 'required', 'readonly', 'rows', 'minlength', 'maxlength']
         }
-
         get value() {
-            return this.shadowRoot.querySelector('textarea').value
+            return this.textarea.value
         }
-
         set value(val) {
-            this.shadowRoot.querySelector('textarea').value = val;
-            this.checkInput()
+            this.setAttribute('value', val)
             this.fireEvent()
         }
-
-        get placeholder() {
-            return this.getAttribute('placeholder')
+        get disabled() {
+            return this.hasAttribute('disabled')
         }
-
-        set placeholder(val) {
-            this.setAttribute('placeholder', val)
+        set disabled(val) {
+            if (val) {
+                this.setAttribute('disabled', '')
+            } else {
+                this.removeAttribute('disabled')
+            }
         }
-
+        get isValid() {
+            return this.textarea.checkValidity()
+        }
+        reset() {
+            this.setAttribute('value', '')
+        }
+        focusIn() {
+            this.textarea.focus()
+        }
         fireEvent() {
             let event = new Event('input', {
                 bubbles: true,
@@ -722,66 +711,40 @@ customElements.define('sm-textarea',
             });
             this.dispatchEvent(event);
         }
-
         checkInput() {
             if (!this.hasAttribute('placeholder') || this.getAttribute('placeholder') === '')
                 return;
-            if (this.input.value !== '') {
-                this.clearBtn.classList.remove('hide')
-                if (this.animate)
-                    this.inputParent.classList.add('animate-label')
-                else
-                    this.label.classList.add('hide')
+            if (this.textarea.value !== '') {
+                this.placeholder.classList.add('hide')
             } else {
-                this.clearBtn.classList.add('hide')
-                if (this.animate)
-                    this.inputParent.classList.remove('animate-label')
-                else
-                    this.label.classList.remove('hide')
+                this.placeholder.classList.remove('hide')
             }
-
-            this.input.style.height = 'auto'
-            this.input.style.height = (this.input.scrollHeight) + 'px';
         }
-
-
         connectedCallback() {
-            this.inputParent = this.shadowRoot.querySelector('.input')
-            this.clearBtn = this.shadowRoot.querySelector('.clear')
-            this.label = this.shadowRoot.querySelector('.label')
-            this.valueChanged = false;
-            this.animate = this.hasAttribute('animate')
-            this.input = this.shadowRoot.querySelector('textarea')
-            this.shadowRoot.querySelector('.label').textContent = this.getAttribute('placeholder')
-
-            this.input.setAttribute('style', 'height:' + (this.input.scrollHeight) + 'px;overflow-y:hidden;');
-
-            if (this.hasAttribute('value')) {
-                this.input.value = this.getAttribute('value')
+            this.textarea.addEventListener('input', e => {
+                this.textareaBox.dataset.value = this.textarea.value
                 this.checkInput()
-            }
-            if (this.hasAttribute('required')) {
-                this.input.setAttribute('required', '')
-            }
-            if (this.hasAttribute('readonly')) {
-                this.input.setAttribute('readonly', '')
-            }
-            this.input.addEventListener('input', e => {
-                this.checkInput()
-            })
-            this.clearBtn.addEventListener('click', e => {
-                this.value = ''
             })
         }
-
         attributeChangedCallback(name, oldValue, newValue) {
-            if (oldValue !== newValue) {
-                if (name === 'placeholder')
-                    this.shadowRoot.querySelector('.label').textContent = newValue;
+            if (this.reflectedAttributes.includes(name)) {
+                if (this.hasAttribute(name)) {
+                    this.textarea.setAttribute(name, this.getAttribute(name) ? this.getAttribute(name) : '')
+                }
+                else {
+                    this.textContent.removeAttribute(name)
+                }
+            }
+            else if (name === 'placeholder') {
+                this.placeholder.textContent = this.getAttribute('placeholder')
+            }
+            else if (name === 'value') {
+                this.textarea.value = newValue;
+                this.textareaBox.dataset.value = newValue
+                this.checkInput()
             }
         }
     })
-
 // tab
 const smTab = document.createElement('template')
 smTab.innerHTML = `
@@ -1355,18 +1318,18 @@ customElements.define('sm-select', class extends HTMLElement {
             previousOption
         this.open = false;
         this.slideDown = [{
-                    transform: `translateY(-0.5rem)`
-                },
-                {
-                    transform: `translateY(0)`
-                }
-            ],
+            transform: `translateY(-0.5rem)`
+        },
+        {
+            transform: `translateY(0)`
+        }
+        ],
             this.slideUp = [{
-                    transform: `translateY(0)`
-                },
-                {
-                    transform: `translateY(-0.5rem)`
-                }
+                transform: `translateY(0)`
+            },
+            {
+                transform: `translateY(-0.5rem)`
+            }
             ],
             this.animationOptions = {
                 duration: 300,
@@ -2154,8 +2117,8 @@ customElements.define('sm-popup', class extends HTMLElement {
                     this.show()
                     return
                 }
-            else
-                this.hide()
+                else
+                    this.hide()
         }
     }
 
@@ -2428,27 +2391,27 @@ customElements.define('sm-carousel', class extends HTMLElement {
                     if (entry.isIntersecting) {
                         this.indicators[parseInt(entry.target.attributes.rank.textContent)].classList.add('active')
                     }
-                else
-                    this.indicators[parseInt(entry.target.attributes.rank.textContent)].classList.remove('active')
+                    else
+                        this.indicators[parseInt(entry.target.attributes.rank.textContent)].classList.remove('active')
                 if (!entry.target.previousElementSibling)
                     if (entry.isIntersecting) {
                         this.previousArrow.classList.remove('expand')
                         firstVisible = true
                     }
-                else {
-                    this.previousArrow.classList.add('expand')
-                    firstVisible = false
-                }
+                    else {
+                        this.previousArrow.classList.add('expand')
+                        firstVisible = false
+                    }
                 if (!entry.target.nextElementSibling)
                     if (entry.isIntersecting) {
                         this.nextArrow.classList.remove('expand')
                         lastVisible = true
                     }
-                else {
-                    this.nextArrow.classList.add('expand')
+                    else {
+                        this.nextArrow.classList.add('expand')
 
-                    lastVisible = false
-                }
+                        lastVisible = false
+                    }
                 if (firstVisible && lastVisible)
                     this.indicatorsContainer.classList.add('hide')
                 else
@@ -2753,13 +2716,13 @@ customElements.define('sm-notifications', class extends HTMLElement {
         this.notificationPanel.prepend(notification)
         if (window.innerWidth > 640) {
             notification.animate([{
-                    transform: `translateX(1rem)`,
-                    opacity: '0'
-                },
-                {
-                    transform: 'translateX(0)',
-                    opacity: '1'
-                }
+                transform: `translateX(1rem)`,
+                opacity: '0'
+            },
+            {
+                transform: 'translateX(0)',
+                opacity: '1'
+            }
             ], this.animationOptions).onfinish = () => {
                 notification.setAttribute('style', `transform: none;`);
             }
@@ -2777,25 +2740,25 @@ customElements.define('sm-notifications', class extends HTMLElement {
 
         if (toLeft)
             notification.animate([{
-                    transform: `translateX(${this.offset}px)`,
-                    opacity: '1'
-                },
-                {
-                    transform: `translateX(-100%)`,
-                    opacity: '0'
-                }
+                transform: `translateX(${this.offset}px)`,
+                opacity: '1'
+            },
+            {
+                transform: `translateX(-100%)`,
+                opacity: '0'
+            }
             ], this.animationOptions).onfinish = () => {
                 notification.remove()
             }
         else {
             notification.animate([{
-                    transform: `translateX(${this.offset}px)`,
-                    opacity: '1'
-                },
-                {
-                    transform: `translateX(100%)`,
-                    opacity: '0'
-                }
+                transform: `translateX(${this.offset}px)`,
+                opacity: '1'
+            },
+            {
+                transform: `translateX(100%)`,
+                opacity: '0'
+            }
             ], this.animationOptions).onfinish = () => {
                 notification.remove()
             }
@@ -2826,7 +2789,7 @@ customElements.define('sm-notifications', class extends HTMLElement {
         this.touchEndAnimataion;
 
         this.notificationPanel.addEventListener('click', e => {
-            if (e.target.closest('.close'))(
+            if (e.target.closest('.close')) (
                 this.removeNotification(e.target.closest('.notification'))
             )
         })
@@ -3402,40 +3365,40 @@ customElements.define('sm-tab-panels', class extends HTMLElement {
 
         //animations
         let flyInLeft = [{
-                    opacity: 0,
-                    transform: 'translateX(-1rem)'
-                },
-                {
-                    opacity: 1,
-                    transform: 'none'
-                }
-            ],
+            opacity: 0,
+            transform: 'translateX(-1rem)'
+        },
+        {
+            opacity: 1,
+            transform: 'none'
+        }
+        ],
             flyInRight = [{
-                    opacity: 0,
-                    transform: 'translateX(1rem)'
-                },
-                {
-                    opacity: 1,
-                    transform: 'none'
-                }
+                opacity: 0,
+                transform: 'translateX(1rem)'
+            },
+            {
+                opacity: 1,
+                transform: 'none'
+            }
             ],
             flyOutLeft = [{
-                    opacity: 1,
-                    transform: 'none'
-                },
-                {
-                    opacity: 0,
-                    transform: 'translateX(-1rem)'
-                }
+                opacity: 1,
+                transform: 'none'
+            },
+            {
+                opacity: 0,
+                transform: 'translateX(-1rem)'
+            }
             ],
             flyOutRight = [{
-                    opacity: 1,
-                    transform: 'none'
-                },
-                {
-                    opacity: 0,
-                    transform: 'translateX(1rem)'
-                }
+                opacity: 1,
+                transform: 'none'
+            },
+            {
+                opacity: 0,
+                transform: 'translateX(1rem)'
+            }
             ],
             animationOptions = {
                 duration: 300,
