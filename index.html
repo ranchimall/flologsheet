@@ -61,7 +61,7 @@
             floDapps.launchStartUp().then(result => {
                 console.log(result)
                 document.getElementById("user_flo_id").textContent = myFloID
-                reactor.dispatchEvent("startUpSuccessLog", `Downloading objectData! Please Wait...`)
+                console.log(`Downloading objectData! Please Wait...`);
                 //request object data from Supernode
                 logSheet.init().then(result => {
                     console.log(result)
@@ -78,7 +78,7 @@
                         document.querySelectorAll('.sub-admin-option').forEach(option => option.classList.add('hide-completely'))
                     }
                 }).catch(error => {
-                    reactor.dispatchEvent("startUpErrorLog", `Failed to download objectData`)
+                    console.error(`Failed to download objectData`);
                     notify(error, "error")
                 })
             }).catch(error => notify(error, "error"))
@@ -757,8 +757,8 @@
             const observer = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        let { title, description, editors, attributes, sheet, isWriteable, isSubAdmin } = floGlobals.currentSheet
-                        renderSheetView(title, description, editors, attributes, sheet, isWriteable, isSubAdmin, true, true)
+                        let {id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin } = floGlobals.currentSheet;
+                        renderSheetView(id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin, true, true)
                         observer.disconnect()
                     }
                 })
@@ -792,18 +792,18 @@
         }
 
         const render = {
-            sheetCard(sheetName, editors) {
+            sheetCard(sheet_id, sheetName, editors) {
                 let card = document.createElement('div'),
                     type = 'Public'
                 card.classList.add('sheet-card')
-                card.setAttribute('data-name', sheetName)
+                card.setAttribute('data-name', sheet_id)
                 if (editors)
                     type = 'Private'
                 card.innerHTML = `
                     <div class="card">
                         <h5>${type}</h5>
                     </div>
-                    <h4>${removeUnderscore(sheetName)}</h4>
+                    <h4>${sheetName}</h4>
                 `
                 return card
             },
@@ -994,18 +994,18 @@
 
         document.getElementById('first_select').addEventListener("change", function (e) {
             try {
-                let title = floGlobals.currentSheet.title;
+                let sheet_id = floGlobals.currentSheet.id;
                 let sheet = floGlobals.currentSheet.sheet;
                 let type = this.value;
                 console.log(this)
                 if (type === 'count') {
                     secondSelect.classList.add("hide-completely")
-                    let data = logSheet.groupLogsBy.count(title, sheet)
+                    let data = logSheet.groupBy.count(sheet_id, sheet)
                     renderGroupByView("count", data)
                 } else {
                     secondSelect.classList.remove("hide-completely")
                     let column = secondSelect.value;
-                    let data = logSheet.groupLogsBy[type](title, sheet, column);
+                    let data = logSheet.groupBy[type](sheet_id, sheet, column);
                     renderGroupByView(`${type}(${column})`, data)
                 }
             } catch (error) {
@@ -1016,11 +1016,11 @@
         document.getElementById('second_select').addEventListener("change", function (e) {
             try {
                 console.log(this)
-                let title = floGlobals.currentSheet.title;
+                let sheet_id = floGlobals.currentSheet.id;
                 let sheet = floGlobals.currentSheet.sheet;
                 let type = firstSelect.value;
                 let column = this.value;
-                let data = logSheet.groupLogsBy[type](title, sheet, column);
+                let data = logSheet.groupBy[type](sheet_id, sheet, column);
                 renderGroupByView(`${type}(${column})`, data)
             } catch (error) {
                 notify(error, "error")
@@ -1073,7 +1073,7 @@
 
         function createSheet() {
             try {
-                let title = sheetTitleInput.value.trim().replace(/ /g, "_");
+                let title = sheetTitleInput.value.trim();
                 let description = sheetDescriptionInput.value.trim();
                 let columns = []
                 let editors = []
@@ -1088,12 +1088,12 @@
                 else
                     if (!editors.length)
                         editors = floGlobals.subAdmins;
-                logSheet.createNewSheet(title, description, columns, editors)
+                let sheet_id = logSheet.createNewSheet(title, description, columns, editors)
                 let sheet = {}
-                sheet[title] = { editors }
+                sheet[sheet_id] = { editors }
                 renderSheetList(sheet)
                 hidePopup()
-                notify(`Created New Sheet: ${title}`)
+                notify(`Created New Sheet: ${sheet_id} (${title})`)
                 showSave()
             } catch (error) {
                 notify(error, "error")
@@ -1109,7 +1109,7 @@
 
         function enterLog(e) {
             e.preventDefault()
-            let title = floGlobals.currentSheet.title;
+            let sheet_id = floGlobals.currentSheet.id;
             let form = document.forms['new-log'],
                 allFormElements = document.querySelectorAll('input[form="new-log"]')
             allFormElements.forEach(element => element.disabled = true)
@@ -1118,7 +1118,7 @@
                 let log = []
                 for (let i = 1; i < form.length - 1; i++)
                     log.push(form[i].value)
-                logSheet.enterLog(title, floID, log).then(result => {
+                logSheet.enterLog(sheet_id, floID, log).then(result => {
                     allFormElements.forEach(element => element.disabled = false)
                     form.reset();
                     notify('Log entry successful', 'success')
@@ -1133,21 +1133,21 @@
             }
         }
 
-        function viewSheet(title) {
+        function viewSheet(sheet_id) {
             sheetContainer.classList.add('placeholder')
             sheetHeading.classList.add('placeholder')
             sheetType.classList.add('placeholder')
             sheetDescription.classList.add('placeholder')
             tableHeader.classList.add('hide')
             showPage('sheet_page')
-            logSheet.refreshLogs(title).then(result => {
+            logSheet.refreshLogs(sheet_id).then(result => {
                 sheetContainer.classList.remove('placeholder')
                 sheetHeading.classList.remove('placeholder')
                 sheetType.classList.remove('placeholder')
                 sheetDescription.classList.remove('placeholder')
                 tableHeader.classList.remove('hide')
-                let data = logSheet.viewLogs(title)
-                renderSheetView(data.title, data.description, data.editors, data.attributes, data.sheet.reverse(),
+                let data = logSheet.viewLogs(sheet_id)
+                renderSheetView(data.id, data.title, data.description, data.editors, data.attributes, data.sheet.reverse(),
                     !data.editors || data.editors.includes(myFloID), floGlobals.subAdmins.includes(myFloID))
             }).catch(error => notify(error, "error"))
         }
@@ -1188,7 +1188,7 @@
         function renderSheetList(sheetList) {
             console.log(sheetList)
             for (sheet in sheetList) {
-                frag.append(render.sheetCard(sheet, sheetList[sheet].editors))
+                frag.append(render.sheetCard(sheet, sheetList[sheet].title, sheetList[sheet].editors))
             }
             if (floGlobals.subAdmins.includes(myFloID) && !document.getElementById('add_new_sheet')) {
                 let firstCard = document.createElement('div')
@@ -1232,9 +1232,10 @@
         let startingIndex = 0,
             endingIndex = 0
 
-        function renderSheetView(title, description, editors, attributes, sheet, isWriteable, isSubAdmin, onlyRenderTable = false, lazyLoad = false) {
+        function renderSheetView(sheet_id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin, onlyRenderTable = false, lazyLoad = false) {
             if (!lazyLoad)
                 floGlobals.currentSheet = {
+                    id: sheet_id,
                     title,
                     description,
                     editors,
@@ -1261,7 +1262,7 @@
                         if (event.keyCode == 13) {
                             event.preventDefault();
                             gradeField.disabled = true;
-                            logSheet.forwardLog(title, vc, gradeField.value)
+                            logSheet.gradeLog(sheet_id, vc, gradeField.value)
                                 .then(result => notify("Graded Log"))
                                 .catch(error => notify("Grading failed: " + error, "error"))
                                 .finally(_ => gradeField.disabled = false)
@@ -1279,7 +1280,7 @@
             }
             if (!onlyRenderTable) {
                 //Add Sheet Details
-                sheetHeading.textContent = removeUnderscore(title);
+                sheetHeading.textContent = title;
                 if (editors) {
                     sheetType.textContent = 'Private'
                     editors.forEach(editor => {
@@ -1328,7 +1329,7 @@
             tableBody.append(frag)
             if (!onlyRenderTable) {
                 //Add options for groupBy 
-                document.getElementById('group_by_title').textContent = `Group ${removeUnderscore(title)} by`;
+                document.getElementById('group_by_title').textContent = `Group ${title} by`;
                 document.getElementById('group_by_view').innerHTML =
                     `<table><thead><tr><th>FLO ID</th><th><i>null</i></th></tr></thead></table>`
                 let colSelect = clearElement(document.getElementById('group_by_menu').children[1]);
@@ -1413,8 +1414,8 @@
                             return b.log[n - 2] - a.log[n - 2]
                     })
             }
-            let { title, description, editors, attributes, sheet, isWriteable, isSubAdmin } = floGlobals.currentSheet
-            renderSheetView(title, description, editors, attributes, sheet, isWriteable, isSubAdmin, true, false)
+            let {id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin } = floGlobals.currentSheet
+            renderSheetView(id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin, true, false)
         }
     </script>
 </body>
