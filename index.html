@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FLO LogSheet</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Roboto:wght@400;500;700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/main.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/uhtml@3.0.1/es.js"></script>
     <script id="floGlobals">
         /* Constants for FLO blockchain operations !!Make sure to add this at begining!! */
         const floGlobals = {
@@ -32,50 +33,40 @@
         function onLoadStartUp() {
             //display loading screen
             showLoader()
-            //document.getElementById("loading-screen").classList.remove("hide")
-            //clear Rendered Elements
-            /*clearElement(document.getElementById('person-list'))*/
-            clearElement(sheetsContainer)
             //set the custom Privkey input
             floDapps.setCustomPrivKeyInput(() => {
                 return new Promise((resolve, reject) => {
                     hideLoader()
                     showPage('sign_in_page')
-                    let signInBtn = document.getElementById('sign_in_btn'),
-                        //guestButton = document.getElementById('guest_btn'),
-                        privateKeyInput = document.getElementById('get_priv_key_field')
+                    let signInBtn = getRef('sign_in_btn'),
+                        privateKeyInput = getRef('get_priv_key_field')
                     signInBtn.onclick = () => {
-                        hidePopup()
+                        closePopup()
                         showLoader()
                         resolve(privateKeyInput.value)
                         privateKeyInput.value = ''
                     }
-                    /*guestButton.onclick = () => {
-                        hidePopup()
-                        showLoader()
-                        reject(null)
-                    }*/
                 })
             })
             //invoke the startup functions
             floDapps.launchStartUp().then(result => {
                 console.log(result)
-                document.getElementById("user_flo_id").textContent = myFloID
+                getRef("user_flo_id").value = myFloID
                 console.log(`Downloading objectData! Please Wait...`);
                 //request object data from Supernode
                 logSheet.init().then(result => {
                     console.log(result)
                     //Render the personList and sheetList
-                    renderPersonList(logSheet.listPersons())
+                    renderPersonList()
                     renderSheetList(logSheet.listSheets())
                     //hide loading screen
                     hideLoader()
-                    showPage('home_page')
+                    showPage(window.location.hash, { firstLoad: true })
                     //display add buttons if subAdmin, else hide
                     if (floGlobals.subAdmins.includes(myFloID)) {
-                        document.querySelectorAll('.sub-admin-option').forEach(option => option.classList.remove('hide-completely'))
+                        document.querySelectorAll('.sub-admin-option').forEach(option => option.classList.remove('hidden'))
                     } else {
-                        document.querySelectorAll('.sub-admin-option').forEach(option => option.classList.add('hide-completely'))
+                        document.querySelectorAll('.sub-admin-option').forEach(option => option.classList.add('hidden'))
                     }
                 }).catch(error => {
                     console.error(`Failed to download objectData`);
@@ -86,181 +77,25 @@
     </script>
 </head>
 
-<body onload="onLoadStartUp()" class="hide-completely">
-    <audio id="notification_sound">
-        <source src="https://rmservices.duckdns.org/files/notification-sound.mp3" type="audio/mpeg">
-        <source src="https://rmservices.duckdns.org/files/notification-sound.ogg" type="audio/ogg">
-    </audio>
-    <sm-popup id="confirmation">
+<body onload="onLoadStartUp()" class="hidden">
+    <sm-notifications id="notification_drawer"></sm-notifications>
+    <sm-popup id="confirmation_popup">
+        <h4 id="confirm_title"></h4>
         <p id="confirm_message"></p>
         <div class="flex align-center">
-            <sm-button variant="no-outline" class="cancel-btn">Cancel</sm-button>
-            <sm-button variant="no-outline" class="submit-btn">OK</button>
+            <sm-button variant="no-outline" class="cancel-button">Cancel</sm-button>
+            <sm-button variant="no-outline" class="confirm-button">OK</button>
         </div>
     </sm-popup>
-    <sm-popup id="prompt">
-        <h4 id="prompt_message">Some input required</h4>
-        <sm-input id="prompt_field"></sm-input>
-        <div class="flex align-center">
-            <sm-button variant="no-outline" class="cancel-btn">Cancel</sm-button>
-            <sm-button variant="no-outline" class="submit-btn">OK</button>
-        </div>
-    </sm-popup>
-    <sm-notifications id="show_message"></sm-notifications>
     <!-- Loading screen-->
     <section id="main_loader" class="grid">
-        <svg id="loader" viewBox="0 0 73 73">
-            <title>Loader</title>
-            <path d="M72.5,36.5c0,19.88-16.12,36-36,36s-36-16.12-36-36s16.12-36,36-36S72.5,16.62,72.5,36.5" />
-        </svg>
+        <sm-spinner></sm-spinner>
         <h4 id="tip_container">Loading RanchiMall FLO LogSheet</h4>
         <sm-button onclick="signOut()">Sign Out</sm-button>
     </section>
-
-    <!-- User settings popup -->
-    <sm-popup id="user_popup">
-        <header class="popup-header" slot="header">
-            <svg class="icon" onclick="this.closest('sm-popup').hide()" viewBox="0 0 64 64">
-                <title>close</title>
-                <line x1="64" y1="0" x2="0" y2="64" />
-                <line x1="64" y1="64" x2="0" y2="0" />
-            </svg>
-            <h4>
-                Settings
-            </h4>
-        </header>
-        <section>
-            <h4>My FLO address</h4>
-            <div class="copy-row">
-                <h4 id="user_flo_id" class="copy"></h4>
-                <svg class="icon" onclick="copyToClipboard(this.parentNode)" viewBox="0 0 64 64">
-                    <title>Copy</title>
-                    <rect x="16" y="16" width="48" height="48" rx="6" />
-                    <path d="M.5,47.52V6.5a6,6,0,0,1,6-6h41" />
-                </svg>
-            </div>
-            <sm-button id="sign_out_btn" onclick="signOut()">Sign out</sm-button>
-        </section>
-        <section>
-            <h4>Theme</h4>
-            <div class="flex align-center space-between">
-                <p>Turn dark theme on/off.</p>
-                <sm-switch id="theme_switcher"></sm-switch>
-            </div>
-        </section>
-    </sm-popup>
-
-    <!-- Add a person popup -->
-    <sm-popup id="add_person_popup">
-        <header class="popup-header" slot="header">
-            <svg class="icon" onclick="this.closest('sm-popup').hide()" viewBox="0 0 64 64">
-                <title>close popup</title>
-                <line x1="64" y1="0" x2="0" y2="64" />
-                <line x1="64" y1="64" x2="0" y2="0" />
-            </svg>
-            <h4>
-                Add new person
-            </h4>
-            <button onclick="addPerson()" class="primary-btn expand" type="submit" disabled>
-                Add
-            </button>
-        </header>
-        <sm-input id="person_flo_id_input" floId placeholder="FLO ID*" animate required></sm-input>
-        <sm-input id="person_name_input" placeholder="Name*" animate required></sm-input>
-        <div id="specify_details" class="grid">
-            <div class="flex direction-column">
-                <h4>Additional details</h4>
-                <p>Add more details about a person. Specify type of information and actual detail.</p>
-            </div>
-            <div id="additional_fields" class="grid"></div>
-            <div id="add_detail" class="grid align-center">
-                <sm-input id="add_detail_type_input" exclude placeholder="Type"></sm-input>
-                <sm-input id="add_detail_value_input" exclude placeholder="Value"></sm-input>
-                <svg class="icon" onclick="addDetails()" viewBox="0 0 64 64">
-                    <title>Add detail</title>
-                    <polyline points="0.35 31.82 21.45 52.98 63.65 10.66" />
-                </svg>
-            </div>
-        </div>
-    </sm-popup>
-    <!-- Create new sheet popup -->
-    <sm-popup id="new_sheet_popup">
-        <header class="popup-header" slot="header">
-            <svg class="icon" onclick="this.closest('sm-popup').hide()" viewBox="0 0 64 64">
-                <title>close popup</title>
-                <line x1="64" y1="0" x2="0" y2="64" />
-                <line x1="64" y1="64" x2="0" y2="0" />
-            </svg>
-            <h4>
-                Create new sheet
-            </h4>
-            <button onclick="createSheet()" class="primary-btn expand" type="submit" disabled>
-                Create
-            </button>
-        </header>
-        <sm-input id="sheet_title_input" placeholder="Name*" animate required></sm-input>
-        <sm-textarea id="sheet_description_input" placeholder="Description" animate required></sm-textarea>
-        <div id="specify_columns" class="grid">
-            <div class="flex direction-column">
-                <h4>Add Columns</h4>
-                <p>Columns will be added as the order you added them.</p>
-            </div>
-            <div id="columns_container" class="flex"></div>
-            <div id="add_column" class="flex align-center space-between">
-                <sm-input id="add_column_input" exclude placeholder="Column title"></sm-input>
-                <svg class="icon" onclick="addColumn()" viewBox="0 0 64 64">
-                    <title>Add this column</title>
-                    <polyline points="0.35 31.82 21.45 52.98 63.65 10.66" />
-                </svg>
-            </div>
-        </div>
-        <div class="flex align-center space-between top-margin">
-            Make sheet private
-            <sm-switch id="sheet_type_switch" onchange="toggleEditors()"></sm-switch>
-        </div>
-        <div id="specify_editors" class="grid hide-completely">
-            <div class="flex direction-column">
-                <h4>Add editors</h4>
-                <p>Only specified editors will be able to update this sheet.</p>
-            </div>
-            <div id="editors_container" class="grid"></div>
-            <div id="add_editor" class="flex align-center space-between">
-                <sm-input id="add_editor_input" exclude placeholder="Editor's FLO Address"></sm-input>
-                <svg class="icon" onclick="addEditor()" viewBox="0 0 64 64">
-                    <title>Add this editor</title>
-                    <polyline points="0.35 31.82 21.45 52.98 63.65 10.66" />
-                </svg>
-            </div>
-        </div>
-    </sm-popup>
-
-    <!-- Group by popup -->
-    <sm-popup id="group_by">
-        <header class="popup-header" slot="header">
-            <svg class="icon" onclick="this.closest('sm-popup').hide()" viewBox="0 0 64 64">
-                <title>close popup</title>
-                <line x1="64" y1="0" x2="0" y2="64" />
-                <line x1="64" y1="64" x2="0" y2="0" />
-            </svg>
-            <h4 id="group_by_title">
-            </h4>
-        </header>
-        <div class="flex align-center" id="group_by_menu">
-            <sm-select id="first_select" class="justify-right">
-                <sm-option value="count">Count</sm-option>
-                <sm-option value="total" selected>Total</sm-option>
-                <sm-option value="avg">Avg</sm-option>
-                <sm-option value="max">Max</sm-option>
-                <sm-option value="min">Min</sm-option>
-            </sm-select>
-            <sm-select id="second_select"></sm-select>
-        </div>
-        <div class="table-container" id="group_by_view"></div>
-    </sm-popup>
-
-    <div id="save_button" class="hide flex align-center space-between" data-unsaved="0">
+    <div id="save_button" class="hidden flex align-center space-between" data-unsaved="0">
         <span id="changes_indicator"></span>
-        <span>Changes needs to be saved!</span>
+        <p>Changes need to be saved!</p>
         <sm-button>Save</sm-button>
     </div>
 
@@ -271,69 +106,62 @@
                 <h1>LogSheet</h1>
                 <p>Open &bull; Distributed &bull; Reliable</p>
             </div>
-            <div class="sign-in-box flex direction-column">
-                <sm-tab-header target="user_entry">
-                    <sm-tab>Sign In</sm-tab>
-                    <sm-tab>Sign Up</sm-tab>
-                </sm-tab-header>
-                <sm-tab-panels id="user_entry">
-                    <sm-panel>
+            <div class="sign-in-box flex flex-direction-column gap-2">
+                <strip-select id="entry_type_selector" class="align-self-start">
+                    <strip-option value="sign-in" selected>Sign in</strip-option>
+                    <strip-option value="sign-up">Sign up</strip-option>
+                </strip-select>
+                <div id="user_entry">
+                    <div>
                         <h3>Welcome back</h3>
                         <p>Just enter your FLO private key to continue.</p>
-                        <form action="" onsubmit="return false">
-                            <sm-input id="get_priv_key_field" privateKey placeholder="FLO Private Key" type="password"
-                                required animate>
+                        <sm-form>
+                            <sm-input id="get_priv_key_field" data-privateKey placeholder="FLO private key"
+                                type="password" required animate>
                             </sm-input>
-                            <button id="sign_in_btn" class="primary-btn expand" type="submit" disabled>
+                            <button id="sign_in_btn" class="button button--primary" type="submit" disabled>
                                 Sign In
                             </button>
-                        </form>
-                    </sm-panel>
-                    <sm-panel>
+                        </sm-form>
+                    </div>
+                    <div class="hidden">
                         <h3>Get started</h3>
                         <p>Create your FLO public and private key pair. <Strong>Don't forget to store them
                                 securely!</Strong></p>
                         <sm-button id="generate_flo_id" onclick="generateId()" variant="primary">Get FLO credentials
                         </sm-button>
-                        <section id="credentials_section" class="hide-completely">
-                            <h5>FLO ID</h5>
-                            <div class="copy-row">
-                                <h4 id="generated_id" class="copy"></h4>
-                                <svg class="icon" onclick="copyToClipboard(this.parentNode)" viewBox="0 0 64 64">
-                                    <title>Copy</title>
-                                    <rect x="16" y="16" width="48" height="48" rx="6" />
-                                    <path d="M.5,47.52V6.5a6,6,0,0,1,6-6h41" />
-                                </svg>
+                        <section id="credentials_section" class="hidden grid gap-1">
+                            <div class="grid gap-0-3">
+                                <h5>FLO ID</h5>
+                                <sm-copy id="generated_id"></sm-copy>
                             </div>
-                            <h5>Private key</h5>
-                            <div class="copy-row">
-                                <h4 id="generated_key" class="copy"></h4>
-                                <svg class="icon" onclick="copyToClipboard(this.parentNode)" viewBox="0 0 64 64">
-                                    <title>Copy</title>
-                                    <rect x="16" y="16" width="48" height="48" rx="6" />
-                                    <path d="M.5,47.52V6.5a6,6,0,0,1,6-6h41" />
-                                </svg>
+                            <div class="grid gap-0-3">
+                                <h5>Private key</h5>
+                                <sm-copy id="generated_key"></sm-copy>
                             </div>
                         </section>
-                    </sm-panel>
-                </sm-tab-panels>
+                    </div>
+                </div>
             </div>
         </div>
         <header id="main_header" class="grid">
-            <div class="flex align-center space-between">
-                <div class="flex direction-column">
+            <div class="flex align-center space-between gap-1">
+                <div class="flex flex-direction-column">
                     <h5>RanchiMall</h5>
                     <h4>FLO LogSheet</h4>
                 </div>
-                <svg id="user_icon" onclick="showPopup('user_popup')" class="icon" viewBox="0 0 64 64">
-                    <title>user</title>
-                    <path d="M31.6,0.5c8.3,0,14.2,5.6,14.2,15S41.1,32.9,32,32.9s-13.8-8-13.8-17.3s5.9-15,14.2-15" />
-                    <path d="M25.4,33.4c-2.5,4.7-10.5,7.1-16.4,9.7c-2.4,1-4.4,14-1.6,14c7.7,4.4,16.4,6.6,25.2,6.4
-                        c8.5,0.3,16.9-2,24.2-6.4c2.8,0,0.8-12.9-1.6-14c-5.9-2.6-13.9-5-16.4-9.7" />
-                </svg>
+                <theme-toggle class="margin-left-auto"></theme-toggle>
+                <button id="user_icon" onclick="openPopup('user_popup')">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"
+                        fill="#000000">
+                        <path d="M0 0h24v24H0V0z" fill="none" />
+                        <path
+                            d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.09-.16-.26-.25-.44-.25-.06 0-.12.01-.17.03l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.06-.02-.12-.03-.18-.03-.17 0-.34.09-.43.25l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.09.16.26.25.44.25.06 0 .12-.01.17-.03l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.06.02.12.03.18.03.17 0 .34-.09.43-.25l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zm-1.98-1.71c.04.31.05.52.05.73 0 .21-.02.43-.05.73l-.14 1.13.89.7 1.08.84-.7 1.21-1.27-.51-1.04-.42-.9.68c-.43.32-.84.56-1.25.73l-1.06.43-.16 1.13-.2 1.35h-1.4l-.19-1.35-.16-1.13-1.06-.43c-.43-.18-.83-.41-1.23-.71l-.91-.7-1.06.43-1.27.51-.7-1.21 1.08-.84.89-.7-.14-1.13c-.03-.31-.05-.54-.05-.74s.02-.43.05-.73l.14-1.13-.89-.7-1.08-.84.7-1.21 1.27.51 1.04.42.9-.68c.43-.32.84-.56 1.25-.73l1.06-.43.16-1.13.2-1.35h1.39l.19 1.35.16 1.13 1.06.43c.43.18.83.41 1.23.71l.91.7 1.06-.43 1.27-.51.7 1.21-1.07.85-.89.7.14 1.13zM12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" />
+                    </svg>
+                </button>
             </div>
         </header>
-        <section id="home_page" class="page grid hide-completely">
+        <section id="home_page" class="page grid hidden">
             <section id="main_section">
                 <header class="flex align-center space-between section-header">
                     <h4>Sheets</h4>
@@ -342,44 +170,56 @@
                 <section id="sheets_container" class="grid"></section>
             </section>
         </section>
-        <section id="sheet_page" class="page toggle-side-bar grid hide-completely">
+        <section id="sheet_view" class="page toggle-side-bar grid hidden">
             <nav id="side_bar">
                 <div class="flex align-center">
-                    <svg class="icon hide-on-desktop" onclick="toggleSideBar()" viewBox="0 0 64 64">
-                        <title>Go back to sheet</title>
-                        <polyline points="48.01 0.35 16.35 32 48.01 63.65" />
-                    </svg>
+                    <button class="hide-on-desktop" onclick="toggleSideBar()">
+                        <svg class="icon margin-right-0-3" xmlns="http://www.w3.org/2000/svg" height="24px"
+                            viewBox="0 0 24 24" width="24px" fill="#000000">
+                            <path d="M0 0h24v24H0V0z" fill="none" />
+                            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+                        </svg>
+                    </button>
                     <h4 class="section-header">People</h4>
-                    <sm-button class="small sub-admin-option justify-right" onclick="showPopup('add_person_popup')">Add
-                        person</sm-button>
+                    <button class="button button--small margin-left-auto sub-admin-option"
+                        onclick="openPopup('add_person_popup')">Add
+                        person</button>
                 </div>
                 <div id="people_container" class="grid"></div>
             </nav>
             <section id="right">
                 <section id="sheet_details" class="collapse">
                     <div class="flex align-center">
-                        <svg class="icon" onclick="showPage('home_page')" id="go_to_home" viewBox="0 0 64 64">
-                            <title>Go back to homepage</title>
-                            <polyline points="48.01 0.35 16.35 32 48.01 63.65" />
-                        </svg>
-                        <h5>Sheets</h5>
-                        <sm-button class="small justify-right" onclick="showPopup('group_by')">Group by</sm-button>
+                        <a href="#/home_page" class="flex align-center">
+                            <svg class="icon margin-right-0-3" xmlns="http://www.w3.org/2000/svg" height="24px"
+                                viewBox="0 0 24 24" width="24px" fill="#000000">
+                                <path d="M0 0h24v24H0V0z" fill="none" />
+                                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+                            </svg>
+                            Sheets
+                        </a>
+                        <button class="button button--small margin-left-auto" onclick="openPopup('group_by')">Group
+                            by</button>
                     </div>
                     <div class="flex align-center">
-                        <svg class="icon" onclick="toggleSideBar()" viewBox="0 0 64 64">
-                            <title>Reveal/hide side bar</title>
-                            <line y1="18.5" x2="64" y2="18.5" />
-                            <line y1="45.5" x2="42" y2="45.5" />
-                        </svg>
+                        <button onclick="toggleSideBar()">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
+                                width="24px" fill="#000000">
+                                <path d="M0 0h24v24H0V0z" fill="none" />
+                                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+                            </svg>
+                        </button>
                         <h3 id="sheet_heading"></h3>
                         <h5 id="sheet_type"></h5>
-                        <svg id="toggle_details" class="icon justify-right" onclick="toggleDetails()"
-                            viewBox="0 0 64 64">
-                            <title>expand/collapse</title>
-                            <polyline points="63.65 15.99 32 47.66 0.35 15.99" />
-                        </svg>
+                        <button id="toggle_details" class="margin-left-auto" onclick="toggleDetails()">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
+                                width="24px" fill="#000000">
+                                <path d="M24 24H0V0h24v24z" fill="none" opacity=".87" />
+                                <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6-1.41-1.41z" />
+                            </svg>
+                        </button>
                     </div>
-                    <div id="sheet_editors" class="flex align-center"></div>
+                    <div id="sheet_editors" class="flex align-center flex-wrap"></div>
                     <p id="sheet_description"></p>
                 </section>
                 <div id="sheet_container">
@@ -395,203 +235,366 @@
             </section>
         </section>
     </main>
+    <!-- User settings popup -->
+    <sm-popup id="user_popup">
+        <header slot="header" class="popup__header">
+            <button class="popup__header__close" onclick="closePopup()">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="none" d="M0 0h24v24H0z" />
+                    <path
+                        d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z" />
+                </svg>
+            </button>
+            <h3>Settings</h3>
+        </header>
+        <section>
+            <div class="grid gap-1">
+                <div class="grid gap-0-3">
+                    <b>My FLO address</b>
+                    <sm-copy id="user_flo_id"></sm-copy>
+                </div>
+                <button class="button button--danger margin-right-auto" onclick="signOut()">Sign out</button>
+            </div>
+        </section>
+    </sm-popup>
+
+    <!-- Add a person popup -->
+    <sm-popup id="add_person_popup">
+        <header slot="header" class="popup__header">
+            <button class="popup__header__close" onclick="closePopup()">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="none" d="M0 0h24v24H0z" />
+                    <path
+                        d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z" />
+                </svg>
+            </button>
+            <h3>Add new person</h3>
+        </header>
+        <sm-form>
+            <div class="grid gap-0-5">
+                <sm-input id="person_flo_id_input" floId placeholder="FLO ID*" animate autofocus required></sm-input>
+                <sm-input id="person_name_input" placeholder="Name*" animate required></sm-input>
+            </div>
+            <div id="specify_details" class="grid gap-0-5">
+                <div class="flex flex-direction-column gap-0-3">
+                    <h4>Additional details</h4>
+                    <p>Add more details about a person. Specify type of information and actual detail.</p>
+                </div>
+                <div id="additional_fields" class="grid"></div>
+                <div id="add_detail" class="grid align-center">
+                    <sm-input id="add_detail_type_input" exclude placeholder="Type"></sm-input>
+                    <sm-input id="add_detail_value_input" exclude placeholder="Value"></sm-input>
+                    <button class="button margin-left-auto" onclick="addDetails()">
+                        <svg class="icon margin-right-0-5" xmlns="http://www.w3.org/2000/svg" height="24px"
+                            viewBox="0 0 24 24" width="24px" fill="#000000">
+                            <path d="M0 0h24v24H0V0z" fill="none" />
+                            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
+                        </svg>
+                        Add
+                    </button>
+                </div>
+            </div>
+            <button onclick="addPerson()" class="button button--primary" type="submit" disabled>
+                Add person
+            </button>
+        </sm-form>
+    </sm-popup>
+    <!-- Create new sheet popup -->
+    <sm-popup id="new_sheet_popup">
+        <header slot="header" class="popup__header">
+            <button class="popup__header__close" onclick="closePopup()">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="none" d="M0 0h24v24H0z" />
+                    <path
+                        d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z" />
+                </svg>
+            </button>
+            <h3>Create new sheet</h3>
+        </header>
+        <sm-form>
+            <sm-input id="sheet_title_input" placeholder="Name*" autofocus animate required></sm-input>
+            <sm-textarea id="sheet_description_input" placeholder="Description" rows="4" animate required></sm-textarea>
+            <div id="specify_columns" class="grid">
+                <div class="flex flex-direction-column">
+                    <h4>Add Columns</h4>
+                    <p>Columns will be added as the order you added them.</p>
+                </div>
+                <div id="columns_container" class="flex flex-wrap"></div>
+                <div id="add_column" class="flex align-center space-between">
+                    <sm-input id="add_column_input" exclude placeholder="Column title"></sm-input>
+                    <button class="button" onclick="addColumn()">
+                        Add
+                    </button>
+                </div>
+            </div>
+            <div class="flex align-center space-between">
+                Make sheet private
+                <sm-switch id="sheet_type_switch" onchange="toggleEditors()"></sm-switch>
+            </div>
+            <div id="specify_editors" class="grid hidden">
+                <div class="flex flex-direction-column">
+                    <h4>Add editors</h4>
+                    <p>Only specified editors will be able to update this sheet.</p>
+                </div>
+                <div id="editors_container" class="grid"></div>
+                <div id="add_editor" class="flex align-center space-between">
+                    <sm-input id="add_editor_input" exclude placeholder="Editor's FLO Address"></sm-input>
+                    <button class="button" onclick="addEditor()">
+                        Add
+                    </button>
+                </div>
+            </div>
+            <button onclick="createSheet()" class="button button--primary" type="submit" disabled>
+                Create
+            </button>
+        </sm-form>
+    </sm-popup>
+
+    <!-- Group by popup -->
+    <sm-popup id="group_by">
+        <header slot="header" class="popup__header">
+            <button class="popup__header__close" onclick="closePopup()">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="none" d="M0 0h24v24H0z" />
+                    <path
+                        d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z" />
+                </svg>
+            </button>
+            <h3 id="group_by_title"> </h3>
+        </header>
+        <div class="flex align-center" id="group_by_menu">
+            <sm-select id="first_select">
+                <sm-option value="count">Count</sm-option>
+                <sm-option value="total" selected>Total</sm-option>
+                <sm-option value="avg">Avg</sm-option>
+                <sm-option value="max">Max</sm-option>
+                <sm-option value="min">Min</sm-option>
+            </sm-select>
+            <sm-select id="second_select"></sm-select>
+        </div>
+        <div class="table-container" id="group_by_view"></div>
+    </sm-popup>
     <script src="components.js"></script>
     <script>
-        let frag = document.createDocumentFragment(),
-            notificationSound = document.getElementById('notification_sound');
+        /*jshint esversion: 8 */
+        /**
+          * @yaireo/relative-time - javascript function to transform timestamp or date to local relative-time
+          *
+          * @version v1.0.0
+          * @homepage https://github.com/yairEO/relative-time
+          */
+
+        !function (e, t) { var o = o || {}; "function" == typeof o && o.amd ? o([], t) : "object" == typeof exports && "object" == typeof module ? module.exports = t() : "object" == typeof exports ? exports.RelativeTime = t() : e.RelativeTime = t() }(this, (function () { const e = { year: 31536e6, month: 2628e6, day: 864e5, hour: 36e5, minute: 6e4, second: 1e3 }, t = "en", o = { numeric: "auto" }; function n(e) { e = { locale: (e = e || {}).locale || t, options: { ...o, ...e.options } }, this.rtf = new Intl.RelativeTimeFormat(e.locale, e.options) } return n.prototype = { from(t, o) { const n = t - (o || new Date); for (let t in e) if (Math.abs(n) > e[t] || "second" == t) return this.rtf.format(Math.round(n / e[t]), t) } }, n }));
+
+        const relativeTime = new RelativeTime({ style: 'narrow' });
+    </script>
+    <script id="default_ui_library">
+        // Global variables
+        const { html, render: renderElem } = uhtml;
+        const domRefs = {}
+        let frag = document.createDocumentFragment();
         //Checks for internet connection status
         if (!navigator.onLine)
-            notify('There seems to be a problem connecting to the internet.', 'error', 'success', true)
+            notify('There seems to be a problem connecting to the internet, Please check you internet connection.', 'error', '', true)
         window.addEventListener('offline', () => {
-            notify('There seems to be a problem connecting to the internet.', 'error', true, true)
+            notify('There seems to be a problem connecting to the internet, Please check you internet connection.', 'error', true, true)
         })
         window.addEventListener('online', () => {
-            notifications.clearAll()
-            notify('We are back online.', '', '', true)
+            getRef('notification_drawer').clearAll()
+            notify('We are back online.', 'success')
         })
-
-        let themeSwitcher = document.getElementById('theme_switcher')
-
-        if (localStorage.theme === "dark") {
-            nightlight()
-            themeSwitcher.checked = true;
-        } else {
-            daylight()
-            themeSwitcher.checked = false;
-        }
-
-        function daylight() {
-            document.body.setAttribute("data-theme", "light");
-        }
-
-        function nightlight() {
-            document.body.setAttribute("data-theme", "dark");
-        }
-        themeSwitcher.addEventListener('change', function (e) {
-            if (this.checked) {
-                nightlight();
-                localStorage.setItem("theme", "dark");
+        // Use instead of document.getElementById
+        function getRef(elementId) {
+            if (!domRefs.hasOwnProperty(elementId)) {
+                domRefs[elementId] = {
+                    count: 1,
+                    ref: null,
+                };
+                return document.getElementById(elementId);
+            } else {
+                if (domRefs[elementId].count < 3) {
+                    domRefs[elementId].count = domRefs[elementId].count + 1;
+                    return document.getElementById(elementId);
+                } else {
+                    if (!domRefs[elementId].ref)
+                        domRefs[elementId].ref = document.getElementById(elementId);
+                    return domRefs[elementId].ref;
+                }
             }
-            else {
-                daylight();
-                localStorage.setItem("theme", "light");
-            }
-        })
+        }
 
+        // returns dom with specified element
+        function createElement(tagName, options = {}) {
+            const { className, textContent, innerHTML, attributes = {} } = options
+            const elem = document.createElement(tagName)
+            for (let attribute in attributes) {
+                elem.setAttribute(attribute, attributes[attribute])
+            }
+            if (className)
+                elem.className = className
+            if (textContent)
+                elem.textContent = textContent
+            if (innerHTML)
+                elem.innerHTML = innerHTML
+            return elem
+        }
+
+        // Use when a function needs to be executed after user finishes changes
+        const debounce = (callback, wait) => {
+            let timeoutId = null;
+            return (...args) => {
+                window.clearTimeout(timeoutId);
+                timeoutId = window.setTimeout(() => {
+                    callback.apply(null, args);
+                }, wait);
+            };
+        }
+
+        let zIndex = 50
         // function required for popups or modals to appear
-        class Stack {
-            constructor() {
-                this.items = [];
-            }
-            push(element) {
-                this.items.push(element);
-            }
-            pop() {
-                if (this.items.length == 0)
-                    return "Underflow";
-                return this.items.pop();
-            }
-            peek() {
-                return this.items[this.items.length - 1];
-            }
-        }
-        let popupStack = new Stack(),
-            zIndex = 10;
-
-        function showPopup(popup, pinned) {
-            let thisPopup = document.getElementById(popup);
+        function openPopup(popupId, pinned) {
             zIndex++
-            thisPopup.setAttribute('style', `z-index: ${zIndex}`)
-            popupStack = thisPopup.show(pinned, popupStack)
-            return thisPopup;
+            getRef(popupId).setAttribute('style', `z-index: ${zIndex}`)
+            getRef(popupId).show({ pinned })
+            return getRef(popupId);
         }
 
-        // hides the popup or modal 
-        function hidePopup() {
+        // hides the popup or modal
+        function closePopup() {
             if (popupStack.peek() === undefined)
                 return;
             popupStack.peek().popup.hide()
         }
 
-        document.addEventListener('popupclosed', e => {
-            let popup = e.detail.popup
-            switch (popup.id) {
-                case 'new_sheet_popup':
-                    columnsContainer.innerHTML = ''
-                    editorsContainer.innerHTML = ''
-                    break;
-            }
-        })
-
-        const loaderPage = document.getElementById('main_loader'),
-            mainHeader = document.getElementById('main_header')
-        function showLoader() {
-            document.body.classList.remove('hide-completely')
-            loaderPage.classList.remove('hide-completely')
-            loader.classList.add('animate-loader')
-            document.querySelector('main').classList.add('hide-completely')
-            mainHeader.classList.add('hide-completely')
-        }
-        function hideLoader() {
-            loaderPage.classList.add('hide-completely')
-            loader.classList.remove('animate-loader')
-            document.querySelector('main').classList.remove('hide-completely')
-            mainHeader.classList.remove('hide-completely')
-        }
-
-
-        function setAttributes(el, attrs) {
-            for (var key in attrs) {
-                el.setAttribute(key, attrs[key]);
-            }
-        }
-
-        function randomHsl(saturation = 80, lightness = 80) {
-            let hue = Math.random() * 360
-            let color = {
-                primary: `hsla( ${hue}, ${saturation}%, ${lightness}%, 1)`,
-                light: `hsla( ${hue}, ${saturation}%, 90%, 0.6)`
-            }
-            return color;
-        }
-
-        let notifications = document.getElementById('show_message');
-        //Function for displaying toast notifications. pass in error for mode param if you want to show an error.
-        function notify(message, mode, pinned, sound) {
-            if (mode === 'error')
-                console.error(message)
-            else if (mode === 'warn')
-                console.warn(message)
-            else
-                console.log(message)
-            notifications.push(message, mode, pinned)
-            if (navigator.onLine && sound) {
-                notificationSound.currentTime = 0;
-                notificationSound.play();
-            }
-        }
 
         // displays a popup for asking permission. Use this instead of JS confirm
-        let getConfirmation = (message, cancelText = 'Cancel', confirmText = 'OK') => {
+        const getConfirmation = (title, options = {}) => {
             return new Promise(resolve => {
-                let popup = document.getElementById('confirmation');
-                showPopup('confirmation')
-                popup.querySelector('#confirm_message').textContent = message;
-                let submitButton = popup.querySelector('.submit-btn')
-                submitButton.textContent = confirmText
-                submitButton.onclick = () => {
-                    popup.hide()
+                const { message = '', cancelText = 'Cancel', confirmText = 'OK' } = options
+                openPopup('confirmation_popup', true)
+                getRef('confirm_title').innerText = title;
+                getRef('confirm_message').innerText = message;
+                const cancelButton = getRef('confirmation_popup').querySelector('.cancel-button');
+                const confirmButton = getRef('confirmation_popup').querySelector('.confirm-button')
+                confirmButton.textContent = confirmText
+                cancelButton.textContent = cancelText
+                confirmButton.onclick = () => {
+                    closePopup()
                     resolve(true);
                 }
-                let cancelButton = popup.querySelector('.cancel-btn')
-                cancelButton.textContent = cancelText
                 cancelButton.onclick = () => {
-                    popup.hide()
-                    reject(false);
+                    closePopup()
+                    resolve(false);
                 }
             })
         }
 
-        // displays a popup for asking user input. Use this instead of JS prompt
-        let askPrompt = function (message, defaultVal) {
-            return new Promise(resolve => {
-                let popup = document.getElementById('prompt'),
-                    input = popup.querySelector('sm-input');
-                if (defaultVal)
-                    input.value = defaultVal;
-                showPopup('prompt')
-                input.focus()
-                input.addEventListener('keyup', e => {
-                    if (e.key === 'Enter') {
-                        resolve(input.value);
-                        popup.hide()
-                    }
-                })
-                popup.querySelector('#prompt_message').textContent = message;
-                popup.querySelector('.submit-btn').onclick = () => {
-                    popup.hide()
-                    resolve(input.value);
-                }
-                popup.querySelector('.cancel-btn').onclick = () => {
-                    popup.hide()
-                    resolve(null);
-                }
-            })
+        //Function for displaying toast notifications. pass in error for mode param if you want to show an error.
+        function notify(message, mode, options = {}) {
+            let icon
+            switch (mode) {
+                case 'success':
+                    icon = `<svg class="icon icon--success" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"/></svg>`
+                    break;
+                case 'error':
+                    icon = `<svg class="icon icon--error" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7v2h2v-2h-2zm0-8v6h2V7h-2z"/></svg>`
+                    options.pinned = true
+                    break;
+            }
+            getRef("notification_drawer").push(message, { icon, ...options });
+            if (mode === 'error') {
+                console.error(message)
+            }
         }
 
-        const currentYear = new Date().getFullYear()
-        function formatedTime(time, relative) {
+        // detect browser version
+        function detectBrowser() {
+            let ua = navigator.userAgent,
+                tem,
+                M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+            if (/trident/i.test(M[1])) {
+                tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
+                return 'IE ' + (tem[1] || '');
+            }
+            if (M[1] === 'Chrome') {
+                tem = ua.match(/\b(OPR|Edge)\/(\d+)/);
+                if (tem != null) return tem.slice(1).join(' ').replace('OPR', 'Opera');
+            }
+            M = M[2] ? [M[1], M[2]] : [navigator.appName, navigator.appVersion, '-?'];
+            if ((tem = ua.match(/version\/(\d+)/i)) != null) M.splice(1, 1, tem[1]);
+            return M.join(' ');
+        }
+        window.addEventListener('hashchange', e => showPage(window.location.hash))
+        window.addEventListener("load", () => {
+            const [browserName, browserVersion] = detectBrowser().split(' ');
+            const supportedVersions = {
+                Chrome: 85,
+                Firefox: 75,
+                Safari: 13,
+            }
+            if (browserName in supportedVersions) {
+                if (parseInt(browserVersion) < supportedVersions[browserName]) {
+                    notify(`${browserName} ${browserVersion} is not fully supported, some features may not work properly. Please update to ${supportedVersions[browserName]} or higher.`, 'error')
+                }
+            } else {
+                notify('Browser is not fully compatible, some features may not work. for best experience please use Chrome, Edge, Firefox or Safari', 'error')
+            }
+            document.body.classList.remove('hidden')
+            document.querySelectorAll('sm-input[data-flo-id]').forEach(input => input.customValidation = floCrypto.validateAddr)
+            document.querySelectorAll('sm-input[data-private-key]').forEach(input => input.customValidation = floCrypto.getPubKeyHex)
+            document.addEventListener('keyup', (e) => {
+                if (e.code === 'Escape') {
+                    closePopup()
+                }
+            })
+            document.addEventListener("pointerdown", (e) => {
+                if (e.target.closest("button:not([disabled]), sm-button:not([disabled]), .interactive")) {
+                    createRipple(e, e.target.closest("button, sm-button, .interactive"));
+                }
+            });
+            document.addEventListener('copy', () => {
+                notify('copied', 'success')
+            })
+        });
+
+        function createRipple(event, target) {
+            const circle = document.createElement("span");
+            const diameter = Math.max(target.clientWidth, target.clientHeight);
+            const radius = diameter / 2;
+            const targetDimensions = target.getBoundingClientRect();
+            circle.style.width = circle.style.height = `${diameter}px`;
+            circle.style.left = `${event.clientX - (targetDimensions.left + radius)}px`;
+            circle.style.top = `${event.clientY - (targetDimensions.top + radius)}px`;
+            circle.classList.add("ripple");
+            const rippleAnimation = circle.animate(
+                [
+                    {
+                        transform: "scale(4)",
+                        opacity: 0,
+                    },
+                ],
+                {
+                    duration: 600,
+                    fill: "forwards",
+                    easing: "ease-out",
+                }
+            );
+            target.append(circle);
+            rippleAnimation.onfinish = () => {
+                circle.remove();
+            };
+        }
+
+        function getFormattedTime(timestamp, format) {
             try {
-                if (String(time).indexOf('_'))
-                    time = String(time).split('_')[0]
-                let timeFrag = new Date(parseInt(time)).toString().split(' '),
-                    day = timeFrag[0],
-                    month = timeFrag[1],
-                    date = timeFrag[2],
-                    year = timeFrag[3],
-                    minutes = new Date(parseInt(time)).getMinutes(),
-                    hours = new Date(parseInt(time)).getHours(),
+                timestamp = parseInt(timestamp)
+                if (String(timestamp).length < 13)
+                    timestamp *= 1000
+                let [day, month, date, year] = new Date(timestamp).toString().split(' '),
+                    minutes = new Date(timestamp).getMinutes(),
+                    hours = new Date(timestamp).getHours(),
                     currentTime = new Date().toString().split(' ')
+
                 minutes = minutes < 10 ? `0${minutes}` : minutes
                 let finalHours = ``;
                 if (hours > 12)
@@ -602,189 +605,235 @@
                     finalHours = `${hours}:${minutes}`
 
                 finalHours = hours >= 12 ? `${finalHours} PM` : `${finalHours} AM`
-                if (relative) {
-                    if (year == currentYear) {
-                        if (currentTime[1] === month && date === currentTime[2])
-                            return `Today at ${finalHours}`;
+                switch (format) {
+                    case 'date-only':
+                        return `${month} ${date}, ${year}`;
+                        break;
+                    case 'time-only':
+                        return finalHours;
+                    case 'relative':
+                        // check if timestamp is older than a day
+                        if (Date.now() - new Date(timestamp) < 60 * 60 * 24 * 1000)
+                            return `${finalHours}`;
                         else
-                            return ` ${date} ${month}`;
-
-                    }
+                            return relativeTime.from(timestamp)
+                    default:
+                        return `${month} ${date}, ${year} at ${finalHours}`;
                 }
-                else
-                    return `${finalHours} ${month} ${date} ${year}`;
             } catch (e) {
                 console.error(e);
-                return time;
+                return timestamp;
             }
         }
-
-        function copyToClipboard(parent) {
-            let toast = document.getElementById('textCopied'),
-                textToCopy = parent.querySelector('.copy').textContent;
-            navigator.clipboard.writeText(textToCopy)
-            notify('Copied', 'success')
+        function buttonLoader(id, show) {
+            const button = typeof id === 'string' ? getRef(id) : id;
+            button.disabled = show;
+            const animOptions = {
+                duration: 200,
+                fill: 'forwards',
+                easing: 'ease'
+            }
+            if (show) {
+                button.animate([
+                    {
+                        clipPath: 'circle(100%)',
+                    },
+                    {
+                        clipPath: 'circle(0)',
+                    },
+                ], animOptions).onfinish = e => {
+                    e.target.commitStyles()
+                    e.target.cancel()
+                }
+                button.parentNode.append(createElement('sm-spinner'))
+            } else {
+                button.style = ''
+                const potentialTarget = button.parentNode.querySelector('sm-spinner')
+                if (potentialTarget) potentialTarget.remove();
+            }
         }
-        function areInputsValid(parent) {
-            let allInputs = parent.querySelectorAll("sm-input:not([disabled])"),
-                inputsFilled = [...allInputs].every(input => {
-                    if (input.hasAttribute('floId')) {
-                        if (floCrypto.validateAddr(input.value.trim())) return true
+        // implement event delegation
+        function delegate(el, event, selector, fn) {
+            el.addEventListener(event, function (e) {
+                const potentialTarget = e.target.closest(selector)
+                if (potentialTarget) {
+                    e.delegateTarget = potentialTarget
+                    fn.call(this, e)
+                }
+            })
+        }
+        const slideInLeft = [
+            {
+                opacity: 0,
+                transform: 'translateX(1rem)'
+            },
+            {
+                opacity: 1,
+                transform: 'translateX(0)'
+            }
+        ]
+        const slideOutLeft = [
+            {
+                opacity: 1,
+                transform: 'translateX(0)'
+            },
+            {
+                opacity: 0,
+                transform: 'translateX(-1rem)'
+            },
+        ]
+        const slideInRight = [
+            {
+                opacity: 0,
+                transform: 'translateX(-1rem)'
+            },
+            {
+                opacity: 1,
+                transform: 'translateX(0)'
+            }
+        ]
+        const slideOutRight = [
+            {
+                opacity: 1,
+                transform: 'translateX(0)'
+            },
+            {
+                opacity: 0,
+                transform: 'translateX(1rem)'
+            },
+        ]
+        const slideInDown = [
+            {
+                opacity: 0,
+                transform: 'translateY(-1rem)'
+            },
+            {
+                opacity: 1,
+                transform: 'translateY(0)'
+            },
+        ]
+        const slideOutUp = [
+            {
+                opacity: 1,
+                transform: 'translateY(0)'
+            },
+            {
+                opacity: 0,
+                transform: 'translateY(-1rem)'
+            },
+        ]
+        function showChildElement(id, index, options = {}) {
+            return new Promise((resolve) => {
+                const { mobileView = false, entry, exit } = options
+                const animOptions = {
+                    duration: 150,
+                    easing: 'ease',
+                    fill: 'forwards'
+                }
+                const visibleElement = [...getRef(id).children].find(elem => !elem.classList.contains(mobileView ? 'hide-on-mobile' : 'hidden'));
+                if (visibleElement === getRef(id).children[index]) return;
+                visibleElement.getAnimations().forEach(anim => anim.cancel())
+                getRef(id).children[index].getAnimations().forEach(anim => anim.cancel())
+                if (visibleElement) {
+                    if (exit) {
+                        visibleElement.animate(exit, animOptions).onfinish = () => {
+                            visibleElement.classList.add(mobileView ? 'hide-on-mobile' : 'hidden')
+                            getRef(id).children[index].classList.remove(mobileView ? 'hide-on-mobile' : 'hidden')
+                            if (entry)
+                                getRef(id).children[index].animate(entry, animOptions).onfinish = () => resolve()
+                        }
+                    } else {
+                        visibleElement.classList.add(mobileView ? 'hide-on-mobile' : 'hidden')
+                        getRef(id).children[index].classList.remove(mobileView ? 'hide-on-mobile' : 'hidden')
+                        resolve()
                     }
-                    else if (input.hasAttribute('privateKey')) {
-                        if (floCrypto.getPubKeyHex(input.value.trim())) return true
-                    }
+                } else {
+                    getRef(id).children[index].classList.remove(mobileView ? 'hide-on-mobile' : 'hidden')
+                    getRef(id).children[index].animate(entry, animOptions).onfinish = () => resolve()
+                }
+            })
+        }
+
+        document.addEventListener('popupclosed', e => {
+            let popup = e.detail.popup
+            switch (popup.id) {
+                case 'new_sheet_popup':
+                    getRef('columns_container').innerHTML = ''
+                    getRef('editors_container').innerHTML = ''
+                    break;
+            }
+        })
+        const tableHeader = getRef('sheet_container').firstElementChild.firstElementChild,
+            tableBody = getRef('sheet_container').firstElementChild.children[1]
+        function showLoader() {
+            document.body.classList.remove('hidden')
+            getRef('main_loader').classList.remove('hidden')
+            document.querySelector('main').classList.add('hidden')
+            getRef('main_header').classList.add('hidden')
+        }
+        function hideLoader() {
+            getRef('main_loader').classList.add('hidden')
+            document.querySelector('main').classList.remove('hidden')
+            getRef('main_header').classList.remove('hidden')
+        }
+
+
+        function setAttributes(el, attrs) {
+            for (var key in attrs) {
+                el.setAttribute(key, attrs[key]);
+            }
+        }
+        let currentTableHeader
+        document.addEventListener('click', e => {
+            try {
+                if (e.target.closest(".person-card"))
+                    copyToLogInput(e.target.closest(".person-card").dataset.floId)
+                else if (e.target.closest("th")) {
+                    let trgt = e.target.closest('th')
+                    if (currentTableHeader && currentTableHeader !== trgt)
+                        currentTableHeader.classList.remove('ascending', 'descending')
+                    sortTable(trgt.cellIndex, trgt.classList.contains('descending'))
+                    if (trgt.classList.contains('descending'))
+                        trgt.classList.add('ascending')
                     else
-                        return input.isValid
-                })
-            let allRadios = parent.querySelectorAll("input[type='radio']")
-            if (allRadios.length)
-                return inputsFilled && parent.querySelector('[checked]')
-            else
-                return inputsFilled
-        }
+                        trgt.classList.remove('ascending')
+                    trgt.classList.toggle('descending')
+                    currentTableHeader = trgt
+                }
+            } catch (error) {
+                //do nothing
+            }
+        })
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    let { id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin } = floGlobals.currentSheet;
+                    renderSheetView(id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin, true, true)
+                    observer.disconnect()
+                }
+            })
+        })
+        const watchLastElement = new MutationObserver(mutations => {
+            mutations.forEach(mutation => {
+                if (mutation.addedNodes.length) {
+                    observer.observe(mutation.addedNodes[mutation.addedNodes.length - 1])
+                }
+            })
+        })
+        watchLastElement.observe(tableBody, { childList: true, subtree: true })
 
-        function formValidation(formElement) {
-            let parent = formElement.closest('sm-popup') || formElement.closest('form'),
-                submitBtn = parent.querySelector("[type='submit']");
-            if (!submitBtn) return;
-            if (areInputsValid(parent))
-                submitBtn.disabled = false;
-            else
-                submitBtn.disabled = true;
-        }
-
-        window.addEventListener('load', () => {
-            document.addEventListener('input', e => {
-                if (e.target.closest('sm-input')) {
-                    let input = e.target.closest('sm-input')
-                    if (!input.closest('sm-popup') && !input.closest('form')) return
-                    formValidation(input)
-                    if (input.value === '')
-                        input.setValidity('')
-                    let validityState = input.validity
-                    if (input.hasAttribute('type') && input.getAttribute('type') === 'number') {
-                        if (validityState.rangeUnderflow) {
-                            input.setValidity('Minium ₹1 should be entered.')
-                        }
-                        else if (validityState.typeMismatch) {
-                            input.setValidity('Only digits are allowed.')
-                        }
-                        else {
-                            input.setValidity('')
-                        }
-                    }
-                    else if (input.hasAttribute('floId')) {
-                        if (floCrypto.validateAddr(input.value.trim()) || input.value.trim() === '')
-                            input.setValidity('')
-                        else
-                            input.setValidity('Invalid FLO address.')
-                    }
-                    else if (input.hasAttribute('privateKey')) {
-                        if (floCrypto.getPubKeyHex(input.value.trim()) || input.value.trim() === '')
-                            input.setValidity('')
-                        else
-                            input.setValidity('Invalid FLO private key!')
+        getRef('search_sheets').addEventListener('input', function () {
+            if (this.value.trim !== '') {
+                for (child of getRef('sheets_container').children) {
+                    if (child.id === 'add_new_sheet') continue
+                    if (child.dataset.name.toUpperCase().indexOf(this.value.toUpperCase()) > -1) {
+                        child.classList.remove('hidden')
                     }
                     else {
-                        if (validityState.patternMismatch)
-                            input.setValidity('Invalid UPI address.')
-                        if (validityState.tooShort || validityState.tooLong)
-                            input.setValidity('UPI transaction Id should be 12 digits long.')
-                        else
-                            input.setValidity('')
+                        child.classList.add('hidden')
                     }
-                }
-            })
-            document.addEventListener('keyup', (e) => {
-                if (e.target.closest('sm-input')) {
-                    if (e.key === 'Enter') {
-                        let parent = e.target.closest('sm-popup') || e.target.closest('form')
-                        parent.querySelector("button[type='submit']")
-                            .click();
-                    }
-                }
-            })
-            let currentTableHeader
-            document.addEventListener('click', e => {
-                try {
-                    if (e.target.closest('#add_new_sheet'))
-                        showPopup('new_sheet_popup')
-                    else if (e.target.closest('.sheet-card'))
-                        viewSheet(e.target.closest('.sheet-card').dataset.name)
-                    else if (e.target.closest(".person-card"))
-                        copyToLogInput(e.target.closest(".person-card").dataset.floId)
-                    else if (e.target.closest("th")) {
-                        let trgt = e.target.closest('th')
-                        if (currentTableHeader && currentTableHeader !== trgt)
-                            currentTableHeader.classList.remove('ascending', 'descending')
-                        sortTable(trgt.cellIndex, trgt.classList.contains('descending'))
-                        if (trgt.classList.contains('descending'))
-                            trgt.classList.add('ascending')
-                        else
-                            trgt.classList.remove('ascending')
-                        trgt.classList.toggle('descending')
-                        currentTableHeader = trgt
-                    }
-                    else if (e.target.closest('h4')) {
-                        createRipple(e)
-                    }
-                } catch (error) {
-                    //do nothing
-                }
-            })
-            function createRipple(event) {
-                const target = event.target.closest('h4')
-                const ripple = target.querySelector('.ripple');
-                if (ripple) {
-                    ripple.remove();
-                }
-                const ogOverflow = target.style.overflow
-                target.style.overflow = 'hidden'
-                console.log(target.getBoundingClientRect(), event)
-                const circle = document.createElement("span");
-                const diameter = Math.max(target.clientWidth, target.clientHeight);
-                const radius = diameter / 2;
-                circle.style.width = circle.style.height = `${diameter}px`;
-                circle.style.left = `${event.clientX - radius}px`;
-                circle.style.top = `${event.clientY - radius}px`;
-                circle.classList.add("ripple");
-                target.append(circle);
-                circle.onanimationend = () => {
-                    target.style.overflow = ogOverflow
                 }
             }
-            const observer = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        let {id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin } = floGlobals.currentSheet;
-                        renderSheetView(id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin, true, true)
-                        observer.disconnect()
-                    }
-                })
-            })
-            const watchLastElement = new MutationObserver(mutations => {
-                mutations.forEach(mutation => {
-                    if (mutation.addedNodes.length) {
-                        observer.observe(mutation.addedNodes[mutation.addedNodes.length - 1])
-                    }
-                })
-            })
-            watchLastElement.observe(tableBody, { childList: true, subtree: true })
-
-            document.getElementById('search_sheets').addEventListener('input', function () {
-                if (this.value.trim !== '') {
-                    for (child of sheetsContainer.children) {
-                        if (child.id === 'add_new_sheet') continue
-                        if (child.dataset.name.toUpperCase().indexOf(this.value.toUpperCase()) > -1) {
-                            child.classList.remove('hide-completely')
-                        }
-                        else {
-                            child.classList.add('hide-completely')
-                        }
-                    }
-                }
-            })
         })
 
         function removeUnderscore(word) {
@@ -792,35 +841,27 @@
         }
 
         const render = {
-            sheetCard(sheet_id, sheetName, editors) {
-                let card = document.createElement('div'),
-                    type = 'Public'
-                card.classList.add('sheet-card')
-                card.setAttribute('data-name', sheet_id)
-                if (editors)
-                    type = 'Private'
-                card.innerHTML = `
-                    <div class="card">
-                        <h5>${type}</h5>
-                    </div>
-                    <h4>${sheetName}</h4>
-                `
-                return card
+            sheetCard(sheetId, details) {
+                const { title, editors } = details
+                const type = editors ? 'Private' : 'Public'
+                return html`
+                    <a class="sheet-card interactive" href=${`#/sheet_view?id=${sheetId}`} .dataset=${{ name: title }}>
+                        <div class="card">
+                            <h5>${type}</h5>
+                        </div>
+                        <h4>${title}</h4>
+                    </a>
+                `;
             },
-            personCard(floId, details) {
-                let card = document.createElement('div'),
-                    { name } = details
-                card.classList.add('person-card')
-                setAttributes(card, {
-                    'data-flo-id': floId,
-                    'data-name': name
-                })
-                card.innerHTML = `
-                    <h3 class="person-initials">${name.charAt(0)}</h3>
-                    <h4 class="person-name">${name}</h4>
-                    <h5 class="person-flo-id overflow-ellipsis">${floId}</h5>
-                `
-                return card
+            personCard(floId, details, ref) {
+                const { name } = details
+                return html.for(ref, floId)`
+                    <div class="person-card interactive" .dataset=${{ floId, name }}>
+                        <h3 class="person-initials">${name.charAt(0)}</h3>
+                        <h4 class="person-name">${name}</h4>
+                        <h5 class="person-flo-id overflow-ellipsis">${floId}</h5>
+                    </div>
+                `;
             },
             editorCard(floId) {
                 let card = document.createElement('div')
@@ -830,11 +871,9 @@
                 })
                 card.innerHTML = `
                     <h4 class="editor-address">${floId}</h4>
-                    <svg class="icon" onclick="this.parentNode.remove()" viewBox="0 0 64 64">
-                        <title>Remove editor</title>
-                        <line x1="64" y1="0" x2="0" y2="64" />
-                        <line x1="64" y1="64" x2="0" y2="0" />
-                    </svg>
+                    <button onclick="this.parentNode.remove()">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></svg>
+                    </button>
                 `
                 return card
             },
@@ -846,11 +885,9 @@
                 })
                 card.innerHTML = `
                     <h5 class="column-title">${title}</h5>
-                    <svg class="icon" onclick="this.parentNode.remove()" viewBox="0 0 64 64">
-                        <title>Remove column</title>
-                        <line x1="64" y1="0" x2="0" y2="64" />
-                        <line x1="64" y1="64" x2="0" y2="0" />
-                    </svg>
+                    <button onclick="this.parentNode.remove()">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></svg>
+                    </button>
                 `
                 return card
             },
@@ -864,148 +901,184 @@
                 card.innerHTML = `
                     <h5 class="type">${type}</h5>
                     <h4 class="value">${value}</h4>
-                    <svg class="icon" onclick="this.parentNode.remove()" viewBox="0 0 64 64">
-                        <title>Remove this field</title>
-                        <line x1="64" y1="0" x2="0" y2="64" />
-                        <line x1="64" y1="64" x2="0" y2="0" />
-                    </svg>
+                    <button onclick="this.parentNode.remove()">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></svg>
+                    </button>
                 `
                 return card
             }
         }
 
-        const sheetDetails = document.getElementById('sheet_details')
-        const sheetPage = document.getElementById('sheet_page')
-
-        const addEditorInput = document.getElementById('add_editor_input')
-        const specifyEditors = document.getElementById('specify_editors')
-        const editorsContainer = document.getElementById('editors_container')
-
-        const addColumnInput = document.getElementById('add_column_input')
-        const columnsContainer = document.getElementById('columns_container')
-
-        const additionalFields = document.getElementById('additional_fields')
-        const personFloIdInput = document.getElementById('person_flo_id_input')
-        const personNameInput = document.getElementById('person_name_input')
-        const addDetailTypeInput = document.getElementById('add_detail_type_input')
-        const addDetailValueInput = document.getElementById('add_detail_value_input')
-
-
-
         function addEditor() {
-            let address = addEditorInput.value.trim()
+            let address = getRef('add_editor_input').value.trim()
             if (address === '') return;
             if (floCrypto.validateAddr(address)) {
-                editorsContainer.append(render.editorCard(address))
-                addEditorInput.value = ''
-            }
-            else {
+                getRef('editors_container').append(render.editorCard(address))
+                getRef('add_editor_input').value = ''
+            } else {
                 notify('Invalid editor FLO address', 'error')
             }
         }
         function addColumn() {
-            let columnTitle = addColumnInput.value.trim()
+            let columnTitle = getRef('add_column_input').value.trim()
             if (columnTitle !== '') {
-                columnsContainer.append(render.columnCard(columnTitle))
-                addColumnInput.value = ''
-
-            }
-            else
+                getRef('columns_container').append(render.columnCard(columnTitle))
+                getRef('add_column_input').value = ''
+                getRef('add_column_input').focusIn()
+            } else
                 notify("Column name should be specified.", 'error')
         }
 
         function addDetails() {
-            let type = addDetailTypeInput.value.trim()
-            let value = addDetailValueInput.value.trim()
+            let type = getRef('add_detail_type_input').value.trim()
+            let value = getRef('add_detail_value_input').value.trim()
             if (type !== '' && value !== '') {
-                additionalFields.append(render.detailsCard(type, value))
-                addDetailTypeInput.value = ''
-                addDetailValueInput.value = ''
+                getRef('additional_fields').append(render.detailsCard(type, value))
+                getRef('add_detail_type_input').value = ''
+                getRef('add_detail_value_input').value = ''
+                getRef('add_detail_type_input').focusIn()
             }
             else
                 notify('Please enter both type and value', 'error')
         }
 
         function toggleDetails() {
-            sheetDetails.classList.toggle('collapse')
+            getRef('sheet_details').classList.toggle('collapse')
         }
         function toggleSideBar() {
-            sheetPage.classList.toggle('toggle-side-bar')
+            getRef('sheet_view').classList.toggle('toggle-side-bar')
         }
         function toggleEditors() {
-            specifyEditors.classList.toggle('hide-completely')
+            getRef('specify_editors').classList.toggle('hidden')
         }
-
-        const allPages = document.querySelectorAll('.page')
-        function showPage(page) {
-            allPages.forEach(page => page.classList.add('hide-completely'))
-            document.getElementById(page).classList.remove('hide-completely')
-            if (page === 'home_page') {
-                tableBody.innerHTML = ''
-                sheetHeading.textContent = ''
-                sheetType.textContent = ''
-                sheetDescription.textContent = ''
-                mainHeader.classList.remove('hide-completely')
+        let lastPage
+        function showPage(targetPage, options = {}) {
+            const { firstLoad, hashChange } = options
+            let pageId
+            let searchParams
+            let params
+            if (targetPage === '') {
+                pageId = 'home_page'
             }
-            else
-                mainHeader.classList.add('hide-completely')
-        }
+            else {
+                if (targetPage.includes('/')) {
+                    if (targetPage.includes('?')) {
+                        const splitAddress = targetPage.split('?')
+                        searchParams = splitAddress.pop()
+                        const pages = splitAddress.pop().split('/')
+                        pageId = pages[1]
+                        subPageId1 = pages[2]
+                        subPageId2 = pages[3]
+                    } else {
+                        const pages = targetPage.split('/')
+                        pageId = pages[1]
+                        subPageId1 = pages[2]
+                        subPageId2 = pages[3]
+                    }
+                } else {
+                    pageId = targetPage
+                }
+            }
 
-        const credentialsSection = document.getElementById('credentials_section'),
-            generateFloId = document.getElementById('generate_flo_id'),
-            generatedId = document.getElementById('generated_id'),
-            generatedKey = document.getElementById('generated_key')
+            if (!document.querySelector(`#${pageId}.page`)) return
+
+            if (searchParams) {
+                const urlSearchParams = new URLSearchParams('?' + searchParams);
+                params = Object.fromEntries(urlSearchParams.entries());
+            }
+            switch (pageId) {
+                case 'home_page':
+                    tableBody.innerHTML = ''
+                    getRef('sheet_heading').textContent = ''
+                    getRef('sheet_type').textContent = ''
+                    getRef('sheet_description').textContent = ''
+                    getRef('main_header').classList.remove('hidden')
+                    break;
+                case 'sheet_view':
+                    if (params) {
+                        viewSheet(params.id)
+                    }
+                    break;
+            }
+            if (pageId !== 'home_page') {
+                getRef('main_header').classList.add('hidden')
+            }
+            if (document.querySelector('.nav-list__item--active'))
+                document.querySelector('.nav-list__item--active').classList.remove('nav-list__item--active');
+            const targetListItem = [...document.querySelectorAll(`a.nav-list__item`)].find(item => item.href.includes(pageId))
+            if (targetListItem)
+                targetListItem.classList.add('nav-list__item--active')
+            if (pageId !== lastPage && document.querySelector('.page:not(.hidden)')) {
+                document.querySelector('.page:not(.hidden)').classList.add('hidden')
+            }
+            getRef(pageId).classList.remove('hidden')
+            lastPage = pageId
+        }
 
         function generateId() {
-            generateFloId.classList.add('hide-completely')
-            credentialsSection.classList.remove('hide-completely')
+            getRef('generate_flo_id').classList.add('hidden')
+            getRef('credentials_section').classList.remove('hidden')
             let { floID, privKey } = floCrypto.generateNewID()
-            generatedId.textContent = floID
-            generatedKey.textContent = privKey
+            getRef('generated_id').value = floID
+            getRef('generated_key').value = privKey
         }
 
         function signOut() {
-            getConfirmation('Are you sure you want to Sign out?').then(result => {
-                try {
-                    hidePopup()
-                    generateFloId.classList.remove('hide-completely')
-                    credentialsSection.classList.add('hide-completely')
-                    generatedId.textContent = ''
-                    generatedKey.textContent = ''
-                    floDapps.clearCredentials();
-                    setTimeout(onLoadStartUp, 1000)
-                } catch (error) {
-                    notify(error, "error")
-                }
-            })
+            getConfirmation('Sign out?', { message: 'You are about to sign out of the app, continue?', confirmText: 'Leave', cancelText: 'Stay' })
+                .then(async (res) => {
+                    if (res) {
+                        await floDapps.clearCredentials();
+                        location.reload();
+                    }
+                });
         }
 
-        document.getElementById('save_button').children[2].addEventListener("click", function (e) {
+        getRef('entry_type_selector').addEventListener('change', e => {
+            if (e.target.value === 'sign-in') {
+                showChildElement('user_entry', 0, { entry: slideInRight, exit: slideOutRight }).then(() => {
+                })
+            } else {
+                showChildElement('user_entry', 1, { entry: slideInLeft, exit: slideOutLeft }).then(() => {
+                })
+            }
+        })
+
+        getRef('save_button').children[2].addEventListener("click", function (e) {
             logSheet.commitUpdates().then(result => {
-                this.parentNode.classList.add('hide')
-                this.parentNode.classList.remove('no-transformations')
-                this.parentNode.dataset["unsaved"] = '0'
-                notify("Save Successful")
+                getRef('save_button').animate([
+                    {
+                        transform: 'none',
+                        opacity: 1
+                    },
+                    {
+                        transform: 'translateY(1rem)',
+                        opacity: 0
+                    },
+                ], {
+                    duration: 300,
+                    easing: 'ease',
+                    fill: 'forwards'
+                }).onfinish = e => {
+                    getRef('save_button').classList.add('hidden')
+                    getRef('save_button').dataset["unsaved"] = '0'
+                    notify("Save Successful", 'success')
+                }
             }).catch(error => notify(`Save Unsuccessful [${error}]`, error))
         })
 
-        const firstSelect = document.getElementById('first_select')
-        const secondSelect = document.getElementById('second_select')
-
-        document.getElementById('first_select').addEventListener("change", function (e) {
+        getRef('first_select').addEventListener("change", function (e) {
             try {
-                let sheet_id = floGlobals.currentSheet.id;
+                let sheetId = floGlobals.currentSheet.id;
                 let sheet = floGlobals.currentSheet.sheet;
                 let type = this.value;
-                console.log(this)
                 if (type === 'count') {
-                    secondSelect.classList.add("hide-completely")
-                    let data = logSheet.groupBy.count(sheet_id, sheet)
+                    getRef('second_select').classList.add("hidden")
+                    let data = logSheet.groupBy.count(sheetId, sheet)
                     renderGroupByView("count", data)
                 } else {
-                    secondSelect.classList.remove("hide-completely")
-                    let column = secondSelect.value;
-                    let data = logSheet.groupBy[type](sheet_id, sheet, column);
+                    getRef('second_select').classList.remove("hidden")
+                    let column = getRef('second_select').value;
+                    let data = logSheet.groupBy[type](sheetId, sheet, column);
                     renderGroupByView(`${type}(${column})`, data)
                 }
             } catch (error) {
@@ -1013,87 +1086,88 @@
             }
         })
 
-        document.getElementById('second_select').addEventListener("change", function (e) {
+        getRef('second_select').addEventListener("change", function (e) {
             try {
                 console.log(this)
-                let sheet_id = floGlobals.currentSheet.id;
+                let sheetId = floGlobals.currentSheet.id;
                 let sheet = floGlobals.currentSheet.sheet;
-                let type = firstSelect.value;
+                let type = getRef('first_select').value;
                 let column = this.value;
-                let data = logSheet.groupBy[type](sheet_id, sheet, column);
+                let data = logSheet.groupBy[type](sheetId, sheet, column);
                 renderGroupByView(`${type}(${column})`, data)
             } catch (error) {
                 notify(error, "error")
             }
         })
 
-        function removeElement(element) {
-            element.parentNode.removeChild(element);
-        }
-
         function clearElement(element) {
             element.innerHTML = '';
             return element;
         }
 
-        let banner = document.getElementById('save_button')
         function showSave() {
-            banner.dataset["unsaved"] = parseInt(banner.dataset["unsaved"]) + 1
-            banner.classList.remove('no-transformations');
-            banner.classList.add('hide');
-            setTimeout(() => {
-                banner.children[0].style.background = `#F${Math.max(9 - parseInt(banner.dataset["unsaved"]), 0)}0`;
-                banner.classList.add('no-transformations');
-                banner.classList.remove('hide');
-            }, 300)
+            getRef('save_button').classList.remove('hidden')
+            getRef('save_button').dataset["unsaved"] = parseInt(getRef('save_button').dataset["unsaved"]) + 1
+            getRef('save_button').animate([
+                {
+                    transform: 'translateY(1rem)',
+                    opacity: 0
+                },
+                {
+                    transform: 'none',
+                    opacity: 1
+                }
+            ], {
+                duration: 300,
+                easing: 'ease',
+                fill: 'forwards'
+            }).onfinish = e => {
+                getRef('save_button').children[0].style.background = `#F${Math.max(9 - parseInt(getRef('save_button').dataset["unsaved"]), 0)}0`;
+            }
         }
 
         function addPerson() {
             try {
-                let floID = personFloIdInput.value.trim();
-                let name = personNameInput.value.trim();
+                let floID = getRef('person_flo_id_input').value.trim();
+                let name = getRef('person_name_input').value.trim();
                 let otherDetails = {}
-                let fields = additionalFields.querySelectorAll('.type, .value')
+                let fields = getRef('additional_fields').querySelectorAll('.type, .value')
                 for (let i = 0; i < fields.length; i += 2)
                     otherDetails[fields[i].textContent] = fields[i + 1].textContent
                 console.log(fields, otherDetails)
                 logSheet.addPerson(floID, name, otherDetails)
-                peopleContainer.append(render.personCard(floID, logSheet.viewPerson(floID)))
-                hidePopup()
-                notify(`Added Person: ${floID}`)
+                renderPersonList()
+                closePopup()
+                notify(`Added person: ${floID}`, 'success')
                 showSave()
             } catch (error) {
                 notify(error, "error")
             }
         }
 
-        const sheetTitleInput = document.getElementById('sheet_title_input'),
-            sheetDescriptionInput = document.getElementById('sheet_description_input'),
-            sheetTypeSwitch = document.getElementById('sheet_type_switch')
-
         function createSheet() {
             try {
-                let title = sheetTitleInput.value.trim();
-                let description = sheetDescriptionInput.value.trim();
+                let title = getRef('sheet_title_input').value.trim();
+                let description = getRef('sheet_description_input').value.trim();
                 let columns = []
                 let editors = []
-                columnsContainer.querySelectorAll('.column-title').forEach(column => columns.push(column.textContent))
+                getRef('columns_container').querySelectorAll('.column-title').forEach(column => columns.push(column.textContent))
                 if (!columns.length) {
                     notify('Every LogSheet should contain atleast 1 column.', 'error')
                     return
                 }
-                editorsContainer.querySelectorAll('.editor-address').forEach(editor => editors.push(editor.textContent))
-                if (!sheetTypeSwitch.checked)
+                getRef('editors_container').querySelectorAll('.editor-address').forEach(editor => editors.push(editor.textContent))
+                if (!getRef('sheet_type_switch').checked)
                     editors = null;
                 else
                     if (!editors.length)
                         editors = floGlobals.subAdmins;
-                let sheet_id = logSheet.createNewSheet(title, description, columns, editors)
+                let sheetId = logSheet.createNewSheet(title, description, columns, editors)
                 let sheet = {}
-                sheet[sheet_id] = { editors }
+                sheet[sheetId] = { editors }
                 renderSheetList(sheet)
-                hidePopup()
-                notify(`Created New Sheet: ${sheet_id} (${title})`)
+                closePopup()
+                notify(`Created New Sheet: ${sheetId} (${title})`, 'success')
                 showSave()
             } catch (error) {
                 notify(error, "error")
@@ -1109,7 +1183,7 @@
 
         function enterLog(e) {
             e.preventDefault()
-            let sheet_id = floGlobals.currentSheet.id;
+            let sheetId = floGlobals.currentSheet.id;
             let form = document.forms['new-log'],
                 allFormElements = document.querySelectorAll('input[form="new-log"]')
             allFormElements.forEach(element => element.disabled = true)
@@ -1118,7 +1192,7 @@
                 let log = []
                 for (let i = 1; i < form.length - 1; i++)
                     log.push(form[i].value)
-                logSheet.enterLog(sheet_id, floID, log).then(result => {
+                logSheet.enterLog(sheetId, floID, log).then(result => {
                     allFormElements.forEach(element => element.disabled = false)
                     form.reset();
                     notify('Log entry successful', 'success')
@@ -1133,80 +1207,49 @@
             }
         }
 
-        function viewSheet(sheet_id) {
-            sheetContainer.classList.add('placeholder')
-            sheetHeading.classList.add('placeholder')
-            sheetType.classList.add('placeholder')
-            sheetDescription.classList.add('placeholder')
-            tableHeader.classList.add('hide')
-            showPage('sheet_page')
-            logSheet.refreshLogs(sheet_id).then(result => {
-                sheetContainer.classList.remove('placeholder')
-                sheetHeading.classList.remove('placeholder')
-                sheetType.classList.remove('placeholder')
-                sheetDescription.classList.remove('placeholder')
-                tableHeader.classList.remove('hide')
-                let data = logSheet.viewLogs(sheet_id)
+        function viewSheet(sheetId) {
+            getRef('sheet_container').classList.add('placeholder')
+            getRef('sheet_heading').classList.add('placeholder')
+            getRef('sheet_type').classList.add('placeholder')
+            getRef('sheet_description').classList.add('placeholder')
+            tableHeader.classList.add('hidden')
+            showPage('sheet_view')
+            logSheet.refreshLogs(sheetId).then(result => {
+                getRef('sheet_container').classList.remove('placeholder')
+                getRef('sheet_heading').classList.remove('placeholder')
+                getRef('sheet_type').classList.remove('placeholder')
+                getRef('sheet_description').classList.remove('placeholder')
+                tableHeader.classList.remove('hidden')
+                let data = logSheet.viewLogs(sheetId)
                 renderSheetView(data.id, data.title, data.description, data.editors, data.attributes, data.sheet.reverse(),
                     !data.editors || data.editors.includes(myFloID), floGlobals.subAdmins.includes(myFloID))
             }).catch(error => notify(error, "error"))
         }
 
-        function renderPersonCard(floID, details) {
-            let newCard = document.createElement("div");
-            newCard.classList.add("person-card"); { }
-            let frontSide = document.createElement("div");
-            let initalTag = document.createElement("span");
-            initalTag.textContent = details.name.charAt(0)
-            frontSide.appendChild(initalTag);
-            let nameTag = document.createTextNode(details.name);
-            frontSide.appendChild(nameTag);
-            let backSide = document.createElement("div");
-            let idTag = document.createElement("span");
-            idTag.textContent = floID;
-            backSide.appendChild(idTag);
-            for (d in details)
-                if (d !== "name") {
-                    let detailTag = document.createElement("li")
-                    detailTag.textContent = `${d}: ${details[d]}`
-                    backSide.appendChild(detailTag)
-                }
-            newCard.appendChild(frontSide);
-            newCard.appendChild(backSide);
-            document.getElementById("people_container").appendChild(newCard);
-        }
-
-        const peopleContainer = document.getElementById("people_container")
-
-        function renderPersonList(personList = {}) {
+        function renderPersonList(personList = logSheet.listPersons()) {
+            let list = []
             for (person in personList)
-                frag.append(render.personCard(person, personList[person]))
-            peopleContainer.append(frag)
+                list.push(render.personCard(person, personList[person], getRef("people_container")))
+            renderElem(getRef("people_container"), html`${list}`)
         }
 
-        const sheetsContainer = document.getElementById("sheets_container")
         function renderSheetList(sheetList) {
-            console.log(sheetList)
-            for (sheet in sheetList) {
-                frag.append(render.sheetCard(sheet, sheetList[sheet].title, sheetList[sheet].editors))
-            }
-            if (floGlobals.subAdmins.includes(myFloID) && !document.getElementById('add_new_sheet')) {
-                let firstCard = document.createElement('div')
-                firstCard.id = 'add_new_sheet'
-                firstCard.classList.add('sheet-card')
-                firstCard.innerHTML = `
-                    <div class="card">
-                        <svg class="icon" viewBox="0 0 64 64">
-                            <title>add</title>
-                            <line x1="32" x2="32" y2="64" />
-                            <line x1="64" y1="32" y2="32" />
-                        </svg>
+            const list = []
+            if (floGlobals.subAdmins.includes(myFloID)) {
+                const firstCard = html`
+                    <div id="add_new_sheet" class="sheet-card interactive" onclick="openPopup('new_sheet_popup')">
+                        <div class="card">
+                            <svg class="icon" viewBox="0 0 64 64"> <title>add</title> <line x1="32" x2="32" y2="64" /> <line x1="64" y1="32" y2="32" /> </svg>
+                        </div>
+                        <h4>Add new sheet</h4>
                     </div>
-                    <h4>Add new sheet</h4>
-                `
-                frag.prepend(firstCard)
+                `;
+                list.push(firstCard)
             }
-            sheetsContainer.append(frag)
+            for (const sheet in sheetList) {
+                list.push(render.sheetCard(sheet, sheetList[sheet]))
+            }
+            renderElem(getRef('sheets_container'), html`${list}`)
         }
 
         function createTh(text) {
@@ -1216,26 +1259,16 @@
         }
         function createCell(text) {
             let cell = document.createElement('td')
-            /*if(text.split(/,|:| /).length > 5)
-                cell.classList.add('text-field')*/
             cell.textContent = text
             return cell
         }
-
-        const sheetContainer = document.getElementById('sheet_container'),
-            sheetHeading = document.getElementById('sheet_heading'),
-            sheetType = document.getElementById('sheet_type'),
-            sheetDescription = document.getElementById('sheet_description'),
-            sheetEditors = document.getElementById('sheet_editors'),
-            tableHeader = sheetContainer.firstElementChild.firstElementChild,
-            tableBody = sheetContainer.firstElementChild.children[1]
         let startingIndex = 0,
             endingIndex = 0
 
-        function renderSheetView(sheet_id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin, onlyRenderTable = false, lazyLoad = false) {
+        function renderSheetView(sheetId, title, description, editors, attributes, sheet, isWriteable, isSubAdmin, onlyRenderTable = false, lazyLoad = false) {
             if (!lazyLoad)
                 floGlobals.currentSheet = {
-                    id: sheet_id,
+                    id: sheetId,
                     title,
                     description,
                     editors,
@@ -1262,7 +1295,7 @@
                         if (event.keyCode == 13) {
                             event.preventDefault();
                             gradeField.disabled = true;
-                            logSheet.gradeLog(sheet_id, vc, gradeField.value)
+                            logSheet.gradeLog(sheetId, vc, gradeField.value)
                                 .then(result => notify("Graded Log"))
                                 .catch(error => notify("Grading failed: " + error, "error"))
                                 .finally(_ => gradeField.disabled = false)
@@ -1280,23 +1313,23 @@
             }
             if (!onlyRenderTable) {
                 //Add Sheet Details
-                sheetHeading.textContent = title;
+                getRef('sheet_heading').textContent = title;
                 if (editors) {
-                    sheetType.textContent = 'Private'
+                    getRef('sheet_type').textContent = 'Private'
                     editors.forEach(editor => {
                         let card = document.createElement('div')
                         card.className = 'editor'
                         card.textContent = editor;
                         frag.append(card)
                     })
-                    sheetEditors.innerHTML = 'Maintained by: '
-                    sheetEditors.append(frag)
+                    getRef('sheet_editors').innerHTML = 'Maintained by: '
+                    getRef('sheet_editors').append(frag)
                 }
                 else {
-                    sheetType.textContent = 'Public'
-                    sheetEditors.innerHTML = ''
+                    getRef('sheet_type').textContent = 'Public'
+                    getRef('sheet_editors').innerHTML = ''
                 }
-                sheetDescription.textContent = description;
+                getRef('sheet_description').textContent = description;
                 clearElement(tableHeader)
                 let row = tableHeader.insertRow();
                 row.append(createTh("FLO ID"), createTh("Grade"));
@@ -1329,10 +1362,10 @@
             tableBody.append(frag)
             if (!onlyRenderTable) {
                 //Add options for groupBy 
-                document.getElementById('group_by_title').textContent = `Group ${title} by`;
-                document.getElementById('group_by_view').innerHTML =
+                getRef('group_by_title').textContent = `Group ${title} by`;
+                getRef('group_by_view').innerHTML =
                     `<table><thead><tr><th>FLO ID</th><th><i>null</i></th></tr></thead></table>`
-                let colSelect = clearElement(document.getElementById('group_by_menu').children[1]);
+                let colSelect = clearElement(getRef('group_by_menu').children[1]);
                 attributes.forEach(a => {
                     let opt = document.createElement('sm-option');
                     opt.setAttribute('value', a);
@@ -1354,7 +1387,7 @@
                 row.insertCell(1).textContent = groupData[floID]
             }
             table.appendChild(tbody);
-            clearElement(document.getElementById("group_by_view")).appendChild(table);
+            clearElement(getRef("group_by_view")).appendChild(table);
         }
 
         function sortTable(n, ascending) {
@@ -1414,7 +1447,7 @@
                             return b.log[n - 2] - a.log[n - 2]
                     })
             }
-            let {id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin } = floGlobals.currentSheet
+            let { id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin } = floGlobals.currentSheet
             renderSheetView(id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin, true, false)
         }
     </script>
