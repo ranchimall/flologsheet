@@ -38,13 +38,11 @@
                 return new Promise((resolve, reject) => {
                     hideLoader()
                     showPage('sign_in_page')
-                    let signInBtn = getRef('sign_in_btn'),
-                        privateKeyInput = getRef('get_priv_key_field')
-                    signInBtn.onclick = () => {
+                    getRef('sign_in_btn').onclick = () => {
                         closePopup()
                         showLoader()
-                        resolve(privateKeyInput.value)
-                        privateKeyInput.value = ''
+                        resolve(getRef('get_priv_key_field').value.trim())
+                        getRef('get_priv_key_field').value = ''
                     }
                 })
             })
@@ -58,7 +56,7 @@
                     console.log(result)
                     //Render the personList and sheetList
                     renderPersonList()
-                    renderSheetList(logSheet.listSheets())
+                    renderSheetList()
                     //hide loading screen
                     hideLoader()
                     showPage(window.location.hash, { firstLoad: true })
@@ -165,7 +163,14 @@
             <section id="main_section">
                 <header class="flex align-center space-between section-header">
                     <h4>Sheets</h4>
-                    <sm-input id="search_sheets" placeholder="Search sheets" type="search"></sm-input>
+                    <sm-input id="search_sheets" placeholder="Search sheets" type="search">
+                        <svg class="icon" slot="icon" xmlns="http://www.w3.org/2000/svg" height="24px"
+                            viewBox="0 0 24 24" width="24px" fill="#000000">
+                            <path d="M0 0h24v24H0V0z" fill="none" />
+                            <path
+                                d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                        </svg>
+                    </sm-input>
                 </header>
                 <section id="sheets_container" class="grid"></section>
             </section>
@@ -224,10 +229,8 @@
                 </section>
                 <div id="sheet_container">
                     <table>
-                        <thead>
-                            <tr></tr>
-                        </thead>
-                        <tbody></tbody>
+                        <thead id="sheet_container__header"></thead>
+                        <tbody id="sheet_container__body"></tbody>
                     </table>
                 </div>
                 <form id="new-log" style="display: none;" onsubmit="enterLog(event); return false;"></form>
@@ -314,7 +317,7 @@
         <sm-form>
             <sm-input id="sheet_title_input" placeholder="Name*" autofocus animate required></sm-input>
             <sm-textarea id="sheet_description_input" placeholder="Description" rows="4" animate required></sm-textarea>
-            <div id="specify_columns" class="grid">
+            <div id="specify_columns" class="grid gap-0-5">
                 <div class="flex flex-direction-column">
                     <h4>Add Columns</h4>
                     <p>Columns will be added as the order you added them.</p>
@@ -327,16 +330,17 @@
                     </button>
                 </div>
             </div>
-            <div class="flex align-center space-between">
-                Make sheet private
-                <sm-switch id="sheet_type_switch" onchange="toggleEditors()"></sm-switch>
-            </div>
-            <div id="specify_editors" class="grid hidden">
+            <sm-switch id="sheet_type_switch" onchange="toggleEditors()">
+                <div slot="left" class="flex align-center space-between">
+                    Make sheet private
+                </div>
+            </sm-switch>
+            <div id="specify_editors" class="grid gap-0-5 hidden">
                 <div class="flex flex-direction-column">
                     <h4>Add editors</h4>
                     <p>Only specified editors will be able to update this sheet.</p>
                 </div>
-                <div id="editors_container" class="grid"></div>
+                <div id="editors_container" class="grid gap-0-3"></div>
                 <div id="add_editor" class="flex align-center space-between">
                     <sm-input id="add_editor_input" exclude placeholder="Editor's FLO Address"></sm-input>
                     <button class="button" onclick="addEditor()">
@@ -763,8 +767,6 @@
                     break;
             }
         })
-        const tableHeader = getRef('sheet_container').firstElementChild.firstElementChild,
-            tableBody = getRef('sheet_container').firstElementChild.children[1]
         function showLoader() {
             document.body.classList.remove('hidden')
             getRef('main_loader').classList.remove('hidden')
@@ -820,7 +822,7 @@
                 }
             })
         })
-        watchLastElement.observe(tableBody, { childList: true, subtree: true })
+        watchLastElement.observe(getRef('sheet_container__body'), { childList: true, subtree: true })
 
         getRef('search_sheets').addEventListener('input', function () {
             if (this.value.trim !== '') {
@@ -870,7 +872,7 @@
                     'data-flo-id': floId
                 })
                 card.innerHTML = `
-                    <h4 class="editor-address">${floId}</h4>
+                    <h4 class="editor-address wrap-around">${floId}</h4>
                     <button onclick="this.parentNode.remove()">
                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></svg>
                     </button>
@@ -987,8 +989,11 @@
                 params = Object.fromEntries(urlSearchParams.entries());
             }
             switch (pageId) {
+                case 'sign_in_page':
+                    getRef('get_priv_key_field').focusIn();
+                    break;
                 case 'home_page':
-                    tableBody.innerHTML = ''
+                    getRef('sheet_container__body').innerHTML = ''
                     getRef('sheet_heading').textContent = ''
                     getRef('sheet_type').textContent = ''
                     getRef('sheet_description').textContent = ''
@@ -1036,6 +1041,7 @@
         getRef('entry_type_selector').addEventListener('change', e => {
             if (e.target.value === 'sign-in') {
                 showChildElement('user_entry', 0, { entry: slideInRight, exit: slideOutRight }).then(() => {
+                    getRef('get_priv_key_field').focusIn()
                 })
             } else {
                 showChildElement('user_entry', 1, { entry: slideInLeft, exit: slideOutLeft }).then(() => {
@@ -1150,13 +1156,12 @@
                 let title = getRef('sheet_title_input').value.trim();
                 let description = getRef('sheet_description_input').value.trim();
                 let columns = []
-                let editors = []
                 getRef('columns_container').querySelectorAll('.column-title').forEach(column => columns.push(column.textContent))
                 if (!columns.length) {
-                    notify('Every LogSheet should contain atleast 1 column.', 'error')
+                    notify('Every LogSheet should contain at least 1 column.', 'error')
                     return
                 }
-                getRef('editors_container').querySelectorAll('.editor-address').forEach(editor => editors.push(editor.textContent))
+                let editors = [...new Set([...getRef('editors_container').querySelectorAll('.editor-address')].map(editor => editor.textContent))]
                 if (!getRef('sheet_type_switch').checked)
                     editors = null;
                 else
@@ -1165,7 +1170,7 @@
                 let sheetId = logSheet.createNewSheet(title, description, columns, editors)
                 let sheet = {}
                 sheet[sheetId] = { editors }
-                renderSheetList(sheet)
+                renderSheetList()
                 closePopup()
                 notify(`Created New Sheet: ${sheetId} (${title})`, 'success')
                 showSave()
@@ -1196,10 +1201,13 @@
                     allFormElements.forEach(element => element.disabled = false)
                     form.reset();
                     notify('Log entry successful', 'success')
-                    let row = tableBody.insertRow(0);
-                    row.insertCell().textContent = floID
-                    row.insertCell().innerHTML = `<input type="text" class="grade-input" disabled>`
-                    log.forEach(l => row.insertCell().textContent = l)
+                    getRef('sheet_container__body').prepend(html.node`
+                        <tr>
+                            <td>${floID}</td>
+                            <td><input type="text" class="grade-input" disabled></td>
+                            ${log.map(l => html`<td>${l}</td>`)}
+                        </tr>
+                    `)
                 }).catch(error => {
                     notify(error, "error")
                     allFormElements.forEach(element => element.disabled = false)
@@ -1212,14 +1220,14 @@
             getRef('sheet_heading').classList.add('placeholder')
             getRef('sheet_type').classList.add('placeholder')
             getRef('sheet_description').classList.add('placeholder')
-            tableHeader.classList.add('hidden')
+            getRef('sheet_container__header').classList.add('hidden')
             showPage('sheet_view')
             logSheet.refreshLogs(sheetId).then(result => {
                 getRef('sheet_container').classList.remove('placeholder')
                 getRef('sheet_heading').classList.remove('placeholder')
                 getRef('sheet_type').classList.remove('placeholder')
                 getRef('sheet_description').classList.remove('placeholder')
-                tableHeader.classList.remove('hidden')
+                getRef('sheet_container__header').classList.remove('hidden')
                 let data = logSheet.viewLogs(sheetId)
                 renderSheetView(data.id, data.title, data.description, data.editors, data.attributes, data.sheet.reverse(),
                     !data.editors || data.editors.includes(myFloID), floGlobals.subAdmins.includes(myFloID))
@@ -1233,7 +1241,8 @@
             renderElem(getRef("people_container"), html`${list}`)
         }
 
-        function renderSheetList(sheetList) {
+        function renderSheetList() {
+            const sheetList = logSheet.listSheets()
             const list = []
             if (floGlobals.subAdmins.includes(myFloID)) {
                 const firstCard = html`
@@ -1330,21 +1339,25 @@
                     getRef('sheet_editors').innerHTML = ''
                 }
                 getRef('sheet_description').textContent = description;
-                clearElement(tableHeader)
-                let row = tableHeader.insertRow();
+                clearElement(getRef('sheet_container__header'))
+                let row = getRef('sheet_container__header').insertRow();
                 row.append(createTh("FLO ID"), createTh("Grade"));
                 attributes.forEach(a => row.append(createTh(a)))
                 //Add input fields if writable
+                let blockEditingID = (!isSubAdmin && (editors || true));
                 if (isWriteable && !lazyLoad) {
-                    let row = tableHeader.insertRow();
-                    row.insertCell().innerHTML = `<input form="new-log" class="log-input" type="text">`;
-                    row.insertCell().textContent = ``;
-                    attributes.forEach(a => row.insertCell().innerHTML = `<input form="new-log" class="log-input" type="text">`);
+                    getRef('sheet_container__header').append(html.node`
+                        <tr>
+                            <td><input form="new-log" class="log-input" value="${blockEditingID ? myFloID : ''}" ?readonly=${blockEditingID}></td>
+                            <td></td>
+                            ${attributes.map(attr => html`<td><input form="new-log" class="log-input"></td>`)}
+                        </tr>
+                    `)
                 }
             }
             if (onlyRenderTable) {
                 if (!lazyLoad)
-                    tableBody.innerHTML = ''
+                    getRef('sheet_container__body').innerHTML = ''
             }
             for (let i = startingIndex; i < endingIndex; i++) {
                 let data = sheet[i]
@@ -1359,7 +1372,7 @@
                 data.log.forEach(l => row.append(createCell(l)))
                 frag.append(row)
             }
-            tableBody.append(frag)
+            getRef('sheet_container__body').append(frag)
             if (!onlyRenderTable) {
                 //Add options for groupBy 
                 getRef('group_by_title').textContent = `Group ${title} by`;
