@@ -779,14 +779,13 @@ ul {
   }
 }
 #home_page {
-  padding: 1rem 1.5rem;
+  padding: 1rem;
 }
 .section-header {
   position: sticky;
   top: 0;
   z-index: 1;
   background: var(--dark-shade);
-  padding: 1rem 0;
   margin-bottom: 1rem;
   h4 {
     font-size: 1.2rem;
@@ -811,8 +810,9 @@ ul {
 }
 
 #sheets_container {
-  gap: 2rem 1.5rem;
-  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+  gap: 0.5rem;
   margin-bottom: 3rem;
   animation: slide-up 0.6s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -827,18 +827,7 @@ ul {
 }
 
 #add_new_sheet {
-  .icon {
-    height: 2rem;
-    width: 2rem;
-    stroke-width: 10;
-    stroke: #fff;
-    stroke-linecap: square;
-    opacity: 1;
-    top: 50%;
-    transform: translateY(-50%);
-    position: absolute;
-  }
-  .card {
+  .sheet-card__icon {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -846,41 +835,38 @@ ul {
     background: url(card-bg1.svg), #a7003e;
     background-size: cover;
   }
+  .icon {
+    fill: rgba(var(--foreground-color), 1);
+  }
 }
 
 .sheet-card {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
   color: inherit;
-  .card {
-    position: relative;
-    border-radius: 0.5rem;
-    background: url(card-bg2.svg) center, rgba(var(--text-color), 0.06);
-    background-size: contain;
-    padding: 1rem;
-    padding-top: 66%;
-    width: 100%;
-    transition: box-shadow 0.3s, transform 0.3s;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  background-color: rgba(var(--foreground-color), 1);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  transition: 0.2s;
+  border: solid thin rgba(var(--text-color), 0.1);
+  &__icon {
+    display: flex;
+    padding: 0.6rem;
+    border-radius: 2rem;
+    background: rgba(var(--text-color), 0.06);
+    margin-right: 1rem;
   }
   h4 {
-    font-weight: 400;
     opacity: 0.9;
-    margin-top: 0.8rem;
-    text-align: center;
-    max-width: 90%;
+    font-size: 1rem;
   }
-  h5 {
+  &__type {
+    font-size: 0.8rem;
     background: rgba(var(--text-color), 0.1);
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 0.5rem 0;
-    padding: 0.4rem 0.6rem;
-    border-radius: 0.2rem 0 0 0.2rem;
-    font-weight: 500;
-    opacity: 0.8;
+    padding: 0.3rem 0.6rem;
+    border-radius: 1rem;
   }
 }
 
@@ -1058,8 +1044,11 @@ th.ascending::after {
   background: rgba(var(--background-color), 1);
   bottom: 0;
   top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   & > .flex:first-of-type {
-    padding: 0 1rem;
+    padding: 0.5rem 1rem;
   }
   .section-header {
     margin-bottom: 0;
@@ -1300,11 +1289,6 @@ th.ascending::after {
   #main_header > div {
     grid-area: main;
   }
-
-  #sheets_container {
-    gap: 2rem;
-    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-  }
   #sheet_view {
     &.toggle-side-bar {
       grid-template-columns: 19rem 1fr;
@@ -1364,6 +1348,13 @@ th.ascending::after {
   #right {
     z-index: 1;
     box-shadow: -0.5rem 0 0.5rem #00000010;
+  }
+  .sheet-card {
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0.5rem 1rem rgba(0 0 0 /0.1);
+      z-index: 1;
+    }
   }
 }
 .hidden {

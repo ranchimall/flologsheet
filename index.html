@@ -848,10 +848,11 @@
                 const type = editors ? 'Private' : 'Public'
                 return html`
                     <a class="sheet-card interactive" href=${`#/sheet_view?id=${sheetId}`} .dataset=${{ name: title }}>
-                        <div class="card">
-                            <h5>${type}</h5>
+                        <div class="sheet-card__icon">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M8 16h8v2H8zm0-4h8v2H8zm6-10H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
                         </div>
                         <h4>${title}</h4>
+                        <span class="sheet-card__type">${type}</span>
                     </a>
                 `;
             },
@@ -1261,8 +1262,8 @@
             if (floGlobals.subAdmins.includes(myFloID)) {
                 const firstCard = html`
                     <div id="add_new_sheet" class="sheet-card interactive" onclick="openPopup('new_sheet_popup')">
-                        <div class="card">
-                            <svg class="icon" viewBox="0 0 64 64"> <title>add</title> <line x1="32" x2="32" y2="64" /> <line x1="64" y1="32" y2="32" /> </svg>
+                        <div class="sheet-card__icon">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
                         </div>
                         <h4>Add new sheet</h4>
                     </div>
