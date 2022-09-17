@@ -18,7 +18,7 @@
             blockchain: "FLO",
             adminID: "FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf", //"FRaBr5F665RVkQ1A1EYrMfbX2UF52vWjKr",
             application: "TEST_MODE", // "LogSheet",
-            // for storing signle log sheet data 
+            // for storing single log sheet data 
             currentSheet: {}
         }
     </script>
@@ -54,10 +54,6 @@
                 //request object data from Supernode
                 logSheet.init().then(result => {
                     console.log(result)
-                    //Render the personList and sheetList
-                    renderPersonList()
-                    renderSheetList()
-                    //hide loading screen
                     hideLoader()
                     showPage(window.location.hash, { firstLoad: true })
                     //display add buttons if subAdmin, else hide
@@ -998,8 +994,10 @@
                     getRef('sheet_type').textContent = ''
                     getRef('sheet_description').textContent = ''
                     getRef('main_header').classList.remove('hidden')
+                    renderSheetList()
                     break;
                 case 'sheet_view':
+                    renderPersonList()
                     if (params) {
                         viewSheet(params.id)
                     }
@@ -1200,7 +1198,6 @@
                 }
                 allFormElements.forEach(element => element.disabled = true)
                 logSheet.enterLog(sheetId, floID, log).then(result => {
-                    allFormElements.forEach(element => element.disabled = false)
                     form.reset();
                     notify('Log entry successful', 'success')
                     getRef('sheet_container__body').prepend(html.node`
@@ -1212,6 +1209,7 @@
                     `)
                 }).catch(error => {
                     notify(error, "error")
+                }).finally(() => {
                     allFormElements.forEach(element => element.disabled = false)
                 })
             }
@@ -1260,17 +1258,6 @@
                 list.push(render.sheetCard(sheet, sheetList[sheet]))
             }
             renderElem(getRef('sheets_container'), html`${list}`)
-        }
-
-        function createTh(text) {
-            let cell = document.createElement('th')
-            cell.textContent = text
-            return cell
-        }
-        function createCell(text) {
-            let cell = document.createElement('td')
-            cell.textContent = text
-            return cell
         }
         let startingIndex = 0,
             endingIndex = 0
@@ -1360,15 +1347,9 @@
             }
             getRef('sheet_container__body').append(frag)
             if (!onlyRenderTable) {
-                //Add options for groupBy 
                 getRef('group_by_title').textContent = `Group ${title} by`;
-                let colSelect = clearElement(getRef('group_by_menu').children[1]);
-                attributes.forEach(a => {
-                    let opt = document.createElement('sm-option');
-                    opt.setAttribute('value', a);
-                    opt.textContent = a;
-                    colSelect.appendChild(opt)
-                })
+                //Add options for groupBy 
+                renderElem(getRef('second_select'), html`${attributes.map(attr => html`<sm-option value="${attr}">${attr}</sm-option>`)}`)
             }
         }
 

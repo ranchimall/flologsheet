@@ -850,6 +850,7 @@ ul {
   color: inherit;
   grid-template-columns: auto 1fr auto;
   align-items: center;
+  gap: 0.8rem;
   background-color: rgba(var(--foreground-color), 1);
   padding: 1rem;
   border-radius: 0.5rem;
@@ -860,11 +861,10 @@ ul {
     padding: 0.6rem;
     border-radius: 2rem;
     background: rgba(var(--text-color), 0.06);
-    margin-right: 1rem;
   }
   h4 {
-    opacity: 0.9;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
   }
   &__type {
     font-size: 0.8rem;
