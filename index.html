@@ -1191,12 +1191,26 @@
             let sheetId = floGlobals.currentSheet.id;
             let form = document.forms['new-log'],
                 allFormElements = document.querySelectorAll('input[form="new-log"]')
-            allFormElements.forEach(element => element.disabled = true)
             if (form[0].tagName === 'INPUT') {
-                let floID = form[0].value;
+                let floID = form[0].value.trim();
+                if (floID === '' || !floCrypto.validateAddr(floID)) {
+                    notify('Please enter a valid FLO ID', 'error')
+                    form[0].focus()
+                    return
+                }
                 let log = []
-                for (let i = 1; i < form.length - 1; i++)
-                    log.push(form[i].value)
+                let isValid = false;
+                for (let i = 1; i < form.length - 1; i++) {
+                    const value = form[i].value.trim()
+                    log.push(value)
+                    if (value !== '')
+                        isValid = true
+                }
+                if (!isValid) {
+                    form[1].focus()
+                    return notify('Please enter value in at least one column', 'error')
+                }
+                allFormElements.forEach(element => element.disabled = true)
                 logSheet.enterLog(sheetId, floID, log).then(result => {
                     allFormElements.forEach(element => element.disabled = false)
                     form.reset();
