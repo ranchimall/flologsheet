@@ -758,12 +758,23 @@
             })
         }
 
+        document.addEventListener('popupopened', e => {
+            let popup = e.detail.popup
+            switch (popup.id) {
+                case 'group_by':
+                    renderGroup()
+                    break;
+            }
+        })
         document.addEventListener('popupclosed', e => {
             let popup = e.detail.popup
             switch (popup.id) {
                 case 'new_sheet_popup':
                     getRef('columns_container').innerHTML = ''
                     getRef('editors_container').innerHTML = ''
+                    break;
+                case 'group_by':
+                    renderElem(getRef("group_by_view"), html``)
                     break;
             }
         })
@@ -785,32 +796,25 @@
                 el.setAttribute(key, attrs[key]);
             }
         }
+        delegate(getRef('people_container'), 'click', '.person-card', e => {
+            copyToLogInput(e.delegateTarget.dataset.floId)
+        })
         let currentTableHeader
-        document.addEventListener('click', e => {
-            try {
-                if (e.target.closest(".person-card"))
-                    copyToLogInput(e.target.closest(".person-card").dataset.floId)
-                else if (e.target.closest("th")) {
-                    let trgt = e.target.closest('th')
-                    if (currentTableHeader && currentTableHeader !== trgt)
-                        currentTableHeader.classList.remove('ascending', 'descending')
-                    sortTable(trgt.cellIndex, trgt.classList.contains('descending'))
-                    if (trgt.classList.contains('descending'))
-                        trgt.classList.add('ascending')
-                    else
-                        trgt.classList.remove('ascending')
-                    trgt.classList.toggle('descending')
-                    currentTableHeader = trgt
-                }
-            } catch (error) {
-                //do nothing
-            }
+        delegate(getRef('sheet_container__header'), 'click', 'th', e => {
+            if (currentTableHeader && currentTableHeader !== e.delegateTarget)
+                currentTableHeader.classList.remove('ascending', 'descending')
+            sortTable(e.delegateTarget.cellIndex, e.delegateTarget.classList.contains('descending'))
+            if (e.delegateTarget.classList.contains('descending'))
+                e.delegateTarget.classList.add('ascending')
+            else
+                e.delegateTarget.classList.remove('ascending')
+            e.delegateTarget.classList.toggle('descending')
+            currentTableHeader = e.delegateTarget
         })
         const observer = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    let { id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin } = floGlobals.currentSheet;
-                    renderSheetView(id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin, true, true)
+                    renderSheetView({ ...floGlobals.currentSheet, onlyRenderTable: true, lazyLoad: true })
                     observer.disconnect()
                 }
             })
@@ -828,19 +832,14 @@
             if (this.value.trim !== '') {
                 for (child of getRef('sheets_container').children) {
                     if (child.id === 'add_new_sheet') continue
-                    if (child.dataset.name.toUpperCase().indexOf(this.value.toUpperCase()) > -1) {
+                    if (child.dataset.name.toLowerCase().includes(this.value.trim().toLowerCase())) {
                         child.classList.remove('hidden')
-                    }
-                    else {
+                    } else {
                         child.classList.add('hidden')
                     }
                 }
             }
         })
-
-        function removeUnderscore(word) {
-            return word.replace(/_/g, ' ')
-        }
 
         const render = {
             sheetCard(sheetId, details) {
@@ -1073,39 +1072,28 @@
             }).catch(error => notify(`Save Unsuccessful [${error}]`, error))
         })
 
-        getRef('first_select').addEventListener("change", function (e) {
+        getRef('first_select').addEventListener("change", renderGroup)
+
+        getRef('second_select').addEventListener("change", renderGroup)
+
+        function renderGroup() {
             try {
-                let sheetId = floGlobals.currentSheet.id;
-                let sheet = floGlobals.currentSheet.sheet;
-                let type = this.value;
+                const type = getRef('first_select').value
+                const column = getRef('second_select').value
+                const { sheetId, sheet } = floGlobals.currentSheet
                 if (type === 'count') {
                     getRef('second_select').classList.add("hidden")
                     let data = logSheet.groupBy.count(sheetId, sheet)
                     renderGroupByView("count", data)
                 } else {
                     getRef('second_select').classList.remove("hidden")
-                    let column = getRef('second_select').value;
                     let data = logSheet.groupBy[type](sheetId, sheet, column);
                     renderGroupByView(`${type}(${column})`, data)
                 }
             } catch (error) {
                 notify(error, "error")
             }
-        })
-
-        getRef('second_select').addEventListener("change", function (e) {
-            try {
-                console.log(this)
-                let sheetId = floGlobals.currentSheet.id;
-                let sheet = floGlobals.currentSheet.sheet;
-                let type = getRef('first_select').value;
-                let column = this.value;
-                let data = logSheet.groupBy[type](sheetId, sheet, column);
-                renderGroupByView(`${type}(${column})`, data)
-            } catch (error) {
-                notify(error, "error")
-            }
-        })
+        }
 
         function clearElement(element) {
             element.innerHTML = '';
@@ -1184,12 +1172,11 @@
             let input = document.forms['new-log'][0]
             if (input.tagName === 'INPUT')
                 input.value = floID;
-            console.log(floID, input)
         }
 
         function enterLog(e) {
             e.preventDefault()
-            let sheetId = floGlobals.currentSheet.id;
+            let sheetId = floGlobals.currentSheet.sheetId;
             let form = document.forms['new-log'],
                 allFormElements = document.querySelectorAll('input[form="new-log"]')
             if (form[0].tagName === 'INPUT') {
@@ -1243,9 +1230,8 @@
                 getRef('sheet_type').classList.remove('placeholder')
                 getRef('sheet_description').classList.remove('placeholder')
                 getRef('sheet_container__header').classList.remove('hidden')
-                let data = logSheet.viewLogs(sheetId)
-                renderSheetView(data.id, data.title, data.description, data.editors, data.attributes, data.sheet.reverse(),
-                    !data.editors || data.editors.includes(myFloID), floGlobals.subAdmins.includes(myFloID))
+                const { id, title, description, editors, attributes, sheet } = logSheet.viewLogs(sheetId)
+                renderSheetView({ sheetId: id, title, description, editors, attributes, sheet: sheet.reverse() })
             }).catch(error => notify(error, "error"))
         }
 
@@ -1289,22 +1275,15 @@
         let startingIndex = 0,
             endingIndex = 0
 
-        function renderSheetView(sheetId, title, description, editors, attributes, sheet, isWriteable, isSubAdmin, onlyRenderTable = false, lazyLoad = false) {
+        function renderSheetView(details = {}) {
+            const { sheetId, title, description, editors, attributes, sheet, onlyRenderTable = false, lazyLoad = false } = details
+            const isWriteable = !editors || editors.includes(myFloID)
+            const isSubAdmin = floGlobals.subAdmins.includes(myFloID)
             if (!lazyLoad)
-                floGlobals.currentSheet = {
-                    id: sheetId,
-                    title,
-                    description,
-                    editors,
-                    attributes,
-                    sheet,
-                    isWriteable,
-                    isSubAdmin,
-                }
+                floGlobals.currentSheet = { sheetId, title, description, editors, attributes, sheet, }
             const parseVectorClock = (vc) => {
-                vc = vc.split('_')
-                let time = new Date(parseInt(vc[0])).toString().slice(4, 24);
-                let floID = vc[1]
+                const [vectorClock, floID] = vc.split('_')
+                let time = new Date(parseInt(vectorClock)).toString().slice(4, 24);
                 return `by ${floID} (${time})`
             }
             const createGradeField = (vc, grade) => {
@@ -1315,8 +1294,8 @@
                 if (!isWriteable || !isSubAdmin || vc.split('_')[1] == myFloID)
                     gradeField.disabled = true;
                 else {
-                    gradeField.addEventListener("keypress", (event) => {
-                        if (event.keyCode == 13) {
+                    gradeField.addEventListener("keydown", (event) => {
+                        if (event.key === 'Enter') {
                             event.preventDefault();
                             gradeField.disabled = true;
                             logSheet.gradeLog(sheetId, vc, gradeField.value)
@@ -1338,61 +1317,51 @@
             if (!onlyRenderTable) {
                 //Add Sheet Details
                 getRef('sheet_heading').textContent = title;
-                if (editors) {
-                    getRef('sheet_type').textContent = 'Private'
-                    editors.forEach(editor => {
-                        let card = document.createElement('div')
-                        card.className = 'editor'
-                        card.textContent = editor;
-                        frag.append(card)
-                    })
-                    getRef('sheet_editors').innerHTML = 'Maintained by: '
-                    getRef('sheet_editors').append(frag)
-                }
-                else {
-                    getRef('sheet_type').textContent = 'Public'
-                    getRef('sheet_editors').innerHTML = ''
-                }
+                getRef('sheet_type').textContent = editors ? 'Private' : 'Public';
+                renderElem(getRef('sheet_editors'), html`${editors ? html`Maintained by: ${editors.map(editor => html`<div class="editor">${editor}</div>`)}` : ''}`)
                 getRef('sheet_description').textContent = description;
-                clearElement(getRef('sheet_container__header'))
-                let row = getRef('sheet_container__header').insertRow();
-                row.append(createTh("FLO ID"), createTh("Grade"));
-                attributes.forEach(a => row.append(createTh(a)))
-                //Add input fields if writable
                 let blockEditingID = (!isSubAdmin && (editors || true));
+                let addLogRow = null
+                //Add input fields if writable
                 if (isWriteable && !lazyLoad) {
-                    getRef('sheet_container__header').append(html.node`
+                    addLogRow = html`
                         <tr>
-                            <td><input form="new-log" class="log-input" value="${blockEditingID ? myFloID : ''}" ?readonly=${blockEditingID}></td>
+                            <td>${blockEditingID ? myFloID : html`<input form="new-log" class="log-input">`}</td>
                             <td></td>
                             ${attributes.map(attr => html`<td><input form="new-log" class="log-input"></td>`)}
                         </tr>
-                    `)
+                    `;
                 }
+                renderElem(getRef('sheet_container__header'), html`
+                    <tr>
+                        <th>FLO ID</th>
+                        <th>Grade</th>
+                        ${attributes.map(attr => html`<th>${attr}</th>`)}
+                    </tr>
+                    ${addLogRow}
+                `)
+
             }
             if (onlyRenderTable) {
                 if (!lazyLoad)
                     getRef('sheet_container__body').innerHTML = ''
             }
             for (let i = startingIndex; i < endingIndex; i++) {
-                let data = sheet[i]
-                if (!data.log || !data.floID || !data.vc)
+                const { log, floID, vc, grade } = sheet[i]
+                if (!log || !floID || !vc)
                     continue;
-                let row = document.createElement('tr')
-                row.setAttribute("title", parseVectorClock(data.vc))
-                row.append(createCell(data.floID))
-                let gradeF = document.createElement('td')
-                gradeF.append(createGradeField(data.vc, data.grade))
-                row.append(gradeF)
-                data.log.forEach(l => row.append(createCell(l)))
-                frag.append(row)
+                frag.append(html.node`
+                    <tr title="${parseVectorClock(vc)}">
+                        <td>${floID}</td>
+                        <td>${createGradeField(vc, grade)}</td>
+                        ${log.map(l => html`<td>${l}</td>`)}
+                    </tr>
+                `)
             }
             getRef('sheet_container__body').append(frag)
             if (!onlyRenderTable) {
                 //Add options for groupBy 
                 getRef('group_by_title').textContent = `Group ${title} by`;
-                getRef('group_by_view').innerHTML =
-                    `<table><thead><tr><th>FLO ID</th><th><i>null</i></th></tr></thead></table>`
                 let colSelect = clearElement(getRef('group_by_menu').children[1]);
                 attributes.forEach(a => {
                     let opt = document.createElement('sm-option');
@@ -1404,22 +1373,27 @@
         }
 
         function renderGroupByView(groupName, groupData) {
-            let table = document.createElement("table")
-            let head = table.createTHead().insertRow(0)
-            head.insertCell(0).textContent = "FLO ID";
-            head.insertCell(1).textContent = groupName;
-            let tbody = document.createElement("tbody")
-            for (floID in groupData) {
-                let row = tbody.insertRow(0);
-                row.insertCell(0).textContent = floID
-                row.insertCell(1).textContent = groupData[floID]
-            }
-            table.appendChild(tbody);
-            clearElement(getRef("group_by_view")).appendChild(table);
+            renderElem(getRef("group_by_view"), html`
+                <table class="margin-top-1">
+                    <thead>
+                        <tr>
+                            <th>FLO ID</th>
+                            <th>${groupName}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${Object.keys(groupData).map(floID => html`
+                            <tr>
+                                <td>${floID}</td>
+                                <td>${groupData[floID]}</td>
+                            </tr>
+                        `)}
+                    </tbody>
+                </table>
+            `)
         }
 
         function sortTable(n, ascending) {
-            console.log(n)
             if (ascending) {
                 if (n === 0)
                     floGlobals.currentSheet.sheet.sort((a, b) => a.floID.toLowerCase().localeCompare(b.floID.toLowerCase()))
@@ -1427,8 +1401,7 @@
                     floGlobals.currentSheet.sheet.sort((a, b) => {
                         if (a.grade === b.grade) {
                             return 0;
-                        }
-                        else {
+                        } else {
                             return (a.grade < b.grade) ? -1 : 1;
                         }
                     })
@@ -1439,12 +1412,10 @@
                             let y = (b.log[n - 2]) ? b.log[n - 2].toLowerCase() : b.log[n - 2]
                             if (x === y) {
                                 return 0;
-                            }
-                            else {
+                            } else {
                                 return (x < y) ? -1 : 1;
                             }
-                        }
-                        else
+                        } else
                             return a.log[n - 2] - b.log[n - 2]
                     })
             } else {
@@ -1454,8 +1425,7 @@
                     floGlobals.currentSheet.sheet.sort((a, b) => {
                         if (a.grade === b.grade) {
                             return 0;
-                        }
-                        else {
+                        } else {
                             return (a.grade > b.grade) ? -1 : 1;
                         }
                     })
@@ -1466,17 +1436,14 @@
                             let y = (b.log[n - 2]) ? b.log[n - 2].toLowerCase() : b.log[n - 2]
                             if (x === y) {
                                 return 0;
-                            }
-                            else {
+                            } else {
                                 return (x > y) ? -1 : 1;
                             }
-                        }
-                        else
+                        } else
                             return b.log[n - 2] - a.log[n - 2]
                     })
             }
-            let { id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin } = floGlobals.currentSheet
-            renderSheetView(id, title, description, editors, attributes, sheet, isWriteable, isSubAdmin, true, false)
+            renderSheetView({ ...floGlobals.currentSheet, onlyRenderTable: true })
         }
     </script>
 </body>

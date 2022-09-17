@@ -487,6 +487,10 @@ ul {
   margin-right: auto;
 }
 
+.margin-top-1 {
+  margin-top: 1rem;
+}
+
 .margin-bottom-0-5 {
   margin-bottom: 0.5rem;
 }
@@ -906,7 +910,7 @@ ul {
 }
 
 #sheet_description {
-  margin-top: 0.8rem;
+  margin-top: 0.5rem;
   opacity: 0.8;
 }
 
@@ -941,27 +945,21 @@ ul {
 
 #toggle_details {
   transform: rotateX(180deg);
+  padding: 0.4rem;
+  background-color: rgba(var(--text-color), 0.1);
 }
 
 #sheet_details {
   padding: 1rem;
-  margin-bottom: 1rem;
-}
-#sheet_details .flex:first-of-type {
-  margin-bottom: 1rem;
 }
 #sheet_details .flex:nth-of-type(2) {
-  margin-bottom: 1rem;
+  padding: 0.5rem 0;
 }
-#sheet_details .flex:not(:first-of-type) {
-  margin-bottom: 0.3rem;
+#sheet_details .flex:nth-of-type(2) button:first-of-type {
+  margin-left: -0.7rem;
 }
 #sheet_details.collapse {
   padding: 0.5rem 1rem;
-  margin-bottom: 0;
-}
-#sheet_details.collapse .flex {
-  margin-bottom: 0;
 }
 #sheet_details.collapse #toggle_details {
   transform: none;
@@ -1062,6 +1060,10 @@ th.ascending::after {
 }
 #group_by sm-select:last-of-type {
   margin-left: 0.5rem;
+}
+#group_by th,
+#group_by td {
+  padding: 1rem;
 }
 
 #side_bar {

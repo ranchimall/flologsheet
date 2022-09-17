@@ -481,7 +481,9 @@ ul {
 .margin-right-auto {
   margin-right: auto;
 }
-
+.margin-top-1 {
+  margin-top: 1rem;
+}
 .margin-bottom-0-5 {
   margin-bottom: 0.5rem;
 }
@@ -895,7 +897,7 @@ ul {
   background: rgba(var(--text-color), 0.1);
 }
 #sheet_description {
-  margin-top: 0.8rem;
+  margin-top: 0.5rem;
   opacity: 0.8;
 }
 #sheet_editors {
@@ -925,25 +927,19 @@ ul {
 }
 #toggle_details {
   transform: rotateX(180deg);
+  padding: 0.4rem;
+  background-color: rgba(var(--text-color), 0.1);
 }
 #sheet_details {
   padding: 1rem;
-  margin-bottom: 1rem;
-  .flex:first-of-type {
-    margin-bottom: 1rem;
-  }
   .flex:nth-of-type(2) {
-    margin-bottom: 1rem;
-  }
-  .flex:not(:first-of-type) {
-    margin-bottom: 0.3rem;
+    padding: 0.5rem 0;
+    button:first-of-type {
+      margin-left: -0.7rem;
+    }
   }
   &.collapse {
     padding: 0.5rem 1rem;
-    margin-bottom: 0;
-    .flex {
-      margin-bottom: 0;
-    }
     #toggle_details {
       transform: none;
     }
@@ -1041,6 +1037,10 @@ th.ascending::after {
   }
   sm-select:last-of-type {
     margin-left: 0.5rem;
+  }
+  th,
+  td {
+    padding: 1rem;
   }
 }
 
