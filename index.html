@@ -1093,11 +1093,6 @@
             }
         }
 
-        function clearElement(element) {
-            element.innerHTML = '';
-            return element;
-        }
-
         function showSave() {
             getRef('save_button').classList.remove('hidden')
             getRef('save_button').dataset["unsaved"] = parseInt(getRef('save_button').dataset["unsaved"]) + 1
