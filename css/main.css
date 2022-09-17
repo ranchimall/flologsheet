@@ -257,10 +257,12 @@ sm-select {
   --padding: 0.8rem;
   font-size: 0.9rem;
   --min-width: 8rem;
+  --border-radius: 0.5rem;
 }
 
 sm-option {
   font-size: 0.9rem;
+  --border-radius: 0.3rem;
 }
 
 strip-select {
@@ -986,6 +988,7 @@ ul {
 table {
   border-collapse: collapse;
   position: relative;
+  width: 100%;
 }
 table input {
   position: relative;
@@ -1023,6 +1026,9 @@ tr:nth-of-type(2n) {
 td {
   padding: 0.4rem 0.8rem;
   opacity: 0.9;
+}
+td:nth-of-type(n + 3) {
+  min-width: 12em;
 }
 
 .text-field {
