@@ -54,10 +54,11 @@
                 //request object data from Supernode
                 logSheet.init().then(result => {
                     console.log(result)
+                    floGlobals.isSubAdmin = floGlobals.subAdmins.includes(myFloID)
                     hideLoader()
                     showPage(window.location.hash, { firstLoad: true })
                     //display add buttons if subAdmin, else hide
-                    if (floGlobals.subAdmins.includes(myFloID)) {
+                    if (floGlobals.isSubAdmin) {
                         document.querySelectorAll('.sub-admin-option').forEach(option => option.classList.remove('hidden'))
                     } else {
                         document.querySelectorAll('.sub-admin-option').forEach(option => option.classList.add('hidden'))
@@ -1238,7 +1239,7 @@
         function renderSheetList() {
             const sheetList = logSheet.listSheets()
             const list = []
-            if (floGlobals.subAdmins.includes(myFloID)) {
+            if (floGlobals.isSubAdmin) {
                 const firstCard = html`
                     <div id="add_new_sheet" class="sheet-card interactive" onclick="openPopup('new_sheet_popup')">
                         <div class="sheet-card__icon">
@@ -1260,35 +1261,8 @@
         function renderSheetView(details = {}) {
             const { sheetId, title, description, editors, attributes, sheet, onlyRenderTable = false, lazyLoad = false } = details
             const isWriteable = !editors || editors.includes(myFloID)
-            const isSubAdmin = floGlobals.subAdmins.includes(myFloID)
             if (!lazyLoad)
                 floGlobals.currentSheet = { sheetId, title, description, editors, attributes, sheet, }
-            const parseVectorClock = (vc) => {
-                const [vectorClock, floID] = vc.split('_')
-                let time = new Date(parseInt(vectorClock)).toString().slice(4, 24);
-                return `by ${floID} (${time})`
-            }
-            const createGradeField = (vc, grade) => {
-                let gradeField = document.createElement("input")
-                gradeField.setAttribute("type", "text")
-                gradeField.className = "grade-input"
-                gradeField.value = grade
-                if (!isWriteable || !isSubAdmin || vc.split('_')[1] == myFloID)
-                    gradeField.disabled = true;
-                else {
-                    gradeField.addEventListener("keydown", (event) => {
-                        if (event.key === 'Enter') {
-                            event.preventDefault();
-                            gradeField.disabled = true;
-                            logSheet.gradeLog(sheetId, vc, gradeField.value)
-                                .then(result => notify("Graded Log"))
-                                .catch(error => notify("Grading failed: " + error, "error"))
-                                .finally(_ => gradeField.disabled = false)
-                        }
-                    })
-                }
-                return gradeField
-            }
             if (lazyLoad) {
                 startingIndex = sheet.length > endingIndex ? endingIndex : sheet.length
                 endingIndex = sheet.length - endingIndex > 20 ? endingIndex + 20 : sheet.length
@@ -1302,13 +1276,13 @@
                 getRef('sheet_type').textContent = editors ? 'Private' : 'Public';
                 renderElem(getRef('sheet_editors'), html`${editors ? html`Maintained by: ${editors.map(editor => html`<div class="editor">${editor}</div>`)}` : ''}`)
                 getRef('sheet_description').textContent = description;
-                let blockEditingID = (!isSubAdmin && (editors || true));
+                let blockEditingID = (!floGlobals.isSubAdmin && (editors || true));
                 let addLogRow = null
                 //Add input fields if writable
                 if (isWriteable && !lazyLoad) {
                     addLogRow = html`
                         <tr>
-                            <td>${blockEditingID ? myFloID : html`<input form="new-log" class="log-input">`}</td>
+                            <td>${html`<input form="new-log" class="log-input" value=${blockEditingID ? myFloID : ''} ?readonly=${blockEditingID}>`}</td>
                             <td></td>
                             ${attributes.map(attr => html`<td><input form="new-log" class="log-input"></td>`)}
                         </tr>
@@ -1328,12 +1302,21 @@
                 if (!lazyLoad)
                     getRef('sheet_container__body').innerHTML = ''
             }
+            const parseVectorClock = (vc) => {
+                const [vectorClock, floID] = vc.split('_')
+                let time = getFormattedTime(parseInt(vectorClock));
+                return `by ${floID} (${time})`
+            }
+            const createGradeField = (vc, grade) => {
+                const isDisabled = (!isWriteable || !floGlobals.isSubAdmin || vc.split('_')[1] == myFloID)
+                return html`<input type="number" class="grade-input" min="0" max="100" value=${grade} ?disabled=${isDisabled}>`
+            }
             for (let i = startingIndex; i < endingIndex; i++) {
                 const { log, floID, vc, grade } = sheet[i]
                 if (!log || !floID || !vc)
                     continue;
                 frag.append(html.node`
-                    <tr title="${parseVectorClock(vc)}">
+                    <tr title="${parseVectorClock(vc)}" .dataset=${{ vc }}>
                         <td>${floID}</td>
                         <td>${createGradeField(vc, grade)}</td>
                         ${log.map(l => html`<td>${l}</td>`)}
@@ -1347,6 +1330,24 @@
                 renderElem(getRef('second_select'), html`${attributes.map(attr => html`<sm-option value="${attr}">${attr}</sm-option>`)}`)
             }
         }
+
+        delegate(getRef('sheet_container'), 'keydown', 'input[type="number"]', e => {
+            if (e.key.length === 1) {
+                if (e.key === '.' && (e.target.value.includes('.') || e.target.value.length === 0)) {
+                    e.preventDefault();
+                } else if (!['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'].includes(e.key)) {
+                    e.preventDefault();
+                }
+            } else if (e.key === 'Enter' && floGlobals.isSubAdmin) {
+                e.preventDefault();
+                e.delegateTarget.disabled = true;
+                const vc = e.delegateTarget.closest('tr').dataset.vc;
+                logSheet.gradeLog(floGlobals.currentSheet.sheetId, vc, e.delegateTarget.value.trim())
+                    .then(result => notify("Graded Log", 'success'))
+                    .catch(error => notify("Grading failed: " + error, "error"))
+                    .finally(_ => e.delegateTarget.disabled = false)
+            }
+        })
 
         function renderGroupByView(groupName, groupData) {
             renderElem(getRef("group_by_view"), html`
