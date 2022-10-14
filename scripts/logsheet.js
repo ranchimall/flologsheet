@@ -1,9 +1,9 @@
-(function() {
+(function () {
     'use strict';
     const logSheet = window.logSheet = {};
     const TYPE_SHEET_ENTRY = "sheet_entry";
 
-    logSheet.init = function() {
+    logSheet.init = function () {
         return new Promise((resolve, reject) => {
             floCloudAPI.requestObjectData("logSheet").then(result => {
                 if (!floGlobals.appObjects.logSheet || typeof floGlobals.appObjects.logSheet !== "object")
@@ -16,7 +16,7 @@
             }).catch(error => reject(error))
         })
     }
-    logSheet.addPerson = function(floID, name, otherDetails = {}) {
+    logSheet.addPerson = function (floID, name, otherDetails = {}) {
         if (floGlobals.appObjects.logSheet.personDetails[floID])
             throw ("floID already exist")
         floGlobals.appObjects.logSheet.personDetails[floID] = {};
@@ -29,13 +29,13 @@
         }
     }
 
-    logSheet.rmPerson = function(floID) {
+    logSheet.rmPerson = function (floID) {
         if (!floGlobals.appObjects.logSheet.personDetails[floID])
             throw ("floID not found")
         delete floGlobals.appObjects.logSheet.personDetails[floID]
     }
 
-    logSheet.editPerson = function(floID, details) {
+    logSheet.editPerson = function (floID, details) {
         if (!floGlobals.appObjects.logSheet.personDetails[floID])
             throw ("floID not found")
         for (d in details) {
@@ -48,17 +48,17 @@
         }
     }
 
-    logSheet.listPersons = function() {
+    logSheet.listPersons = function () {
         return floGlobals.appObjects.logSheet.personDetails
     }
 
-    logSheet.viewPerson = function(floID) {
+    logSheet.viewPerson = function (floID) {
         if (!floGlobals.appObjects.logSheet.personDetails[floID])
             throw ("floID not found")
         return floGlobals.appObjects.logSheet.personDetails[floID]
     }
 
-    logSheet.createNewSheet = function(title, description, attributes, editors = floGlobals.subAdmins) {
+    logSheet.createNewSheet = function (title, description, attributes, editors = floGlobals.subAdmins) {
         let sheet_id = floCrypto.tmpID;
         floGlobals.appObjects.logSheet.sheetList[sheet_id] = {
             title: title,
@@ -69,7 +69,7 @@
         return sheet_id;
     }
 
-    logSheet.manageSheetControl = function(sheet_id, addList, rmList) {
+    logSheet.manageSheetControl = function (sheet_id, addList, rmList) {
         if (addList === null && rmList === null) {
             floGlobals.appObjects.logSheet.sheetList[sheet_id].editors = null
             return
@@ -82,15 +82,15 @@
         floGlobals.appObjects.logSheet.sheetList[sheet_id].editors = editorList
     }
 
-    logSheet.editSheetDescription = function(sheet_id, description) {
+    logSheet.editSheetDescription = function (sheet_id, description) {
         floGlobals.appObjects.logSheet.sheetList[sheet_id].description = description
     }
 
-    logSheet.listSheets = function() {
+    logSheet.listSheets = function () {
         return floGlobals.appObjects.logSheet.sheetList
     }
 
-    logSheet.commitUpdates = function() {
+    logSheet.commitUpdates = function () {
         return new Promise((resolve, reject) => {
             if (!floGlobals.subAdmins.includes(floDapps.user.id))
                 reject("Access Denied! only subAdmins can commit")
@@ -100,7 +100,7 @@
         })
     }
 
-    logSheet.enterLog = function(sheet_id, floID, log) {
+    logSheet.enterLog = function (sheet_id, floID, log) {
         return new Promise((resolve, reject) => {
             if (floGlobals.appObjects.logSheet.sheetList[sheet_id].editors) {
                 if (!floGlobals.appObjects.logSheet.sheetList[sheet_id].editors.includes(floDapps.user.id))
@@ -110,16 +110,16 @@
             } else if (!floGlobals.subAdmins.includes(floDapps.user.id) && floID != floDapps.user.id)
                 return reject("Public authorized to log their own floID only");
             floCloudAPI.sendGeneralData({
-                    floID,
-                    log
-                }, TYPE_SHEET_ENTRY, {
-                    receiverID: sheet_id
-                }).then(result => resolve(result))
+                floID,
+                log
+            }, TYPE_SHEET_ENTRY, {
+                receiverID: sheet_id
+            }).then(result => resolve(result))
                 .catch(error => reject(error))
         })
     }
 
-    logSheet.gradeLog = function(sheet_id, vc, grade) {
+    logSheet.gradeLog = function (sheet_id, vc, grade) {
         return new Promise((resolve, reject) => {
             //reject if user is not subAdmin or editor
             if (!floGlobals.subAdmins.includes(floDapps.user.id) ||
@@ -136,27 +136,27 @@
                 return reject("Cannot grade own log")
 
             floCloudAPI.tagApplicationData(vc, grade, {
-                    receiverID: sheet_id
-                }).then(result => resolve(result))
+                receiverID: sheet_id
+            }).then(result => resolve(result))
                 .catch(error => reject(error))
         })
     }
 
-    logSheet.refreshLogs = function(sheet_id) {
+    logSheet.refreshLogs = function (sheet_id) {
         return new Promise((resolve, reject) => {
             if (!(sheet_id in floGlobals.appObjects.logSheet.sheetList))
                 reject("Sheet not found")
             else {
                 floCloudAPI.requestGeneralData(TYPE_SHEET_ENTRY, {
-                        senderIDs: floGlobals.appObjects.logSheet.sheetList[sheet_id].editors,
-                        receiverID: sheet_id
-                    }).then(result => resolve(result))
+                    senderIDs: floGlobals.appObjects.logSheet.sheetList[sheet_id].editors,
+                    receiverID: sheet_id
+                }).then(result => resolve(result))
                     .catch(error => reject(error))
             }
         })
     }
 
-    logSheet.viewLogs = function(sheet_id) {
+    logSheet.viewLogs = function (sheet_id) {
         if (!(sheet_id in floGlobals.appObjects.logSheet.sheetList))
             throw ("Sheet not found")
         let sheet = [],
@@ -191,7 +191,7 @@
     }
 
     const groupBy = logSheet.groupBy = {};
-    groupBy.count = function(sheet_id, sheet) {
+    groupBy.count = function (sheet_id, sheet) {
         if (!(sheet_id in floGlobals.appObjects.logSheet.sheetList))
             throw ("Sheet not found")
         let group = {};
@@ -204,7 +204,7 @@
         return group;
     }
 
-    groupBy.total = function(sheet_id, sheet, attribute) {
+    groupBy.total = function (sheet_id, sheet, attribute) {
         if (!(sheet_id in floGlobals.appObjects.logSheet.sheetList))
             throw ("Sheet not found")
         let group = {};
@@ -221,7 +221,7 @@
         return group;
     }
 
-    groupBy.avg = function(sheet_id, sheet, attribute) {
+    groupBy.avg = function (sheet_id, sheet, attribute) {
         if (!(sheet_id in floGlobals.appObjects.logSheet.sheetList))
             throw ("Sheet not found")
         let group = {};
@@ -240,12 +240,12 @@
                 }
             }
         })
-        for (floID in group)
+        for (const floID in group)
             group[floID] = group[floID].total / group[floID].count
         return group;
     }
 
-    groupBy.min = function(sheet_id, sheet, attribute) {
+    groupBy.min = function (sheet_id, sheet, attribute) {
         if (!(sheet_id in floGlobals.appObjects.logSheet.sheetList))
             throw ("Sheet not found")
         let group = {};
@@ -262,7 +262,7 @@
         return group;
     }
 
-    groupBy.max = function(sheet_id, sheet, attribute) {
+    groupBy.max = function (sheet_id, sheet, attribute) {
         if (!(sheet_id in floGlobals.appObjects.logSheet.sheetList))
             throw ("Sheet not found")
         let group = {};
