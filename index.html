@@ -16,7 +16,7 @@
 
             //Required for all
             blockchain: "FLO",
-            adminID: "FLf3jtkPQryh1ide7AJ8tigBmYzLj3h7Cq", 
+            adminID: "FLf3jtkPQryh1ide7AJ8tigBmYzLj3h7Cq",
             application: "logSheet",
             // for storing single log sheet data 
             currentSheet: {}
@@ -1282,7 +1282,7 @@
                 if (isWriteable && !lazyLoad) {
                     addLogRow = html`
                         <tr>
-                            <td>${html`<input form="new-log" class="log-input" value=${blockEditingID ? myFloID : ''} ?readonly=${blockEditingID}>`}</td>
+                            <td>${html`<input form="new-log" class="log-input" style="width: 22rem" value=${blockEditingID ? myFloID : ''} ?readonly=${blockEditingID}>`}</td>
                             <td></td>
                             ${attributes.map(attr => html`<td><input form="new-log" class="log-input"></td>`)}
                         </tr>
