@@ -103,12 +103,16 @@
     logSheet.enterLog = function (sheet_id, floID, log) {
         return new Promise((resolve, reject) => {
             if (floGlobals.appObjects.logSheet.sheetList[sheet_id].editors) {
+                // private sheet constraints
                 if (!floGlobals.appObjects.logSheet.sheetList[sheet_id].editors.includes(floDapps.user.id))
                     return reject("Only editors can update logs");
-                else if (!(floID in floGlobals.appObjects.logSheet.personDetails))
-                    return reject("floID not found");
-            } else if (!floGlobals.subAdmins.includes(floDapps.user.id) && floID != floDapps.user.id)
-                return reject("Public authorized to log their own floID only");
+                /*else if (!(floID in floGlobals.appObjects.logSheet.personDetails))
+                    return reject("floID not found");*/
+            } else {
+                //public sheet constraint
+                if (!floGlobals.subAdmins.includes(floDapps.user.id) && floID != floDapps.user.id)
+                    return reject("Public authorized to log their own floID only");
+            }
             floCloudAPI.sendGeneralData({
                 floID,
                 log

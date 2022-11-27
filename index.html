@@ -1276,10 +1276,10 @@
                 getRef('sheet_type').textContent = editors ? 'Private' : 'Public';
                 renderElem(getRef('sheet_editors'), html`${editors ? html`Maintained by: ${editors.map(editor => html`<div class="editor">${editor}</div>`)}` : ''}`)
                 getRef('sheet_description').textContent = description;
-                let blockEditingID = (!floGlobals.isSubAdmin && (editors || true));
                 let addLogRow = null
                 //Add input fields if writable
                 if (isWriteable && !lazyLoad) {
+                    const blockEditingID = editors ? false: !floGlobals.isSubAdmin;
                     addLogRow = html`
                         <tr>
                             <td>${html`<input form="new-log" class="log-input" style="width: 22rem" value=${blockEditingID ? myFloID : ''} ?readonly=${blockEditingID}>`}</td>
