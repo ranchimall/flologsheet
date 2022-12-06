@@ -126,18 +126,16 @@
     logSheet.gradeLog = function (sheet_id, vc, grade) {
         return new Promise((resolve, reject) => {
             //reject if user is not subAdmin or editor
-            if (!floGlobals.subAdmins.includes(floDapps.user.id) ||
-                (floGlobals.appObjects.logSheet.sheetList[sheet_id].editors &&
-                    !floGlobals.appObjects.logSheet.sheetList[sheet_id].editors.includes(floDapps.user.id)))
-                return reject("Only subAdmins in editor list can grade logs")
+            if (!floGlobals.subAdmins.includes(floDapps.user.id))
+                return reject("Only subAdmins can grade logs")
 
             let log = floGlobals.generalDataset(TYPE_SHEET_ENTRY, {
                 receiverID: sheet_id
             })[vc];
             if (!log)
                 return reject("Log not found");
-            else if (log.senderID === floDapps.user.id)
-                return reject("Cannot grade own log")
+            //else if (log.senderID === floDapps.user.id)
+            //    return reject("Cannot grade own log")
 
             floCloudAPI.tagApplicationData(vc, grade, {
                 receiverID: sheet_id
