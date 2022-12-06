@@ -1260,7 +1260,7 @@
 
         function renderSheetView(details = {}) {
             const { sheetId, title, description, editors, attributes, sheet, onlyRenderTable = false, lazyLoad = false } = details
-            const isWriteable = !editors || editors.includes(myFloID)
+            const isWriteable = !editors || editors.includes(myFloID) || floGlobals.isSubAdmin
             if (!lazyLoad)
                 floGlobals.currentSheet = { sheetId, title, description, editors, attributes, sheet, }
             if (lazyLoad) {
@@ -1279,7 +1279,7 @@
                 let addLogRow = null
                 //Add input fields if writable
                 if (isWriteable && !lazyLoad) {
-                    const blockEditingID = editors ? false: !floGlobals.isSubAdmin;
+                    const blockEditingID = editors ? false : !floGlobals.isSubAdmin;
                     addLogRow = html`
                         <tr>
                             <td>${html`<input form="new-log" class="log-input" style="width: 22rem" value=${blockEditingID ? myFloID : ''} ?readonly=${blockEditingID}>`}</td>
@@ -1307,8 +1307,8 @@
                 let time = getFormattedTime(parseInt(vectorClock));
                 return `by ${floID} (${time})`
             }
-            const createGradeField = (vc, grade) => {
-                const isDisabled = (!isWriteable || !floGlobals.isSubAdmin || vc.split('_')[1] == myFloID)
+            const createGradeField = (grade) => {
+                const isDisabled = (!isWriteable || !floGlobals.isSubAdmin)
                 return html`<input type="number" class="grade-input" min="0" max="100" value=${grade} ?disabled=${isDisabled}>`
             }
             for (let i = startingIndex; i < endingIndex; i++) {
@@ -1318,7 +1318,7 @@
                 frag.append(html.node`
                     <tr title="${parseVectorClock(vc)}" .dataset=${{ vc }}>
                         <td>${floID}</td>
-                        <td>${createGradeField(vc, grade)}</td>
+                        <td>${createGradeField(grade)}</td>
                         ${log.map(l => html`<td>${l}</td>`)}
                     </tr>
                 `)
