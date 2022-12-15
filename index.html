@@ -824,18 +824,21 @@
             e.delegateTarget.classList.toggle('descending')
             currentTableHeader = e.delegateTarget
         })
-        const observer = new IntersectionObserver((entries, observer) => {
+        const intersectionObserver = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     renderSheetView({ ...floGlobals.currentSheet, onlyRenderTable: true, lazyLoad: true })
                     observer.disconnect()
                 }
             })
+        }, {
+            root: getRef('sheet_container'),
         })
+
         const watchLastElement = new MutationObserver(mutations => {
             mutations.forEach(mutation => {
                 if (mutation.addedNodes.length) {
-                    observer.observe(mutation.addedNodes[mutation.addedNodes.length - 1])
+                    intersectionObserver.observe(mutation.addedNodes[mutation.addedNodes.length - 1])
                 }
             })
         })
@@ -1302,15 +1305,17 @@
         function renderSheetView(details = {}) {
             const { sheetId, title, description, editors, attributes, sheet, onlyRenderTable = false, lazyLoad = false } = details
             console.log(sheet)
+
             const isWriteable = !editors || editors.includes(myFloID) || floGlobals.isSubAdmin
+            const lazyLoadRows = 4
             if (!lazyLoad)
                 floGlobals.currentSheet = { sheetId, title, description, editors, attributes, sheet, }
             if (lazyLoad) {
                 startingIndex = sheet.length > endingIndex ? endingIndex : sheet.length
-                endingIndex = sheet.length - endingIndex > 20 ? endingIndex + 20 : sheet.length
+                endingIndex = sheet.length - endingIndex > lazyLoadRows ? endingIndex + lazyLoadRows : sheet.length
             } else {
                 startingIndex = 0
-                endingIndex = sheet.length > 20 ? 20 : sheet.length
+                endingIndex = sheet.length > lazyLoadRows ? lazyLoadRows : sheet.length
             }
             if (!onlyRenderTable) {
                 //Add Sheet Details
