@@ -22,13 +22,14 @@
             currentSheet: {}
         }
     </script>
-    <script src="scripts/lib.js"></script>
-    <script src="scripts/floCrypto.js"></script>
-    <script src="scripts/floBlockchainAPI.js"></script>
-    <script src="scripts/compactIDB.js"></script>
-    <script src="scripts/floCloudAPI.js"></script>
-    <script src="scripts/floDapps.js"></script>
-    <script src="scripts/logsheet.js"></script>
+    <script src="scripts/lib.js" defer></script>
+    <script src="scripts/floCrypto.js" defer></script>
+    <script src="scripts/floBlockchainAPI.js" defer></script>
+    <script src="scripts/compactIDB.js" defer></script>
+    <script src="scripts/floCloudAPI.js" defer></script>
+    <script src="scripts/floDapps.js" defer></script>
+    <script src="scripts/btcOperator.js" defer></script>
+    <script src="scripts/logsheet.js" defer></script>
     <script id="onLoadStartUp">
         function onLoadStartUp() {
             //display loading screen
@@ -49,8 +50,27 @@
             //invoke the startup functions
             floDapps.launchStartUp().then(result => {
                 console.log(result)
-                getRef("user_flo_id").value = myFloID
-                console.log(`Downloading objectData! Please Wait...`);
+                let floId = floDapps.user.id
+                if (!floCrypto.validateFloID(floId)) {
+                    const type = coinjs.addressDecode(floId).type
+                    if (type === 'standard') {
+                        floId = btcOperator.convert.legacy2legacy(floId, 0x23);
+                    } else if (type === 'bech32') {
+                        floId = btcOperator.convert.bech2legacy(floId, 0x23);
+                    } else {
+                        notify(`Multisig address can't be used to sign in`, 'error');
+                        return;
+                    }
+                }
+                floGlobals.myFloID = floId
+                floGlobals.myBtcID = btcOperator.convert.legacy2bech(floId)
+                getRef('user_profile_id').textContent = floGlobals.myFloID
+                let showingFloID = true
+                // alternating between floID and btcID every 10 seconds
+                setInterval(() => {
+                    getRef('user_profile_id').textContent = showingFloID ? floGlobals.myBtcID : floGlobals.myFloID
+                    showingFloID = !showingFloID
+                }, 10000)
                 //request object data from Supernode
                 logSheet.init().then(result => {
                     console.log(result)
@@ -140,21 +160,21 @@
             </div>
         </div>
         <header id="main_header" class="grid">
-            <div class="flex align-center space-between gap-1">
-                <div class="flex flex-direction-column">
-                    <h5>RanchiMall</h5>
-                    <h4>FLO LogSheet</h4>
-                </div>
-                <theme-toggle class="margin-left-auto"></theme-toggle>
-                <button id="user_icon" onclick="openPopup('user_popup')">
-                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"
-                        fill="#000000">
-                        <path d="M0 0h24v24H0V0z" fill="none" />
-                        <path
-                            d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.09-.16-.26-.25-.44-.25-.06 0-.12.01-.17.03l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.06-.02-.12-.03-.18-.03-.17 0-.34.09-.43.25l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.09.16.26.25.44.25.06 0 .12-.01.17-.03l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.06.02.12.03.18.03.17 0 .34-.09.43-.25l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zm-1.98-1.71c.04.31.05.52.05.73 0 .21-.02.43-.05.73l-.14 1.13.89.7 1.08.84-.7 1.21-1.27-.51-1.04-.42-.9.68c-.43.32-.84.56-1.25.73l-1.06.43-.16 1.13-.2 1.35h-1.4l-.19-1.35-.16-1.13-1.06-.43c-.43-.18-.83-.41-1.23-.71l-.91-.7-1.06.43-1.27.51-.7-1.21 1.08-.84.89-.7-.14-1.13c-.03-.31-.05-.54-.05-.74s.02-.43.05-.73l.14-1.13-.89-.7-1.08-.84.7-1.21 1.27.51 1.04.42.9-.68c.43-.32.84-.56 1.25-.73l1.06-.43.16-1.13.2-1.35h1.39l.19 1.35.16 1.13 1.06.43c.43.18.83.41 1.23.71l.91.7 1.06-.43 1.27-.51.7 1.21-1.07.85-.89.7.14 1.13zM12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" />
-                    </svg>
-                </button>
+            <div class="flex flex-direction-column hide-on-mobile">
+                <h5>RanchiMall</h5>
+                <h4>FLO LogSheet</h4>
             </div>
+            <theme-toggle class="margin-left-auto"></theme-toggle>
+            <button id="user_profile_button" class="user-content button--small" onclick="openPopup('profile_popup')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon margin-right-0-5" height="24px" viewBox="0 0 24 24"
+                    width="24px" fill="#000000">
+                    <path d="M0 0h24v24H0V0z" fill="none"></path>
+                    <path
+                        d="M12 5.9c1.16 0 2.1.94 2.1 2.1s-.94 2.1-2.1 2.1S9.9 9.16 9.9 8s.94-2.1 2.1-2.1m0 9c2.97 0 6.1 1.46 6.1 2.1v1.1H5.9V17c0-.64 3.13-2.1 6.1-2.1M12 4C9.79 4 8 5.79 8 8s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 9c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z">
+                    </path>
+                </svg>
+                <div id="user_profile_id" class="overflow-ellipsis"></div>
+            </button>
         </header>
         <section id="home_page" class="page grid hidden">
             <section id="main_section">
@@ -236,26 +256,19 @@
         </section>
     </main>
     <!-- User settings popup -->
-    <sm-popup id="user_popup">
+    <sm-popup id="profile_popup">
         <header slot="header" class="popup__header">
-            <button class="popup__header__close" onclick="closePopup()">
-                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                    <path fill="none" d="M0 0h24v24H0z" />
+            <button class="popup__header__close justify-self-start" onclick="closePopup()">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"
+                    fill="#000000">
+                    <path d="M0 0h24v24H0V0z" fill="none" />
                     <path
-                        d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z" />
+                        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
                 </svg>
             </button>
-            <h3>Settings</h3>
+            <h3>Profile</h3>
         </header>
-        <section>
-            <div class="grid gap-1">
-                <div class="grid gap-0-3">
-                    <b>My FLO address</b>
-                    <sm-copy id="user_flo_id"></sm-copy>
-                </div>
-                <button class="button button--danger margin-right-auto" onclick="signOut()">Sign out</button>
-            </div>
-        </section>
+        <div id="profile_popup__content" class="grid gap-3"></div>
     </sm-popup>
 
     <!-- Add a person popup -->
@@ -761,6 +774,9 @@
                 case 'group_by':
                     renderGroup()
                     break;
+                case 'profile_popup':
+                    renderElem(getRef('profile_popup__content'), render.profile())
+                    break;
             }
         })
         document.addEventListener('popupclosed', e => {
@@ -905,6 +921,31 @@
                     </button>
                 `
                 return card
+            },
+            profile() {
+                return html`
+                    <div class="grid gap-1-5">
+                        <div class="grid gap-0-5">
+                            <h4>
+                                BTC integrated with FLO
+                            </h4>
+                            <p>
+                                You can use your FLO private key to perform transactions on the BTC network within our
+                                app
+                                ecosystem. The private key is the same for both.
+                            </p>
+                        </div>
+                        <div class="grid gap-0-5">
+                            <b>My FLO address</b>
+                            <sm-copy class="user-flo-id" clip-text value=${floGlobals.myFloID}></sm-copy>
+                        </div>
+                        <div class="grid gap-0-5">
+                            <b>My Bitcoin address</b>
+                            <sm-copy class="user-btc-id" clip-text value=${floGlobals.myBtcID}></sm-copy>
+                        </div>
+                        <button class="button button--danger justify-self-start" onclick="signOut()">Sign out</button>
+                    </div>
+                `;
             }
         }
 
@@ -1260,6 +1301,7 @@
 
         function renderSheetView(details = {}) {
             const { sheetId, title, description, editors, attributes, sheet, onlyRenderTable = false, lazyLoad = false } = details
+            console.log(sheet)
             const isWriteable = !editors || editors.includes(myFloID) || floGlobals.isSubAdmin
             if (!lazyLoad)
                 floGlobals.currentSheet = { sheetId, title, description, editors, attributes, sheet, }
