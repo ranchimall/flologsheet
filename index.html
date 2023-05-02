@@ -75,6 +75,7 @@
                 logSheet.init().then(result => {
                     console.log(result)
                     floGlobals.isSubAdmin = floGlobals.subAdmins.includes(myFloID)
+                    floGlobals.isTrustedID = floGlobals.trustedIDs.includes(myFloID)
                     hideLoader()
                     showPage(window.location.hash, { firstLoad: true })
                     //display add buttons if subAdmin, else hide
@@ -1345,7 +1346,7 @@
                 return `by ${floID} (${time})`
             }
             const createGradeField = (grade) => {
-                const isDisabled = (!isWriteable || !floGlobals.isSubAdmin)
+                const isDisabled = (!isWriteable || (!floGlobals.isSubAdmin && !floGlobals.isTrustedID))
                 return html`<input type="number" class="grade-input" min="0" max="100" value=${grade} ?disabled=${isDisabled}>`
             }
             for (let i = startingIndex; i < endingIndex; i++) {
