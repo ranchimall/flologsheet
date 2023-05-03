@@ -192,6 +192,8 @@
         }
     }
 
+    const _isNaN = value => isNaN(value) || value === '';
+
     const groupBy = logSheet.groupBy = {};
     groupBy.count = function (sheet_id, sheet) {
         if (!(sheet_id in floGlobals.appObjects.logSheet.sheetList))
@@ -212,8 +214,8 @@
         let group = {};
         let attrubuteIndex = floGlobals.appObjects.logSheet.sheetList[sheet_id].attributes.indexOf(attribute)
         sheet.forEach(l => {
-            let value = parseFloat(l.log[attrubuteIndex])
-            if (!isNaN(value)) {
+            if (!_isNaN(l.log[attrubuteIndex])) {
+                let value = parseFloat(l.log[attrubuteIndex])
                 if (!(l.floID in group))
                     group[l.floID] = value
                 else
@@ -229,8 +231,8 @@
         let group = {};
         let attrubuteIndex = floGlobals.appObjects.logSheet.sheetList[sheet_id].attributes.indexOf(attribute)
         sheet.forEach(l => {
-            let value = parseFloat(l.log[attrubuteIndex])
-            if (!isNaN(value)) {
+            if (!_isNaN(l.log[attrubuteIndex])) {
+                let value = parseFloat(l.log[attrubuteIndex])
                 if (!(l.floID in group))
                     group[l.floID] = {
                         total: value,
@@ -253,8 +255,8 @@
         let group = {};
         let attrubuteIndex = floGlobals.appObjects.logSheet.sheetList[sheet_id].attributes.indexOf(attribute)
         sheet.forEach(l => {
-            let value = parseFloat(l.log[attrubuteIndex])
-            if (!isNaN(value)) {
+            if (!_isNaN(l.log[attrubuteIndex])) {
+                let value = parseFloat(l.log[attrubuteIndex])
                 if (!(l.floID in group))
                     group[l.floID] = value
                 else if (value < group[l.floID])
@@ -270,8 +272,8 @@
         let group = {};
         let attrubuteIndex = floGlobals.appObjects.logSheet.sheetList[sheet_id].attributes.indexOf(attribute)
         sheet.forEach(l => {
-            let value = parseFloat(l.log[attrubuteIndex])
-            if (!isNaN(value)) {
+            if (!_isNaN(l.log[attrubuteIndex])) {
+                let value = parseFloat(l.log[attrubuteIndex])
                 if (!(l.floID in group))
                     group[l.floID] = value
                 else if (value > group[l.floID])
@@ -294,10 +296,11 @@
             throw ("Sheet not found")
         let result = 0;
         let attrubuteIndex = floGlobals.appObjects.logSheet.sheetList[sheet_id].attributes.indexOf(attribute)
-        result = sheet.forEach(l => {
-            let value = parseFloat(l.log[attrubuteIndex])
-            if (!isNaN(value))
+        sheet.forEach(l => {
+            if (!_isNaN(l.log[attrubuteIndex])) {
+                let value = parseFloat(l.log[attrubuteIndex])
                 result += value;
+            }
         });
 
         return result;
@@ -309,8 +312,8 @@
         let result = 0, count = 0;
         let attrubuteIndex = floGlobals.appObjects.logSheet.sheetList[sheet_id].attributes.indexOf(attribute)
         sheet.forEach(l => {
-            let value = parseFloat(l.log[attrubuteIndex])
-            if (!isNaN(value)) {
+            if (!_isNaN(l.log[attrubuteIndex])) {
+                let value = parseFloat(l.log[attrubuteIndex])
                 result += value;
                 count++;
             }
@@ -325,14 +328,12 @@
         let result = null;
         let attrubuteIndex = floGlobals.appObjects.logSheet.sheetList[sheet_id].attributes.indexOf(attribute)
         sheet.forEach(l => {
-            let value = parseFloat(l.log[attrubuteIndex])
-            if (!isNaN(value)) {
+            if (!_isNaN(l.log[attrubuteIndex])) {
+                let value = parseFloat(l.log[attrubuteIndex])
                 if (result === null || value < result)
                     result = value;
             }
         })
-        console.debug(sheet)
-        console.debug(result)
         return result;
     }
 
@@ -342,8 +343,8 @@
         let result = null;
         let attrubuteIndex = floGlobals.appObjects.logSheet.sheetList[sheet_id].attributes.indexOf(attribute)
         sheet.forEach(l => {
-            let value = parseFloat(l.log[attrubuteIndex])
-            if (!isNaN(value)) {
+            if (!_isNaN(l.log[attrubuteIndex])) {
+                let value = parseFloat(l.log[attrubuteIndex])
                 if (result === null || value > result)
                     result = value;
             }
