@@ -280,4 +280,74 @@
         })
         return group;
     }
+
+    const aggBy = logSheet.aggBy = {};
+    aggBy.count = function (sheet_id, sheet) {
+        if (!(sheet_id in floGlobals.appObjects.logSheet.sheetList))
+            throw ("Sheet not found")
+        let result = sheet.length;
+        return result;
+    }
+
+    aggBy.total = function (sheet_id, sheet, attribute) {
+        if (!(sheet_id in floGlobals.appObjects.logSheet.sheetList))
+            throw ("Sheet not found")
+        let result = 0;
+        let attrubuteIndex = floGlobals.appObjects.logSheet.sheetList[sheet_id].attributes.indexOf(attribute)
+        result = sheet.forEach(l => {
+            let value = parseFloat(l.log[attrubuteIndex])
+            if (!isNaN(value))
+                result += value;
+        });
+
+        return result;
+    }
+
+    aggBy.avg = function (sheet_id, sheet, attribute) {
+        if (!(sheet_id in floGlobals.appObjects.logSheet.sheetList))
+            throw ("Sheet not found")
+        let result = 0, count = 0;
+        let attrubuteIndex = floGlobals.appObjects.logSheet.sheetList[sheet_id].attributes.indexOf(attribute)
+        sheet.forEach(l => {
+            let value = parseFloat(l.log[attrubuteIndex])
+            if (!isNaN(value)) {
+                result += value;
+                count++;
+            }
+        })
+        result = result / count;
+        return result;
+    }
+
+    aggBy.min = function (sheet_id, sheet, attribute) {
+        if (!(sheet_id in floGlobals.appObjects.logSheet.sheetList))
+            throw ("Sheet not found")
+        let result = null;
+        let attrubuteIndex = floGlobals.appObjects.logSheet.sheetList[sheet_id].attributes.indexOf(attribute)
+        sheet.forEach(l => {
+            let value = parseFloat(l.log[attrubuteIndex])
+            if (!isNaN(value)) {
+                if (result === null || value < result)
+                    result = value;
+            }
+        })
+        console.debug(sheet)
+        console.debug(result)
+        return result;
+    }
+
+    aggBy.max = function (sheet_id, sheet, attribute) {
+        if (!(sheet_id in floGlobals.appObjects.logSheet.sheetList))
+            throw ("Sheet not found")
+        let result = null;
+        let attrubuteIndex = floGlobals.appObjects.logSheet.sheetList[sheet_id].attributes.indexOf(attribute)
+        sheet.forEach(l => {
+            let value = parseFloat(l.log[attrubuteIndex])
+            if (!isNaN(value)) {
+                if (result === null || value > result)
+                    result = value;
+            }
+        })
+        return result;
+    }
 })();
