@@ -264,21 +264,30 @@ sm-option {
   font-size: 0.9rem;
   --border-radius: 0.3rem;
 }
+sm-option::part(option) {
+  grid-template-columns: none;
+}
 
-strip-select {
+sm-chips {
   --gap: 0;
   background-color: rgba(var(--text-color), 0.06);
   border-radius: 0.3rem;
   padding: 0.3rem;
 }
 
-strip-option {
+sm-chip {
   position: relative;
-  font-size: 0.8rem;
-  --border-radius: 0.2rem;
+  font-size: 0.9rem;
+  --border-radius: 0.3rem;
+  --padding: 0.5rem 0.8rem;
+  --background: rgba(var(--text-color), 0.06);
   -webkit-user-select: none;
      -moz-user-select: none;
           user-select: none;
+}
+sm-chip[selected] {
+  --background: var(--accent-color);
+  color: rgba(var(--background-color), 1);
 }
 
 sm-button {
@@ -310,8 +319,6 @@ ul {
   overflow-wrap: break-word;
   word-wrap: break-word;
   word-break: break-word;
-  -webkit-hyphens: auto;
-          hyphens: auto;
 }
 
 .full-bleed {
@@ -322,8 +329,8 @@ ul {
   text-transform: uppercase;
 }
 
-.capitalize {
-  text-transform: capitalize;
+.capitalize::first-letter {
+  text-transform: uppercase;
 }
 
 .sticky {
@@ -1065,14 +1072,14 @@ th.ascending::after {
   content: " ▲";
 }
 
-#group_by::part(popup) {
+#sheet_processing_popup::part(popup) {
   min-height: 80vh;
 }
-#group_by sm-select:last-of-type {
+#sheet_processing_popup sm-select:last-of-type {
   margin-left: 0.5rem;
 }
-#group_by th,
-#group_by td {
+#sheet_processing_popup th,
+#sheet_processing_popup td {
   padding: 1rem;
 }
 
@@ -1313,7 +1320,7 @@ th.ascending::after {
 }
 
 @media screen and (max-width: 640px) {
-  #group_by_view {
+  #processed_sheet_view {
     overflow: auto;
     max-width: calc(100vw - 3rem);
   }
@@ -1375,8 +1382,11 @@ th.ascending::after {
     position: relative;
     transform: none;
   }
-  #group_by::part(popup) {
-    width: 80vw;
+  #sheet_processing_popup {
+    --width: 36rem;
+  }
+  #sheet_processing_popup[data-mode=group] {
+    --width: 80vw;
   }
   #save_button {
     margin: 1rem auto;

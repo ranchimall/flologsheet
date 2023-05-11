@@ -261,20 +261,29 @@ sm-select {
 sm-option {
   font-size: 0.9rem;
   --border-radius: 0.3rem;
+  &::part(option) {
+    grid-template-columns: none;
+  }
 }
 
-strip-select {
+sm-chips {
   --gap: 0;
   background-color: rgba(var(--text-color), 0.06);
   border-radius: 0.3rem;
   padding: 0.3rem;
 }
 
-strip-option {
+sm-chip {
   position: relative;
-  font-size: 0.8rem;
-  --border-radius: 0.2rem;
+  font-size: 0.9rem;
+  --border-radius: 0.3rem;
+  --padding: 0.5rem 0.8rem;
+  --background: rgba(var(--text-color), 0.06);
   user-select: none;
+  &[selected] {
+    --background: var(--accent-color);
+    color: rgba(var(--background-color), 1);
+  }
 }
 
 sm-button {
@@ -313,7 +322,6 @@ ul {
   overflow-wrap: break-word;
   word-wrap: break-word;
   word-break: break-word;
-  hyphens: auto;
 }
 
 .full-bleed {
@@ -325,7 +333,9 @@ ul {
 }
 
 .capitalize {
-  text-transform: capitalize;
+  &::first-letter {
+    text-transform: uppercase;
+  }
 }
 
 .sticky {
@@ -1040,7 +1050,7 @@ th.ascending::after {
   content: " \25B2";
 }
 
-#group_by {
+#sheet_processing_popup {
   &::part(popup) {
     min-height: 80vh;
   }
@@ -1262,7 +1272,7 @@ th.ascending::after {
 }
 
 @media screen and (max-width: 640px) {
-  #group_by_view {
+  #processed_sheet_view {
     overflow: auto;
     max-width: calc(100vw - 3rem);
   }
@@ -1326,9 +1336,10 @@ th.ascending::after {
     position: relative;
     transform: none;
   }
-  #group_by {
-    &::part(popup) {
-      width: 80vw;
+  #sheet_processing_popup {
+    --width: 36rem;
+    &[data-mode="group"] {
+      --width: 80vw;
     }
   }
   #save_button {

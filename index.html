@@ -8,7 +8,9 @@
     <link rel="stylesheet" href="css/main.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/uhtml@3.0.1/es.js"></script>
     <script id="floGlobals">
         /* Constants for FLO blockchain operations !!Make sure to add this at begining!! */
@@ -97,10 +99,10 @@
     <sm-notifications id="notification_drawer"></sm-notifications>
     <sm-popup id="confirmation_popup">
         <h4 id="confirm_title"></h4>
-        <p id="confirm_message"></p>
-        <div class="flex align-center">
-            <sm-button variant="no-outline" class="cancel-button">Cancel</sm-button>
-            <sm-button variant="no-outline" class="confirm-button">OK</button>
+        <p id="confirm_message" class="breakable"></p>
+        <div class="flex align-center gap-0-5 margin-left-auto">
+            <button class="button cancel-button">Cancel</button>
+            <button class="button button--primary confirm-button">OK</button>
         </div>
     </sm-popup>
     <!-- Loading screen-->
@@ -123,10 +125,10 @@
                 <p>Open &bull; Distributed &bull; Reliable</p>
             </div>
             <div class="sign-in-box flex flex-direction-column gap-2">
-                <strip-select id="entry_type_selector" class="align-self-start">
-                    <strip-option value="sign-in" selected>Sign in</strip-option>
-                    <strip-option value="sign-up">Sign up</strip-option>
-                </strip-select>
+                <sm-chips id="entry_type_selector" class="align-self-start">
+                    <sm-chip value="sign-in" selected>Sign in</sm-chip>
+                    <sm-chip value="sign-up">Sign up</sm-chip>
+                </sm-chips>
                 <div id="user_entry">
                     <div>
                         <h3>Welcome back</h3>
@@ -221,8 +223,12 @@
                             </svg>
                             Sheets
                         </a>
-                        <button class="button button--small margin-left-auto" onclick="openPopup('group_by')">Group
-                            by</button>
+                        <div id="sheet_processing_options" class="flex gap-0-5 margin-left-auto hidden">
+                            <button class="button button--small" onclick="initSheetProcessing('group')">Group
+                                by</button>
+                            <button class="button button--small" onclick="initSheetProcessing('aggregate')">Aggregate
+                                by</button>
+                        </div>
                     </div>
                     <div class="flex align-center">
                         <button onclick="toggleSideBar()">
@@ -366,7 +372,7 @@
     </sm-popup>
 
     <!-- Group by popup -->
-    <sm-popup id="group_by">
+    <sm-popup id="sheet_processing_popup">
         <header slot="header" class="popup__header">
             <button class="popup__header__close" onclick="closePopup()">
                 <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
@@ -375,19 +381,19 @@
                         d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z" />
                 </svg>
             </button>
-            <h3 id="group_by_title"> </h3>
+            <h3 id="sheet_processing_title"> </h3>
         </header>
         <div class="flex align-center" id="group_by_menu">
-            <sm-select id="first_select">
+            <sm-select id="process_by_method_selector">
                 <sm-option value="count">Count</sm-option>
                 <sm-option value="total" selected>Total</sm-option>
                 <sm-option value="avg">Avg</sm-option>
                 <sm-option value="max">Max</sm-option>
                 <sm-option value="min">Min</sm-option>
             </sm-select>
-            <sm-select id="second_select"></sm-select>
+            <sm-select id="process_by_attribute_selector"></sm-select>
         </div>
-        <div class="table-container" id="group_by_view"></div>
+        <div id="processed_sheet_view" class="grid"></div>
     </sm-popup>
     <script src="components.js"></script>
     <script>
@@ -464,43 +470,51 @@
                 }, wait);
             };
         }
-
         let zIndex = 50
         // function required for popups or modals to appear
         function openPopup(popupId, pinned) {
             zIndex++
             getRef(popupId).setAttribute('style', `z-index: ${zIndex}`)
-            getRef(popupId).show({ pinned })
-            return getRef(popupId);
+            return getRef(popupId).show({ pinned })
         }
 
         // hides the popup or modal
-        function closePopup() {
+        function closePopup(options = {}) {
             if (popupStack.peek() === undefined)
                 return;
-            popupStack.peek().popup.hide()
+            popupStack.peek().popup.hide(options)
         }
 
 
         // displays a popup for asking permission. Use this instead of JS confirm
         const getConfirmation = (title, options = {}) => {
             return new Promise(resolve => {
-                const { message = '', cancelText = 'Cancel', confirmText = 'OK' } = options
-                openPopup('confirmation_popup', true)
+                const { message = '', cancelText = 'Cancel', confirmText = 'OK', danger = false } = options
                 getRef('confirm_title').innerText = title;
                 getRef('confirm_message').innerText = message;
                 const cancelButton = getRef('confirmation_popup').querySelector('.cancel-button');
                 const confirmButton = getRef('confirmation_popup').querySelector('.confirm-button')
                 confirmButton.textContent = confirmText
                 cancelButton.textContent = cancelText
+                if (danger)
+                    confirmButton.classList.add('button--danger')
+                else
+                    confirmButton.classList.remove('button--danger')
+                const { opened, closed } = openPopup('confirmation_popup')
                 confirmButton.onclick = () => {
-                    closePopup()
-                    resolve(true);
+                    closePopup({ payload: true })
                 }
                 cancelButton.onclick = () => {
                     closePopup()
-                    resolve(false);
                 }
+                closed.then((payload) => {
+                    confirmButton.onclick = null
+                    cancelButton.onclick = null
+                    if (payload)
+                        resolve(true)
+                    else
+                        resolve(false)
+                })
             })
         }
 
@@ -770,10 +784,9 @@
         }
 
         document.addEventListener('popupopened', e => {
-            let popup = e.detail.popup
-            switch (popup.id) {
-                case 'group_by':
-                    renderGroup()
+            switch (e.target.id) {
+                case 'sheet_processing_popup':
+                    renderProcessedSheet()
                     break;
                 case 'profile_popup':
                     renderElem(getRef('profile_popup__content'), render.profile())
@@ -781,14 +794,13 @@
             }
         })
         document.addEventListener('popupclosed', e => {
-            let popup = e.detail.popup
-            switch (popup.id) {
+            switch (e.target.id) {
                 case 'new_sheet_popup':
                     getRef('columns_container').innerHTML = ''
                     getRef('editors_container').innerHTML = ''
                     break;
-                case 'group_by':
-                    renderElem(getRef("group_by_view"), html``)
+                case 'sheet_processing_popup':
+                    renderElem(getRef("processed_sheet_view"), html``)
                     break;
             }
         })
@@ -1105,24 +1117,74 @@
                 }
             }).catch(error => notify(`Save Unsuccessful [${error}]`, error))
         })
+        function initSheetProcessing(type) {
+            floGlobals.sheetProcessingMode = type
+            switch (type) {
+                case 'group':
+                    getRef('sheet_processing_title').textContent = `Group ${floGlobals.currentSheet.title} by`
+                    break;
+                case 'aggregate':
+                    getRef('sheet_processing_title').textContent = `Aggregate ${floGlobals.currentSheet.title} by`
+                    break;
+                default:
+                    break;
+            }
+            getRef('sheet_processing_popup').dataset.mode = type
+            openPopup('sheet_processing_popup')
+        }
 
-        getRef('first_select').addEventListener("change", renderGroup)
+        getRef('process_by_method_selector').addEventListener("change", renderProcessedSheet)
 
-        getRef('second_select').addEventListener("change", renderGroup)
+        getRef('process_by_attribute_selector').addEventListener("change", renderProcessedSheet)
 
-        function renderGroup() {
+        function renderProcessedSheet() {
             try {
-                const type = getRef('first_select').value
-                const column = getRef('second_select').value
+                const type = getRef('process_by_method_selector').value
+                const column = getRef('process_by_attribute_selector').value
                 const { sheetId, sheet } = floGlobals.currentSheet
-                if (type === 'count') {
-                    getRef('second_select').classList.add("hidden")
-                    let data = logSheet.groupBy.count(sheetId, sheet)
-                    renderGroupByView("count", data)
-                } else {
-                    getRef('second_select').classList.remove("hidden")
-                    let data = logSheet.groupBy[type](sheetId, sheet, column);
-                    renderGroupByView(`${type}(${column})`, data)
+                switch (floGlobals.sheetProcessingMode) {
+                    case 'group':
+                        if (type === 'count') {
+                            getRef('process_by_attribute_selector').classList.add("hidden")
+                            let data = logSheet.groupBy.count(sheetId, sheet)
+                            renderGroupByView("count", data)
+                        } else {
+                            getRef('process_by_attribute_selector').classList.remove("hidden")
+                            let data = logSheet.groupBy[type](sheetId, sheet, column);
+                            renderGroupByView(`${type}(${column})`, data)
+                        }
+                        break;
+                    case 'aggregate':
+                        let data = logSheet.aggBy[type](sheetId, sheet, column);
+                        if (type === 'count') {
+                            getRef('process_by_attribute_selector').classList.add("hidden")
+                        } else {
+                            getRef('process_by_attribute_selector').classList.remove("hidden")
+                        }
+                        if (data) {
+                            if (type === 'count') {
+                                renderElem(getRef('processed_sheet_view'), html`
+                                    <div class="grid gap-0-5 text-center" style="padding: 3rem 0;">
+                                        <h1>${data}</h1>
+                                        Total entries
+                                    </div>
+                                `)
+                            } else {
+                                renderElem(getRef('processed_sheet_view'), html`
+                                    <div class="grid gap-0-5 text-center" style="padding: 3rem 0;">
+                                        <h1>${data}</h1>
+                                        <div class="capitalize">${type} ${column}</div>
+                                    </div>
+                                `)
+                            }
+                        } else {
+                            renderElem(getRef('processed_sheet_view'), html`
+                                <h4 style="padding: 1.5rem 0;">${column} doesn't have numeric values</h4>
+                            `)
+                        }
+                        break;
+                    default:
+                        break;
                 }
             } catch (error) {
                 notify(error, "error")
@@ -1252,6 +1314,7 @@
             getRef('sheet_type').classList.add('placeholder')
             getRef('sheet_description').classList.add('placeholder')
             getRef('sheet_container__header').classList.add('hidden')
+            getRef('sheet_processing_options').classList.add('hidden')
             showPage('sheet_view')
             logSheet.refreshLogs(sheetId).then(result => {
                 getRef('sheet_container').classList.remove('placeholder')
@@ -1363,9 +1426,9 @@
             }
             getRef('sheet_container__body').append(frag)
             if (!onlyRenderTable) {
-                getRef('group_by_title').textContent = `Group ${title} by`;
                 //Add options for groupBy 
-                renderElem(getRef('second_select'), html`${attributes.map(attr => html`<sm-option value="${attr}">${attr}</sm-option>`)}`)
+                renderElem(getRef('process_by_attribute_selector'), html`${attributes.map(attr => html`<sm-option value="${attr}" class="wrap-around">${attr}</sm-option>`)}`)
+                getRef('sheet_processing_options').classList.remove('hidden')
             }
         }
 
@@ -1388,7 +1451,7 @@
         })
 
         function renderGroupByView(groupName, groupData) {
-            renderElem(getRef("group_by_view"), html`
+            renderElem(getRef("processed_sheet_view"), html`
                 <table class="margin-top-1">
                     <thead>
                         <tr>
