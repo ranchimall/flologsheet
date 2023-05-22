@@ -1440,10 +1440,14 @@
                     e.preventDefault();
                 }
             } else if (e.key === 'Enter' && floGlobals.isSubAdmin) {
+                // Grade an entry
                 e.preventDefault();
                 e.delegateTarget.disabled = true;
                 const vc = e.delegateTarget.closest('tr').dataset.vc;
-                logSheet.gradeLog(floGlobals.currentSheet.sheetId, vc, e.delegateTarget.value.trim())
+                let grade = e.delegateTarget.value.trim();
+                if (grade === '' || grade == 0)
+                    grade = null
+                logSheet.gradeLog(floGlobals.currentSheet.sheetId, vc, grade)
                     .then(result => notify("Graded Log", 'success'))
                     .catch(error => notify("Grading failed: " + error, "error"))
                     .finally(_ => e.delegateTarget.disabled = false)
