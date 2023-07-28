@@ -21,7 +21,7 @@ Only authorized Bitcoin or FLO addresses can make entries
 ### Scoring  
 • Scoring is done to maintain the authenticity of the data  
 • Unscored enries or the entries with a score 0 is automatically deleted from the cloud  
-• Scoring can only be done by the authorized FLO or BTC addresses
+• Scoring can only be done by the authorized FLO or BTC addresses 
 
 #### Note  
 • Currently Flo LogSheet has sheets for various RanchiMall projects like Project B (Token Room) El Salvador, BIT Sindri Blockchain Project, blockchain based Labour Market in Ranchi, and the token allocation & room nights data for Token Room  
